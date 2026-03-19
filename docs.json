@@ -29,6 +29,7 @@
               "platform/api-keys",
               "platform/usage-analytics",
               "platform/logs",
+              "platform/model-catalog",
               "platform/security",
               "platform/billing"
             ]

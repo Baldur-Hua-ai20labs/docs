@@ -1,0 +1,79 @@
+---
+title: "Model Catalog"
+description: "Browse ZeroGPU models, compare pricing, and pick the model ID to call."
+---
+
+The **Model Catalog** lets you browse all available ZeroGPU models and compare **pricing** across the tasks you care about.
+
+It’s useful when you’re selecting which `model` identifier to send to `POST /v1/responses`.
+
+## What you can do here
+
+You can:
+
+- Search for models with `Search models...`
+- Filter models by **Task** (for example, *Summarization* or *Text Classification*)
+- Filter models by **Use Case** (for example, *Advertisement*, *Email Filtering*, *Content Detection*)
+- Clear filters to return to the full list
+
+## How model cards are structured
+
+Each model is shown as a card with the following key fields:
+
+- **Model ID**: the string you will pass in the request body as `model`
+- **Task & provider**: what it’s for (task) and who published/owns it (provider)
+- **Description**: a short human-readable summary
+- **Parameters / Context / Architecture**:
+  - `Parameters`: approximate parameter count (e.g. `60M`, `90M`)
+  - `Context`: maximum context window (e.g. `400`)
+  - `Architecture`: e.g. `ONNX`
+- **Pricing**:
+  - `$X / 1M input`
+  - `$Y / 1M output`
+
+## Models shown in the catalog 
+
+### `zlm-v1-summary-cloud`
+
+- Task: *Summarization*
+- Provider: *ZeroGPU*
+- Description: *Fast lightweight model for text summarization.*
+- Details: `Parameters: 60M`, `Context: 400`, `Architecture: ONNX`
+- Pricing: `$0.20 / 1M input`, `$0.40 / 1M output`
+
+### `nli-deberta-v3-small`
+
+- Task: *Text Classification*
+- Provider: *Microsoft*
+- Description: *Fast lightweight model for text classification.*
+- Details: `Parameters: 60M`, `Context: 400`, `Architecture: ONNX`
+- Pricing: `$0.20 / 1M input`, `$0.40 / 1M output`
+
+### `zlm-v1-iab-classify-edge`
+
+- Task: *Text Classification*
+- Provider: *ZeroGPU*
+- Description: *Fast lightweight model for IAB classification.*
+- Details: `Parameters: 90M`, `Context: 400`, `Architecture: ONNX`
+- Pricing: `$0.25 / 1M input`, `$0.40 / 1M output`
+
+### `zlm-v1-iab-classify-edge-enriched`
+
+- Task: *Text Classification*
+- Provider: *ZeroGPU*
+- Description: *Fast lightweight model for IAB classification.*
+- Details: `Parameters: 90M`, `Context: 400`, `Architecture: ONNX`
+- Pricing: `$0.25 / 1M input`, `$0.40 / 1M output`
+
+## Using a model from the catalog in an API request
+
+Once you’ve picked a model card, copy the **Model ID** and set it in your request:
+
+```json
+{
+  "model": "zlm-v1-summary-cloud"
+}
+```
+
+The rest of the request (headers and `input`) follows the standard `POST /v1/responses` format.
+
