@@ -109,8 +109,8 @@
           "icon": "github"
         },
         {
-          "anchor": "Join Waitlist",
-          "href": "https://zerogpu.ai",
+          "anchor": "Platform",
+          "href": "https://platform.zerogpu.ai/",
           "icon": "rocket"
         },
         {
@@ -143,8 +143,8 @@
     ],
     "primary": {
       "type": "button",
-      "label": "Join Waitlist",
-      "href": "https://zerogpu.ai"
+      "label": "Platform",
+      "href": "https://platform.zerogpu.ai/"
     }
   },
   "footer": {
