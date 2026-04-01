@@ -89,7 +89,8 @@
               "cookbook/summarize-text",
               "cookbook/iab-classification",
               "cookbook/batch-requests",
-              "cookbook/chrome-extension-sdk-integration"
+              "cookbook/chrome-extension-sdk-integration",
+              "cookbook/chrome-extension-web-store-publishing"
             ]
           }
         ]
