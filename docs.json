@@ -7,7 +7,7 @@
     "light": "#4ADE80",
     "dark": "#16A34A"
   },
-  "favicon": "/favicon.png",
+  "favicon": "/favicon.ico",
   "navigation": {
     "tabs": [
       {
@@ -88,7 +88,8 @@
               "cookbook/demos",
               "cookbook/summarize-text",
               "cookbook/iab-classification",
-              "cookbook/batch-requests"
+              "cookbook/batch-requests",
+              "cookbook/chrome-extension-sdk-integration"
             ]
           }
         ]

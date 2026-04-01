@@ -1,0 +1,299 @@
+---
+title: "Chrome Extension SDK Integration"
+description: "Full deep-dive: integrate the ZeroGPU Browser SDK into a Manifest V3 Chrome extension, with architecture, pitfalls, and complete setup."
+---
+
+This is the full deep-dive guide for running the ZeroGPU Browser SDK in a Chrome Extension (MV3).
+
+## Table of contents
+
+1. [Architecture overview](#architecture-overview)
+2. [Prerequisites](#prerequisites)
+3. [Step 1 - Vendor SDK and Transformers locally](#step-1---vendor-sdk-and-transformers-locally)
+4. [Step 2 - Add offscreen document](#step-2---add-offscreen-document)
+5. [Step 3 - Add offscreen runtime](#step-3---add-offscreen-runtime)
+6. [Step 4 - Add background service worker](#step-4---add-background-service-worker)
+7. [Step 5 - Update manifest.json](#step-5---update-manifestjson)
+8. [Step 6 - Optional debug panel](#step-6---optional-debug-panel)
+9. [Pitfalls and fixes](#pitfalls-and-fixes)
+10. [Local validation checklist](#local-validation-checklist)
+
+## Architecture overview
+
+Use this runtime shape:
+
+1. Popup sends debug/status requests.
+2. `background.js` ensures offscreen document exists.
+3. `offscreen.html` hosts SDK in real `window` context.
+4. `offscreen.js` loads local Transformers runtime, then calls `initZeroGpuSdk`.
+
+Why:
+
+- Popup-only init dies when popup closes.
+- Service worker cannot host SDK (`window`/DOM APIs missing).
+- Offscreen document is the MV3-safe background page equivalent with full `window`.
+
+## Prerequisites
+
+- ZeroGPU `edgeOperatorKey`
+- ZeroGPU `projectId`
+- SDK bundle: `zerogpu-browser-sdk.umd.js`
+- Local Transformers bundle: `transformers.min.js`
+
+Build SDK bundle:
+
+```bash
+cd sdk
+npm install
+npm run build
+```
+
+## Step 1 - Vendor SDK and Transformers locally
+
+Chrome MV3 blocks remote script execution for extension pages. Bundle both files locally in your extension:
+
+```bash
+mkdir -p vendor
+cp /path/to/zerogpu-browser-sdk/sdk/dist/zerogpu-browser-sdk.umd.js ./vendor/zerogpu-browser-sdk.umd.js
+curl -L -o ./vendor/transformers.min.js "https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2/dist/transformers.min.js"
+```
+
+## Step 2 - Add offscreen document
+
+Create `offscreen.html`:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head><title>ZeroGPU offscreen</title></head>
+  <body>
+    <script src="vendor/zerogpu-browser-sdk.umd.js"></script>
+    <script src="offscreen.js"></script>
+  </body>
+</html>
+```
+
+Do not load Transformers via a module tag in HTML here. Load it in `offscreen.js` first, then init SDK.
+
+## Step 3 - Add offscreen runtime
+
+Create `offscreen.js`:
+
+```js
+const DEFAULT_SDK_CONFIG = {
+  edgeOperatorKey: "your-edge-operator-key",
+  projectId: "your-project-id",
+  env: "develop", // or "production"
+};
+
+const sdkDebugState = {
+  status: "idle",
+  initialized: false,
+  lastAttemptAt: null,
+  lastSuccessAt: null,
+  lastErrorAt: null,
+  lastErrorMessage: "",
+  env: DEFAULT_SDK_CONFIG.env,
+};
+
+async function loadTransformersRuntime() {
+  if (window.TransformersPipeline) return;
+
+  const localUrl = chrome.runtime.getURL("vendor/transformers.min.js");
+  const mod = await import(localUrl);
+
+  const pipeline = mod.pipeline;
+  const env = mod.env;
+
+  if (typeof pipeline !== "function" || !env) {
+    throw new Error("transformers module missing pipeline/env exports");
+  }
+
+  env.allowLocalModels = true;
+  env.allowRemoteModels = true;
+  if (env?.backends?.onnx?.env) env.backends.onnx.env.logLevel = "warning";
+  if ("logLevel" in env) env.logLevel = "warning";
+
+  window.TransformersPipeline = pipeline;
+  window.TransformersEnv = env;
+}
+
+async function initSdk(configOverride) {
+  const config = configOverride || DEFAULT_SDK_CONFIG;
+  sdkDebugState.status = "initializing";
+  sdkDebugState.lastAttemptAt = new Date().toISOString();
+  sdkDebugState.env = config.env;
+
+  try {
+    await loadTransformersRuntime();
+
+    const sdkGlobal = window.ZeroGpuBrowserSdk || window.ZeroGpuSdk;
+    if (!sdkGlobal || typeof sdkGlobal.initZeroGpuSdk !== "function") {
+      throw new Error("SDK global not found on window after script load.");
+    }
+
+    await sdkGlobal.initZeroGpuSdk({
+      env: config.env,
+      edgeOperatorKey: config.edgeOperatorKey,
+      projectId: config.projectId,
+      overrides: { telemetry: { enableConsoleLogs: true } },
+    });
+
+    sdkDebugState.status = "running";
+    sdkDebugState.initialized = true;
+    sdkDebugState.lastSuccessAt = new Date().toISOString();
+    sdkDebugState.lastErrorMessage = "";
+  } catch (error) {
+    sdkDebugState.status = "error";
+    sdkDebugState.initialized = false;
+    sdkDebugState.lastErrorAt = new Date().toISOString();
+    sdkDebugState.lastErrorMessage = error?.message || String(error);
+  }
+}
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "zerogpu:getStatus") {
+    sendResponse({ ok: true, state: sdkDebugState });
+    return;
+  }
+
+  if (message?.type === "zerogpu:forceInit") {
+    void initSdk(message.config || null)
+      .then(() => sendResponse({ ok: true, state: sdkDebugState }))
+      .catch((error) =>
+        sendResponse({ ok: false, state: sdkDebugState, error: error?.message || String(error) })
+      );
+    return true;
+  }
+});
+
+void initSdk();
+```
+
+## Step 4 - Add background service worker
+
+Create `background.js`:
+
+```js
+const OFFSCREEN_DOCUMENT_PATH = "offscreen.html";
+let creatingOffscreen = null;
+
+async function ensureOffscreenDocument() {
+  const existingContexts = await chrome.runtime.getContexts({
+    contextTypes: ["OFFSCREEN_DOCUMENT"],
+    documentUrls: [chrome.runtime.getURL(OFFSCREEN_DOCUMENT_PATH)],
+  });
+
+  if (existingContexts.length > 0) return;
+
+  if (creatingOffscreen) {
+    await creatingOffscreen;
+    return;
+  }
+
+  creatingOffscreen = chrome.offscreen.createDocument({
+    url: OFFSCREEN_DOCUMENT_PATH,
+    reasons: ["WORKERS"],
+    justification: "Run ZeroGPU Browser SDK with window/DOM context.",
+  });
+
+  await creatingOffscreen;
+  creatingOffscreen = null;
+}
+
+chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
+  if (message?.type === "zerogpu:getStatus" || message?.type === "zerogpu:forceInit") {
+    void ensureOffscreenDocument()
+      .then(() => chrome.runtime.sendMessage(message))
+      .then((response) => sendResponse(response))
+      .catch((error) => sendResponse({ ok: false, error: error?.message || String(error) }));
+    return true;
+  }
+});
+
+chrome.runtime.onInstalled.addListener(() => void ensureOffscreenDocument());
+chrome.runtime.onStartup.addListener(() => void ensureOffscreenDocument());
+void ensureOffscreenDocument();
+```
+
+## Step 5 - Update manifest.json
+
+```json
+{
+  "manifest_version": 3,
+  "background": { "service_worker": "background.js" },
+  "permissions": ["offscreen"],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
+  },
+  "host_permissions": [
+    "https://*.zerogpu.ai/*",
+    "https://*.workers.dev/*"
+  ]
+}
+```
+
+Notes:
+
+- `'wasm-unsafe-eval'` is required for ONNX runtime in extension pages.
+- Add other host permissions as needed for your environment.
+- `develop` commonly requires workers.dev permission.
+
+## Step 6 - Optional debug panel
+
+In popup:
+
+- Add hidden panel and refresh button.
+- Toggle with `Ctrl+Shift+D`.
+- Trigger `zerogpu:getStatus` and `zerogpu:forceInit` via `chrome.runtime.sendMessage`.
+
+## Pitfalls and fixes
+
+### 1) `window is not defined`
+
+Cause: SDK started in service worker.  
+Fix: run SDK in offscreen document.
+
+### 2) SDK global missing
+
+Cause: checking wrong global name.  
+Fix: use `window.ZeroGpuBrowserSdk` with fallback to `window.ZeroGpuSdk`.
+
+### 3) CSP blocks remote Transformers import
+
+Cause: SDK tries to import CDN script in MV3 extension context.  
+Fix: ship local `vendor/transformers.min.js`, load it before SDK init.
+
+### 4) ONNX/WASM CSP failure
+
+Cause: missing wasm permission in CSP.  
+Fix: add `'wasm-unsafe-eval'` under `content_security_policy.extension_pages`.
+
+### 5) `chrome.storage` undefined in offscreen
+
+Cause: limited API surface in offscreen context.  
+Fix: keep config in constants, or send via messaging from background.
+
+### 6) auth/register errors
+
+Cause: key/project/env mismatch (for example using develop credentials on production).  
+Fix: align `edgeOperatorKey`, `projectId`, and `env`.
+
+### 7) `Unable to determine content-length...`
+
+Cause: upstream response missing content-length.  
+Fix: no action needed; this warning is benign.
+
+## Local validation checklist
+
+1. Load unpacked extension in `chrome://extensions`.
+2. Reload extension after config/code edits.
+3. Open offscreen devtools and confirm:
+   - local Transformers runtime loaded
+   - SDK init succeeded
+4. Open popup debug mode and confirm:
+   - `status: running`
+   - `initialized: true`
+   - no active fatal error
+5. Switch env to `develop`/`production` and validate registration behavior.
+
