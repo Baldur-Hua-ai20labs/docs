@@ -13,7 +13,7 @@ The table and model cards below are loaded live from:
 
 `https://api-dashboard.zerogpu.ai/api/models`
 
-Only models with `display: true` are shown.
+Only models with `display: true` are shown. Catalog data is loaded in the browser by Mintlify [global custom JavaScript](https://www.mintlify.com/docs/customize/custom-scripts): `model-catalog-bootstrap.js` at the repo root (not an MDX `<script>` tag).
 
 <div id="model-catalog-status">Loading models...</div>
 <div id="model-catalog-table"></div>
@@ -21,8 +21,6 @@ Only models with `display: true` are shown.
 ## Detailed model cards
 
 <div id="model-catalog-cards"></div>
-
-<script src="/scripts/model-catalog.js" defer />
 
 ## Using a model from the catalog in an API request
 
