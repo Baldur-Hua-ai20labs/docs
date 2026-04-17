@@ -142,14 +142,23 @@
 
       var visibleModels = models
         .filter(function (model) {
-          return model && model.display === true;
+          // The API may omit `display`; default to visible unless explicitly false.
+          return model && model.display !== false;
         })
         .sort(function (a, b) {
+          var aPriority =
+            typeof a.displayPriority === "number" ? a.displayPriority : -Infinity;
+          var bPriority =
+            typeof b.displayPriority === "number" ? b.displayPriority : -Infinity;
+          if (aPriority !== bPriority) {
+            // Higher priority appears first.
+            return bPriority - aPriority;
+          }
           return String(a.modelId).localeCompare(String(b.modelId));
         });
 
       if (visibleModels.length === 0) {
-        statusEl.textContent = "No models marked for display.";
+        statusEl.textContent = "No models available right now.";
         return;
       }
 
