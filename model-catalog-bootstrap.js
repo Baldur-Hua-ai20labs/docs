@@ -175,13 +175,11 @@
         "<tr>" +
         "<th>Model ID</th>" +
         "<th>Task</th>" +
-        "<th>Provider</th>" +
         "<th>Version</th>" +
         "<th>Max Tokens</th>" +
         "<th>Type</th>" +
         "<th>Input</th>" +
         "<th>Output</th>" +
-        "<th>Total</th>" +
         "</tr>" +
         "</thead>";
 
@@ -190,7 +188,6 @@
         var row = document.createElement("tr");
         createCell(row, textOrNA(model.modelId), true);
         createCell(row, textOrNA(model.taskDisplayName || model.taskType));
-        createCell(row, textOrNA(model.cloudProvider));
         createCell(row, textOrNA(model.modelVersion));
         createCell(row, textOrNA(model.maxTokens));
         createCell(row, textOrNA(model.modelType));
@@ -198,7 +195,6 @@
         var p = model.pricing || {};
         createCell(row, fmtMoney(p.input_per_1m_tokens));
         createCell(row, fmtMoney(p.output_per_1m_tokens));
-        createCell(row, fmtMoney(p.total_per_1m_tokens));
         tbody.appendChild(row);
       });
 
