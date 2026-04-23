@@ -89,8 +89,14 @@ Preview at `http://localhost:3000` (or the port Mintlify reports).
 ### Submitting changes
 
 1. Edit `.mdx` or `.md` files in this repo.
-2. Run `mint dev` to confirm the site builds.
-3. Open a pull request with a clear description.
+2. Regenerate model detail pages from API metadata:
+
+```bash
+node scripts/generate-model-pages.mjs
+```
+
+3. Run `mint dev` to confirm the site builds.
+4. Open a pull request with a clear description.
 
 [Mintlify docs](https://mintlify.com/docs) for configuration and components.
 

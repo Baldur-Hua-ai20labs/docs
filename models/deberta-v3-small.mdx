@@ -3,5 +3,41 @@ title: "deberta-v3-small"
 description: "Model details for deberta-v3-small."
 ---
 
-<div id="model-detail-status" data-model-id="deberta-v3-small">Loading model details...</div>
-<div id="model-detail-content"></div>
+> Microsoft's DeBERTa-v3-small uses a disentangled attention mechanism that separately encodes content and position giving it a major edge in understanding context compared to models of similar size. With ELECTRA-style pre-training and gradient-disentangled embedding sharing, it punches well above its weight on NLU benchmarks, outperforming many frontier models on classification and inference tasks. It's one of the most efficient classifiers you can run at the edge. Ideal for high-throughput classification workloads where every millisecond and every cent matters.
+
+**References:** [Model docs](https://github.com/microsoft/DeBERTa/tree/master/docs) • [Terms](https://github.com/microsoft/DeBERTa/blob/master/SECURITY.md) • [Privacy](https://github.com/microsoft/DeBERTa/blob/master/LICENSE)
+
+## Specifications
+
+| Property | Value |
+| --- | --- |
+| Model ID | `deberta-v3-small` |
+| Task | Text Classification |
+| Type | `nli-deberta-v3` |
+| Parameters | 142M |
+| Version | 1 |
+| Max Tokens | 400 |
+| Provider | N/A |
+| Input Price | $0.05 / 1M |
+| Output Price | $0.40 / 1M |
+
+## Quick Start
+
+Use this model with the ZeroGPU Responses API endpoint:
+
+```bash
+curl --location 'https://api.zerogpu.ai/v1/responses' \
+  --header 'content-type: application/json' \
+  --header 'x-api-key: YOUR_API_KEY' \
+  --header 'x-project-id: YOUR_PROJECT_ID' \
+  --data '{
+    "model": "deberta-v3-small",
+    "input": [
+      {
+        "role": "user",
+        "content": "Your input text here..."
+      }
+    ],
+    "text": { "format": { "type": "text" } }
+  }'
+```

@@ -3,5 +3,41 @@ title: "LFM2.5-1.2B-Thinking"
 description: "Model details for LFM2.5-1.2B-Thinking."
 ---
 
-<div id="model-detail-status" data-model-id="LFM2.5-1.2B-Thinking">Loading model details...</div>
-<div id="model-detail-content"></div>
+>  Liquid AI's LFM2.5-1.2B-Thinking is a hybrid architecture reasoning model built for deep, step-by-step problem solving at the 1B scale. It generates explicit reasoning traces before producing a final answer working through math, logic, and multi-step tasks the way a human would on paper delivering thinking-model performance without the compute overhead that typically comes with it. Its hybrid SSM-attention design keeps inference fast and memory usage low, making it one of the most capable small reasoning models available for constrained environments.
+
+**References:** [Model docs](https://docs.liquid.ai/deployment/on-device/android/ai-agent-usage-guide#text-models) • [Terms](https://www.liquid.ai/terms-conditions) • [Privacy](https://www.liquid.ai/lfm-license)
+
+## Specifications
+
+| Property | Value |
+| --- | --- |
+| Model ID | `LFM2.5-1.2B-Thinking` |
+| Task | Text Generation |
+| Type | `lfm2.5` |
+| Parameters | 1.2B |
+| Version | 2.5 |
+| Max Tokens | 32768 |
+| Provider | N/A |
+| Input Price | $0.20 / 1M |
+| Output Price | $0.40 / 1M |
+
+## Quick Start
+
+Use this model with the ZeroGPU Responses API endpoint:
+
+```bash
+curl --location 'https://api.zerogpu.ai/v1/responses' \
+  --header 'content-type: application/json' \
+  --header 'x-api-key: YOUR_API_KEY' \
+  --header 'x-project-id: YOUR_PROJECT_ID' \
+  --data '{
+    "model": "LFM2.5-1.2B-Thinking",
+    "input": [
+      {
+        "role": "user",
+        "content": "Your input text here..."
+      }
+    ],
+    "text": { "format": { "type": "text" } }
+  }'
+```

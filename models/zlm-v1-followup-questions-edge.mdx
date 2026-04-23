@@ -3,5 +3,41 @@ title: "zlm-v1-followup-questions-edge"
 description: "Model details for zlm-v1-followup-questions-edge."
 ---
 
-<div id="model-detail-status" data-model-id="zlm-v1-followup-questions-edge">Loading model details...</div>
-<div id="model-detail-content"></div>
+> ZeroGPU's zlm-v1-followup-edge is a 60M-parameter model fine-tuned specifically to generate contextual follow-up responses that drive deeper user engagement. Built for edge deployment on the ONNX runtime, it's optimized for the kind of low-latency, conversational interactions that keep users active, think smart nudges, re-engagement prompts, and contextual suggestions. Unlike general-purpose generators, this model is laser-focused on conversational depth, making every response feel intentional rather than generic. Purpose-built for the ZeroGPU distributed inference network.
+
+**References:** [Model docs](https://docs.zerogpu.ai/) • [Terms](https://zerogpu.ai/terms) • [Privacy](https://zerogpu.ai/privacy-policy)
+
+## Specifications
+
+| Property | Value |
+| --- | --- |
+| Model ID | `zlm-v1-followup-questions-edge` |
+| Task | Text Generation |
+| Type | `t5` |
+| Parameters | 120M |
+| Version | 1 |
+| Max Tokens | 400 |
+| Provider | N/A |
+| Input Price | $0.25 / 1M |
+| Output Price | $0.40 / 1M |
+
+## Quick Start
+
+Use this model with the ZeroGPU Responses API endpoint:
+
+```bash
+curl --location 'https://api.zerogpu.ai/v1/responses' \
+  --header 'content-type: application/json' \
+  --header 'x-api-key: YOUR_API_KEY' \
+  --header 'x-project-id: YOUR_PROJECT_ID' \
+  --data '{
+    "model": "zlm-v1-followup-questions-edge",
+    "input": [
+      {
+        "role": "user",
+        "content": "Your input text here..."
+      }
+    ],
+    "text": { "format": { "type": "text" } }
+  }'
+```
