@@ -22,6 +22,16 @@
             ]
           },
           {
+            "group": "Models",
+            "pages": [
+              "platform/model-catalog",
+              "models/text-classification",
+              "models/text-generation",
+              "models/pii",
+              "models/summarization"
+            ]
+          },
+          {
             "group": "Platform",
             "pages": [
               "platform/organizations-and-projects",
@@ -29,7 +39,6 @@
               "platform/api-keys",
               "platform/usage-analytics",
               "platform/logs",
-              "platform/model-catalog",
               "platform/security",
               "platform/billing"
             ]

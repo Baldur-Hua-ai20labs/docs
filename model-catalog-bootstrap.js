@@ -120,6 +120,154 @@
     return payload.models;
   }
 
+  function normalizeTaskCategory(model) {
+    var raw = textOrNA(model.taskDisplayName || model.taskType).toLowerCase();
+    if (
+      raw.indexOf("classification") >= 0 ||
+      raw === "classification" ||
+      raw === "text_classification"
+    ) {
+      return "Text Classification";
+    }
+    if (
+      raw.indexOf("generation") >= 0 ||
+      raw === "text_generation" ||
+      raw === "generation"
+    ) {
+      return "Text Generation";
+    }
+    if (raw.indexOf("pii") >= 0 || raw.indexOf("personally identifiable") >= 0) {
+      return "PII";
+    }
+    if (raw.indexOf("summary") >= 0 || raw.indexOf("summarization") >= 0) {
+      return "Summarization";
+    }
+    return null;
+  }
+
+  function renderLibraryByTask(models, targetEl) {
+    targetEl.innerHTML = "";
+    var sectionOrder = [
+      "Text Classification",
+      "Text Generation",
+      "PII",
+      "Summarization",
+    ];
+    var groups = {};
+    sectionOrder.forEach(function (name) {
+      groups[name] = [];
+    });
+
+    models.forEach(function (model) {
+      var category = normalizeTaskCategory(model);
+      if (category && groups[category]) {
+        groups[category].push(model);
+      }
+    });
+
+    sectionOrder.forEach(function (category) {
+      var section = document.createElement("section");
+      var heading = document.createElement("h3");
+      heading.textContent = category;
+      section.appendChild(heading);
+
+      if (groups[category].length === 0) {
+        var empty = document.createElement("p");
+        empty.textContent = "No models available in this category right now.";
+        section.appendChild(empty);
+      } else {
+        groups[category]
+          .slice()
+          .sort(function (a, b) {
+            return String(a.modelId).localeCompare(String(b.modelId));
+          })
+          .forEach(function (model) {
+            section.appendChild(createDetails(model));
+          });
+      }
+
+      targetEl.appendChild(section);
+    });
+  }
+
+  function getVisibleModels(models) {
+    if (!Array.isArray(models)) return [];
+    return models
+      .filter(function (model) {
+        return model && model.display !== false;
+      })
+      .sort(function (a, b) {
+        var aPriority =
+          typeof a.displayPriority === "number" ? a.displayPriority : -Infinity;
+        var bPriority =
+          typeof b.displayPriority === "number" ? b.displayPriority : -Infinity;
+        if (aPriority !== bPriority) {
+          return bPriority - aPriority;
+        }
+        return String(a.modelId).localeCompare(String(b.modelId));
+      });
+  }
+
+  function tryInitModelCategoryPage() {
+    var statusEl = document.getElementById("model-category-status");
+    var cardsEl = document.getElementById("model-category-cards");
+    if (!statusEl || !cardsEl) return;
+    if (statusEl.getAttribute("data-zerogpu-category-init") === "1") return;
+
+    var category =
+      statusEl.getAttribute("data-model-category") ||
+      cardsEl.getAttribute("data-model-category");
+    if (!category) {
+      statusEl.textContent = "Missing model category configuration.";
+      return;
+    }
+
+    statusEl.setAttribute("data-zerogpu-category-init", "1");
+
+    function renderCategory(models) {
+      cardsEl.innerHTML = "";
+      var visibleModels = getVisibleModels(models);
+      var categoryModels = visibleModels.filter(function (model) {
+        return normalizeTaskCategory(model) === category;
+      });
+
+      if (categoryModels.length === 0) {
+        statusEl.textContent = "No models available in this category right now.";
+        return;
+      }
+
+      statusEl.textContent =
+        "Loaded " +
+        categoryModels.length +
+        " model" +
+        (categoryModels.length === 1 ? "" : "s") +
+        " for " +
+        category +
+        ".";
+
+      categoryModels.forEach(function (model) {
+        cardsEl.appendChild(createDetails(model));
+      });
+    }
+
+    fetchJson(endpoint)
+      .then(function (payload) {
+        renderCategory(parsePayload(payload));
+      })
+      .catch(function () {
+        return fetchJson(fallbackEndpoint)
+          .then(function (payload) {
+            renderCategory(parsePayload(payload));
+            statusEl.textContent =
+              statusEl.textContent + " (using local fallback snapshot)";
+          })
+          .catch(function (fallbackError) {
+            statusEl.textContent =
+              "Unable to load models right now. " + fallbackError.message;
+          });
+      });
+  }
+
   function tryInitModelCatalog() {
     var statusEl = document.getElementById("model-catalog-status");
     if (!statusEl || statusEl.getAttribute("data-zerogpu-catalog-init") === "1") {
@@ -127,35 +275,22 @@
     }
     var tableEl = document.getElementById("model-catalog-table");
     var cardsEl = document.getElementById("model-catalog-cards");
-    if (!tableEl || !cardsEl) return;
+    var libraryEl = document.getElementById("model-catalog-library");
+    if (!tableEl || !cardsEl || !libraryEl) return;
 
     statusEl.setAttribute("data-zerogpu-catalog-init", "1");
 
     function renderCatalog(models) {
       tableEl.innerHTML = "";
       cardsEl.innerHTML = "";
+      libraryEl.innerHTML = "";
 
       if (!Array.isArray(models) || models.length === 0) {
         statusEl.textContent = "No models available right now.";
         return;
       }
 
-      var visibleModels = models
-        .filter(function (model) {
-          // The API may omit `display`; default to visible unless explicitly false.
-          return model && model.display !== false;
-        })
-        .sort(function (a, b) {
-          var aPriority =
-            typeof a.displayPriority === "number" ? a.displayPriority : -Infinity;
-          var bPriority =
-            typeof b.displayPriority === "number" ? b.displayPriority : -Infinity;
-          if (aPriority !== bPriority) {
-            // Higher priority appears first.
-            return bPriority - aPriority;
-          }
-          return String(a.modelId).localeCompare(String(b.modelId));
-        });
+      var visibleModels = getVisibleModels(models);
 
       if (visibleModels.length === 0) {
         statusEl.textContent = "No models available right now.";
@@ -204,6 +339,8 @@
       visibleModels.forEach(function (model) {
         cardsEl.appendChild(createDetails(model));
       });
+
+      renderLibraryByTask(visibleModels, libraryEl);
     }
 
     fetchJson(endpoint)
@@ -226,6 +363,7 @@
 
   function schedule() {
     tryInitModelCatalog();
+    tryInitModelCategoryPage();
   }
 
   if (document.readyState === "loading") {
