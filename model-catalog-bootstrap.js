@@ -121,16 +121,21 @@
     var link = document.createElement("a");
     link.href = buildModelPagePath(model.modelId);
     link.style.display = "block";
-    link.style.border = "1px solid var(--border, #d4d4d8)";
-    link.style.borderRadius = "14px";
-    link.style.padding = "16px";
+    link.style.border = "1px solid rgba(148, 163, 184, 0.25)";
+    link.style.borderRadius = "16px";
+    link.style.padding = "18px";
     link.style.textDecoration = "none";
-    link.style.color = "inherit";
-    link.style.background = "var(--background, #fff)";
+    link.style.color = "var(--foreground, inherit)";
+    link.style.background = "rgba(10, 14, 24, 0.55)";
+    link.style.transition = "border-color 160ms ease, transform 160ms ease, box-shadow 160ms ease";
+    link.style.boxShadow = "0 0 0 1px rgba(255, 255, 255, 0.02) inset";
 
     var title = document.createElement("h3");
-    title.style.margin = "0 0 6px 0";
-    title.style.fontSize = "1.2rem";
+    title.style.margin = "0 0 8px 0";
+    title.style.fontSize = "1.05rem";
+    title.style.lineHeight = "1.35";
+    title.style.fontWeight = "700";
+    title.style.color = "var(--foreground, #f3f4f6)";
     title.textContent = textOrNA(model.modelDisplayName || model.modelId);
     link.appendChild(title);
 
@@ -140,23 +145,63 @@
     meta.style.gap = "8px";
     meta.style.marginBottom = "12px";
 
+    var params = document.createElement("span");
+    params.textContent = buildBadgeText(model);
+    params.style.fontSize = "0.95rem";
+    params.style.color = "var(--muted, #9ca3af)";
+    meta.appendChild(params);
+
+    var dot = document.createElement("span");
+    dot.textContent = "·";
+    dot.style.color = "var(--muted, #6b7280)";
+    meta.appendChild(dot);
+
     var badge = document.createElement("span");
-    badge.textContent = buildBadgeText(model);
+    badge.textContent =
+      typeof model.displayPriority === "number" && model.displayPriority >= 10
+        ? "Recommended"
+        : "Model";
     badge.style.display = "inline-block";
-    badge.style.padding = "2px 10px";
+    badge.style.padding = "3px 10px";
     badge.style.borderRadius = "999px";
-    badge.style.fontSize = "0.85rem";
+    badge.style.fontSize = "0.82rem";
     badge.style.fontWeight = "600";
-    badge.style.background = "rgba(34, 197, 94, 0.15)";
-    badge.style.color = "rgb(22, 163, 74)";
+    if (badge.textContent === "Recommended") {
+      badge.style.background = "rgba(34, 197, 94, 0.18)";
+      badge.style.color = "rgb(74, 222, 128)";
+    } else {
+      badge.style.background = "rgba(245, 158, 11, 0.18)";
+      badge.style.color = "rgb(251, 191, 36)";
+    }
     meta.appendChild(badge);
     link.appendChild(meta);
 
     var description = document.createElement("p");
     description.style.margin = "0";
     description.style.lineHeight = "1.5";
-    description.textContent = textOrNA((model.pricing || {}).description);
+    description.style.fontSize = "0.97rem";
+    description.style.color = "var(--muted, #cbd5e1)";
+    description.style.display = "-webkit-box";
+    description.style.webkitLineClamp = "2";
+    description.style.webkitBoxOrient = "vertical";
+    description.style.overflow = "hidden";
+    var rawDescription = textOrNA((model.pricing || {}).description);
+    description.textContent =
+      rawDescription.length > 120
+        ? rawDescription.slice(0, 117).trimEnd() + "..."
+        : rawDescription;
     link.appendChild(description);
+
+    link.addEventListener("mouseenter", function () {
+      link.style.borderColor = "rgba(74, 222, 128, 0.6)";
+      link.style.transform = "translateY(-1px)";
+      link.style.boxShadow = "0 12px 24px rgba(0, 0, 0, 0.28)";
+    });
+    link.addEventListener("mouseleave", function () {
+      link.style.borderColor = "rgba(148, 163, 184, 0.25)";
+      link.style.transform = "translateY(0)";
+      link.style.boxShadow = "0 0 0 1px rgba(255, 255, 255, 0.02) inset";
+    });
 
     return link;
   }
