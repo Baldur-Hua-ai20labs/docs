@@ -100,6 +100,137 @@
     return wrapper;
   }
 
+  function slugifyModelId(modelId) {
+    return textOrNA(modelId)
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  function buildModelPagePath(modelId) {
+    return "/models/" + slugifyModelId(modelId);
+  }
+
+  function buildBadgeText(model) {
+    if (model && model.parameters) return textOrNA(model.parameters);
+    if (model && model.modelType) return textOrNA(model.modelType);
+    return "Model";
+  }
+
+  function createModelCard(model) {
+    var link = document.createElement("a");
+    link.href = buildModelPagePath(model.modelId);
+    link.style.display = "block";
+    link.style.border = "1px solid var(--border, #d4d4d8)";
+    link.style.borderRadius = "14px";
+    link.style.padding = "16px";
+    link.style.textDecoration = "none";
+    link.style.color = "inherit";
+    link.style.background = "var(--background, #fff)";
+
+    var title = document.createElement("h3");
+    title.style.margin = "0 0 6px 0";
+    title.style.fontSize = "1.2rem";
+    title.textContent = textOrNA(model.modelDisplayName || model.modelId);
+    link.appendChild(title);
+
+    var meta = document.createElement("div");
+    meta.style.display = "flex";
+    meta.style.alignItems = "center";
+    meta.style.gap = "8px";
+    meta.style.marginBottom = "12px";
+
+    var badge = document.createElement("span");
+    badge.textContent = buildBadgeText(model);
+    badge.style.display = "inline-block";
+    badge.style.padding = "2px 10px";
+    badge.style.borderRadius = "999px";
+    badge.style.fontSize = "0.85rem";
+    badge.style.fontWeight = "600";
+    badge.style.background = "rgba(34, 197, 94, 0.15)";
+    badge.style.color = "rgb(22, 163, 74)";
+    meta.appendChild(badge);
+    link.appendChild(meta);
+
+    var description = document.createElement("p");
+    description.style.margin = "0";
+    description.style.lineHeight = "1.5";
+    description.textContent = textOrNA((model.pricing || {}).description);
+    link.appendChild(description);
+
+    return link;
+  }
+
+  function createDetailsForModelPage(model) {
+    var wrapper = document.createElement("div");
+
+    var subtitle = document.createElement("p");
+    subtitle.innerHTML =
+      "<strong>Task:</strong> " +
+      textOrNA(model.taskDisplayName || model.taskType) +
+      " · <strong>Provider:</strong> " +
+      textOrNA(model.cloudProvider || "N/A");
+    wrapper.appendChild(subtitle);
+
+    var specs = document.createElement("p");
+    specs.innerHTML =
+      "<strong>Specs:</strong> " +
+      "<code>Parameters: " +
+      textOrNA(model.parameters) +
+      "</code> · " +
+      "<code>Version: " +
+      textOrNA(model.modelVersion) +
+      "</code> · " +
+      "<code>Max tokens: " +
+      textOrNA(model.maxTokens) +
+      "</code> · " +
+      "<code>Type: " +
+      textOrNA(model.modelType) +
+      "</code>";
+    wrapper.appendChild(specs);
+
+    var pricing = model.pricing || {};
+    var prices = document.createElement("p");
+    prices.innerHTML =
+      "<strong>Pricing:</strong> " +
+      "<code>" +
+      fmtMoney(pricing.input_per_1m_tokens) +
+      " input</code> · " +
+      "<code>" +
+      fmtMoney(pricing.output_per_1m_tokens) +
+      " output</code>";
+    wrapper.appendChild(prices);
+
+    var description = document.createElement("p");
+    description.innerHTML =
+      "<strong>Description:</strong> " + textOrNA(pricing.description);
+    wrapper.appendChild(description);
+
+    var links = document.createElement("p");
+    links.innerHTML =
+      "<strong>References:</strong> " +
+      (pricing.model_doc_url
+        ? '<a href="' +
+          pricing.model_doc_url +
+          '" target="_blank" rel="noopener noreferrer">Model docs</a>'
+        : "N/A") +
+      " · " +
+      (pricing.terms_url
+        ? '<a href="' +
+          pricing.terms_url +
+          '" target="_blank" rel="noopener noreferrer">Terms</a>'
+        : "N/A") +
+      " · " +
+      (pricing.privacy_service
+        ? '<a href="' +
+          pricing.privacy_service +
+          '" target="_blank" rel="noopener noreferrer">Privacy</a>'
+        : "N/A");
+    wrapper.appendChild(links);
+
+    return wrapper;
+  }
+
   function fetchJson(url) {
     return fetch(url, { method: "GET" }).then(function (response) {
       if (!response.ok) {
@@ -210,7 +341,7 @@
 
   function tryInitModelCategoryPage() {
     var statusEl = document.getElementById("model-category-status");
-    var cardsEl = document.getElementById("model-category-cards");
+    var cardsEl = document.getElementById("model-category-grid");
     if (!statusEl || !cardsEl) return;
     if (statusEl.getAttribute("data-zerogpu-category-init") === "1") return;
 
@@ -226,6 +357,10 @@
 
     function renderCategory(models) {
       cardsEl.innerHTML = "";
+      cardsEl.style.display = "grid";
+      cardsEl.style.gridTemplateColumns = "repeat(auto-fill, minmax(280px, 1fr))";
+      cardsEl.style.gap = "16px";
+
       var visibleModels = getVisibleModels(models);
       var categoryModels = visibleModels.filter(function (model) {
         return normalizeTaskCategory(model) === category;
@@ -246,7 +381,7 @@
         ".";
 
       categoryModels.forEach(function (model) {
-        cardsEl.appendChild(createDetails(model));
+        cardsEl.appendChild(createModelCard(model));
       });
     }
 
@@ -264,6 +399,54 @@
           .catch(function (fallbackError) {
             statusEl.textContent =
               "Unable to load models right now. " + fallbackError.message;
+          });
+      });
+  }
+
+  function tryInitModelDetailPage() {
+    var statusEl = document.getElementById("model-detail-status");
+    var contentEl = document.getElementById("model-detail-content");
+    if (!statusEl || !contentEl) return;
+    if (statusEl.getAttribute("data-zerogpu-model-init") === "1") return;
+
+    var modelId = statusEl.getAttribute("data-model-id");
+    if (!modelId) {
+      statusEl.textContent = "Missing model ID.";
+      return;
+    }
+
+    statusEl.setAttribute("data-zerogpu-model-init", "1");
+
+    function renderModel(models) {
+      contentEl.innerHTML = "";
+      var visibleModels = getVisibleModels(models);
+      var selected = visibleModels.find(function (model) {
+        return String(model.modelId) === String(modelId);
+      });
+
+      if (!selected) {
+        statusEl.textContent = "Model not found.";
+        return;
+      }
+
+      statusEl.textContent = "Loaded model details.";
+      contentEl.appendChild(createDetailsForModelPage(selected));
+    }
+
+    fetchJson(endpoint)
+      .then(function (payload) {
+        renderModel(parsePayload(payload));
+      })
+      .catch(function () {
+        return fetchJson(fallbackEndpoint)
+          .then(function (payload) {
+            renderModel(parsePayload(payload));
+            statusEl.textContent =
+              statusEl.textContent + " (using local fallback snapshot)";
+          })
+          .catch(function (fallbackError) {
+            statusEl.textContent =
+              "Unable to load model details right now. " + fallbackError.message;
           });
       });
   }
@@ -364,6 +547,7 @@
   function schedule() {
     tryInitModelCatalog();
     tryInitModelCategoryPage();
+    tryInitModelDetailPage();
   }
 
   if (document.readyState === "loading") {
