@@ -147,7 +147,7 @@
     function getPalette() {
       if (isDarkMode()) {
         return {
-          bg: "#080d18",
+          bg: "#000000",
           border: "rgba(71, 85, 105, 0.45)",
           shadow: "0 1px 2px rgba(0, 0, 0, 0.28)",
           hoverBorder: "var(--primary, #22C55E)",
@@ -210,22 +210,14 @@
     meta.appendChild(dot);
 
     var badge = document.createElement("span");
-    badge.textContent =
-      typeof model.displayPriority === "number" && model.displayPriority >= 10
-        ? "Recommended"
-        : "Model";
+    badge.textContent = textOrNA(model.modelType).toLowerCase();
     badge.style.display = "inline-block";
     badge.style.padding = "3px 10px";
     badge.style.borderRadius = "999px";
     badge.style.fontSize = "0.82rem";
     badge.style.fontWeight = "600";
-    if (badge.textContent === "Recommended") {
-      badge.style.background = "rgba(34, 197, 94, 0.18)";
-      badge.style.color = "rgb(74, 222, 128)";
-    } else {
-      badge.style.background = "rgba(245, 158, 11, 0.18)";
-      badge.style.color = "rgb(251, 191, 36)";
-    }
+    badge.style.background = "rgba(34, 197, 94, 0.18)";
+    badge.style.color = "rgb(74, 222, 128)";
     meta.appendChild(badge);
     link.appendChild(meta);
 
