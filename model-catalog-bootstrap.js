@@ -257,9 +257,6 @@
   function createDetailsForModelPage(model) {
     var wrapper = document.createElement("div");
     var pricing = model.pricing || {};
-    var useCases = Array.isArray(pricing.use_cases)
-      ? pricing.use_cases.filter(Boolean)
-      : [];
 
     var overview = document.createElement("blockquote");
     overview.textContent = textOrNA(pricing.description);
@@ -306,19 +303,6 @@
       "<tr><td>Output Price</td><td>" + fmtMoney(pricing.output_per_1m_tokens) + "</td></tr>" +
       "</tbody>";
     wrapper.appendChild(specsTable);
-
-    if (useCases.length > 0) {
-      var useCasesHeading = document.createElement("h2");
-      useCasesHeading.textContent = "Use Cases";
-      wrapper.appendChild(useCasesHeading);
-      var useCasesList = document.createElement("ul");
-      useCases.forEach(function (uc) {
-        var li = document.createElement("li");
-        li.textContent = uc;
-        useCasesList.appendChild(li);
-      });
-      wrapper.appendChild(useCasesList);
-    }
 
     var quickstartHeading = document.createElement("h2");
     quickstartHeading.textContent = "Quick Start";
