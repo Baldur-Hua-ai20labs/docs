@@ -25,19 +25,44 @@ description: "Model details for zlm-v1-followup-questions-edge."
 
 Use this model with the ZeroGPU Responses API endpoint:
 
+### Request Body (JSON)
+
+```json
+{
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "user",
+      "content": "Electric vehicles are gaining popularity worldwide as battery costs drop and charging infrastructure expands. Most modern EVs offer a range of 250 to 350 miles on a single charge, and fast-charging stations can replenish 80% of battery capacity in under 30 minutes. However, concerns around battery disposal, rare earth mineral sourcing, and grid capacity continue to shape the debate around large-scale EV adoption."
+    }
+  ],
+  "model": "zlm-v1-followup-questions-edge"
+}
+```
+
+### Code Snippet
+
 ```bash
 curl --location 'https://api.zerogpu.ai/v1/responses' \
   --header 'content-type: application/json' \
   --header 'x-api-key: YOUR_API_KEY' \
   --header 'x-project-id: YOUR_PROJECT_ID' \
   --data '{
-    "model": "zlm-v1-followup-questions-edge",
-    "input": [
-      {
-        "role": "user",
-        "content": "Your input text here..."
-      }
-    ],
-    "text": { "format": { "type": "text" } }
-  }'
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "user",
+      "content": "Electric vehicles are gaining popularity worldwide as battery costs drop and charging infrastructure expands. Most modern EVs offer a range of 250 to 350 miles on a single charge, and fast-charging stations can replenish 80% of battery capacity in under 30 minutes. However, concerns around battery disposal, rare earth mineral sourcing, and grid capacity continue to shape the debate around large-scale EV adoption."
+    }
+  ],
+  "model": "zlm-v1-followup-questions-edge"
+}'
 ```

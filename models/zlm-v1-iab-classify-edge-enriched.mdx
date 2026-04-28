@@ -25,19 +25,44 @@ description: "Model details for zlm-v1-iab-classify-edge-enriched."
 
 Use this model with the ZeroGPU Responses API endpoint:
 
+### Request Body (JSON)
+
+```json
+{
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "user",
+      "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment. This transformation did not happen overnight. It emerged through decades of incremental innovation, each new tool building upon the last, until the modern world became deeply interconnected.One of the most significant changes has been the speed at which information travels. "
+    }
+  ],
+  "model": "zlm-v1-iab-classify-edge-enriched"
+}
+```
+
+### Code Snippet
+
 ```bash
 curl --location 'https://api.zerogpu.ai/v1/responses' \
   --header 'content-type: application/json' \
   --header 'x-api-key: YOUR_API_KEY' \
   --header 'x-project-id: YOUR_PROJECT_ID' \
   --data '{
-    "model": "zlm-v1-iab-classify-edge-enriched",
-    "input": [
-      {
-        "role": "user",
-        "content": "Your input text here..."
-      }
-    ],
-    "text": { "format": { "type": "text" } }
-  }'
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "user",
+      "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment. This transformation did not happen overnight. It emerged through decades of incremental innovation, each new tool building upon the last, until the modern world became deeply interconnected.One of the most significant changes has been the speed at which information travels. "
+    }
+  ],
+  "model": "zlm-v1-iab-classify-edge-enriched"
+}'
 ```

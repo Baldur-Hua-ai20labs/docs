@@ -25,19 +25,52 @@ description: "Model details for deberta-v3-small."
 
 Use this model with the ZeroGPU Responses API endpoint:
 
+### Request Body (JSON)
+
+```json
+{
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "system",
+      "content": "[Sports,Politics,Technology,Finance,Entertainment]"
+    },
+    {
+      "role": "user",
+      "content": "Apple is expected to unveil its next-generation M5 chip at WWDC this June, promising a 40% boost in GPU performance and a new dedicated AI core for on-device machine learning tasks."
+    }
+  ],
+  "model": "deberta-v3-small"
+}
+```
+
+### Code Snippet
+
 ```bash
 curl --location 'https://api.zerogpu.ai/v1/responses' \
   --header 'content-type: application/json' \
   --header 'x-api-key: YOUR_API_KEY' \
   --header 'x-project-id: YOUR_PROJECT_ID' \
   --data '{
-    "model": "deberta-v3-small",
-    "input": [
-      {
-        "role": "user",
-        "content": "Your input text here..."
-      }
-    ],
-    "text": { "format": { "type": "text" } }
-  }'
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "system",
+      "content": "[Sports,Politics,Technology,Finance,Entertainment]"
+    },
+    {
+      "role": "user",
+      "content": "Apple is expected to unveil its next-generation M5 chip at WWDC this June, promising a 40% boost in GPU performance and a new dedicated AI core for on-device machine learning tasks."
+    }
+  ],
+  "model": "deberta-v3-small"
+}'
 ```

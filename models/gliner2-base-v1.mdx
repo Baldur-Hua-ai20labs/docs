@@ -25,19 +25,50 @@ description: "Model details for gliner2-base-v1."
 
 Use this model with the ZeroGPU Responses API endpoint:
 
+### Request Body (JSON)
+
+```json
+{
+  "input": [
+    {
+      "role": "user",
+      "content": "The application is built with Python 3.11 and uses PostgreSQL 15 for storage. It runs on Kubernetes with Docker containers and communicates via gRPC."
+    }
+  ],
+  "model": "gliner2-base-v1",
+  "labels": [
+    "programming language",
+    "database",
+    "technology",
+    "protocol"
+  ],
+  "usecase": "ner",
+  "threshold": 0.3
+}
+```
+
+### Code Snippet
+
 ```bash
 curl --location 'https://api.zerogpu.ai/v1/responses' \
   --header 'content-type: application/json' \
   --header 'x-api-key: YOUR_API_KEY' \
   --header 'x-project-id: YOUR_PROJECT_ID' \
   --data '{
-    "model": "gliner2-base-v1",
-    "input": [
-      {
-        "role": "user",
-        "content": "Your input text here..."
-      }
-    ],
-    "text": { "format": { "type": "text" } }
-  }'
+  "input": [
+    {
+      "role": "user",
+      "content": "The application is built with Python 3.11 and uses PostgreSQL 15 for storage. It runs on Kubernetes with Docker containers and communicates via gRPC."
+    }
+  ],
+  "model": "gliner2-base-v1",
+  "labels": [
+    "programming language",
+    "database",
+    "technology",
+    "protocol"
+  ],
+  "usecase": "ner",
+  "threshold": 0.3
+}'
 ```

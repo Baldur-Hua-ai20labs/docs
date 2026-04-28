@@ -44,6 +44,25 @@ function buildMdx(model) {
   const provider = textOrNA(model.cloudProvider || "N/A");
   const inputPrice = fmtMoney(pricing.input_per_1m_tokens);
   const outputPrice = fmtMoney(pricing.output_per_1m_tokens);
+  const sampleFromUseCases =
+    model.modelUsecases && typeof model.modelUsecases === "object"
+      ? Object.values(model.modelUsecases)
+          .map((entry) => entry && entry.sample_responses_body)
+          .find(Boolean)
+      : null;
+  const defaultSample = {
+    text: { format: { type: "text" } },
+    input: [{ role: "user", content: "Your input text here..." }],
+    model: modelId,
+  };
+  const sampleRequestBody =
+    pricing.sample_responses_body || sampleFromUseCases || defaultSample;
+  const normalizedSampleBody =
+    sampleRequestBody && typeof sampleRequestBody === "object"
+      ? { ...sampleRequestBody, model: modelId }
+      : defaultSample;
+  const sampleJson = JSON.stringify(normalizedSampleBody, null, 2);
+  const curlDataJson = sampleJson.replace(/'/g, "'\"'\"'");
 
   const references = [];
   if (pricing.model_doc_url) references.push(`[Model docs](${pricing.model_doc_url})`);
@@ -78,21 +97,20 @@ description: "Model details for ${modelId.replace(/"/g, '\\"')}."
 
 Use this model with the ZeroGPU Responses API endpoint:
 
+### Request Body (JSON)
+
+\`\`\`json
+${sampleJson}
+\`\`\`
+
+### Code Snippet
+
 \`\`\`bash
 curl --location 'https://api.zerogpu.ai/v1/responses' \\
   --header 'content-type: application/json' \\
   --header 'x-api-key: YOUR_API_KEY' \\
   --header 'x-project-id: YOUR_PROJECT_ID' \\
-  --data '{
-    "model": "${modelId}",
-    "input": [
-      {
-        "role": "user",
-        "content": "Your input text here..."
-      }
-    ],
-    "text": { "format": { "type": "text" } }
-  }'
+  --data '${curlDataJson}'
 \`\`\`
 `;
 }

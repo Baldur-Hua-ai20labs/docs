@@ -25,19 +25,44 @@ description: "Model details for LFM2.5-1.2B-Thinking."
 
 Use this model with the ZeroGPU Responses API endpoint:
 
+### Request Body (JSON)
+
+```json
+{
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "user",
+      "content": "What is the capital of Japan"
+    }
+  ],
+  "model": "LFM2.5-1.2B-Thinking"
+}
+```
+
+### Code Snippet
+
 ```bash
 curl --location 'https://api.zerogpu.ai/v1/responses' \
   --header 'content-type: application/json' \
   --header 'x-api-key: YOUR_API_KEY' \
   --header 'x-project-id: YOUR_PROJECT_ID' \
   --data '{
-    "model": "LFM2.5-1.2B-Thinking",
-    "input": [
-      {
-        "role": "user",
-        "content": "Your input text here..."
-      }
-    ],
-    "text": { "format": { "type": "text" } }
-  }'
+  "text": {
+    "format": {
+      "type": "text"
+    }
+  },
+  "input": [
+    {
+      "role": "user",
+      "content": "What is the capital of Japan"
+    }
+  ],
+  "model": "LFM2.5-1.2B-Thinking"
+}'
 ```
