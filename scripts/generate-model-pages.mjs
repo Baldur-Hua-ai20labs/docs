@@ -184,66 +184,6 @@ function renderRubySnippet(endpointPath, payload) {
   ].join("\n");
 }
 
-function renderRequestSection(title, endpointPath, payload, includeLanguageSnippets = false) {
-  let out = `<Accordion title="${title}">\n\n`;
-  out += "### Request Body (JSON)\n\n";
-  out += "```json\n" + toPrettyJson(payload) + "\n```\n\n";
-  out += "### Code Snippet (cURL)\n\n";
-  out += "```bash\n" + renderCurlSnippet(endpointPath, payload) + "\n```\n\n";
-
-  if (includeLanguageSnippets) {
-    out += "### Code Snippet (Python)\n\n";
-    out += "```python\n" + renderPythonSnippet(endpointPath, payload) + "\n```\n\n";
-    out += "### Code Snippet (JavaScript)\n\n";
-    out += "```javascript\n" + renderJavaScriptSnippet(endpointPath, payload) + "\n```\n\n";
-    out += "### Code Snippet (Rust)\n\n";
-    out += "```rust\n" + renderRustSnippet(endpointPath, payload) + "\n```\n\n";
-    out += "### Code Snippet (Go)\n\n";
-    out += "```go\n" + renderGoSnippet(endpointPath, payload) + "\n```\n\n";
-    out += "### Code Snippet (Ruby)\n\n";
-    out += "```ruby\n" + renderRubySnippet(endpointPath, payload) + "\n```\n\n";
-  }
-
-  out += "</Accordion>\n\n";
-  return out;
-}
-
-function renderModelUsecaseSections(model) {
-  if (!model.modelUsecases || typeof model.modelUsecases !== "object") return "";
-  const entries = Object.entries(model.modelUsecases).filter(
-    ([, value]) => value && typeof value === "object"
-  );
-  if (entries.length === 0) return "";
-
-  let out = "## Use Case Examples\n\n";
-  out += "Select Use Case examples below:\n\n";
-  out += "<AccordionGroup>\n\n";
-
-  for (const [, value] of entries) {
-    const label = textOrNA(value.usecase_display_name || value.usecase || "Use Case");
-    const description = textOrNA(value.description || "");
-    const sample =
-      (value.sample_responses_body && typeof value.sample_responses_body === "object"
-        ? value.sample_responses_body
-        : null) || null;
-    if (!sample) continue;
-
-    const normalized = { ...sample, model: textOrNA(model.modelId) };
-    out += `<Accordion title="${label}">\n\n`;
-    if (description && description !== "N/A") {
-      out += description + "\n\n";
-    }
-    out += "### Request Body (JSON)\n\n";
-    out += "```json\n" + toPrettyJson(normalized) + "\n```\n\n";
-    out += "### Code Snippet (cURL)\n\n";
-    out += "```bash\n" + renderCurlSnippet("/v1/responses", normalized) + "\n```\n\n";
-    out += "</Accordion>\n\n";
-  }
-
-  out += "</AccordionGroup>\n";
-  return out;
-}
-
 function buildMdx(model) {
   const pricing = model.pricing || {};
   const modelId = textOrNA(model.modelId);
@@ -257,32 +197,6 @@ function buildMdx(model) {
   const provider = textOrNA(model.cloudProvider || "N/A");
   const inputPrice = fmtMoney(pricing.input_per_1m_tokens);
   const outputPrice = fmtMoney(pricing.output_per_1m_tokens);
-  const sampleFromUseCases =
-    model.modelUsecases && typeof model.modelUsecases === "object"
-      ? Object.values(model.modelUsecases)
-          .map((entry) => entry && entry.sample_responses_body)
-          .find(Boolean)
-      : null;
-  const defaultSample = {
-    text: { format: { type: "text" } },
-    input: [{ role: "user", content: "Your input text here..." }],
-    model: modelId,
-  };
-  const sampleRequestBody =
-    pricing.sample_responses_body || sampleFromUseCases || defaultSample;
-  const sampleChatBody = pricing.sample_chat_completions_body || {
-    model: modelId,
-    messages: (sampleRequestBody && sampleRequestBody.input) || defaultSample.input,
-  };
-  const normalizedSampleBody =
-    sampleRequestBody && typeof sampleRequestBody === "object"
-      ? { ...sampleRequestBody, model: modelId }
-      : defaultSample;
-  const normalizedChatBody =
-    sampleChatBody && typeof sampleChatBody === "object"
-      ? { ...sampleChatBody, model: modelId }
-      : { model: modelId, messages: defaultSample.input };
-
   const references = [];
   if (pricing.model_doc_url) references.push(`[Model docs](${pricing.model_doc_url})`);
   if (pricing.terms_url) references.push(`[Terms](${pricing.terms_url})`);
@@ -314,13 +228,7 @@ description: "Model details for ${modelId.replace(/"/g, '\\"')}."
 
 ## Quick Start
 
-<AccordionGroup>
-
-${renderRequestSection("Responses API", "/v1/responses", normalizedSampleBody, false)}
-${renderRequestSection("Chat Completions API", "/v1/chat/completions", normalizedChatBody, true)}
-</AccordionGroup>
-
-${renderModelUsecaseSections(model)}
+<div data-zgpu-model-playground="${modelId}"></div>
 `;
 }
 

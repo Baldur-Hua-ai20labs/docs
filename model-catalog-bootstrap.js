@@ -356,6 +356,380 @@
     return payload.models;
   }
 
+  var modelsPromise = null;
+  function getModels() {
+    if (modelsPromise) return modelsPromise;
+    modelsPromise = fetchJson(endpoint)
+      .then(parsePayload)
+      .catch(function () {
+        return fetchJson(fallbackEndpoint).then(parsePayload);
+      });
+    return modelsPromise;
+  }
+
+  function prettyJson(value) {
+    try {
+      return JSON.stringify(value, null, 2);
+    } catch (_err) {
+      return String(value);
+    }
+  }
+
+  function shellEscapeSingleQuoted(value) {
+    return String(value).replace(/'/g, "'\"'\"'");
+  }
+
+  function renderCurlSnippet(endpointPath, payload) {
+    var payloadJson = prettyJson(payload);
+    return (
+      "curl --location 'https://api.zerogpu.ai" +
+      endpointPath +
+      "' \\\n" +
+      "  --header 'content-type: application/json' \\\n" +
+      "  --header 'x-api-key: YOUR_API_KEY' \\\n" +
+      "  --header 'x-project-id: YOUR_PROJECT_ID' \\\n" +
+      "  --data '" +
+      shellEscapeSingleQuoted(payloadJson) +
+      "'"
+    );
+  }
+
+  function renderPythonSnippet(endpointPath, payload) {
+    var payloadJson = prettyJson(payload);
+    return (
+      "import requests\nimport json\n\n" +
+      'url = "https://api.zerogpu.ai' +
+      endpointPath +
+      '"\n' +
+      "headers = {\n" +
+      '    "content-type": "application/json",\n' +
+      '    "x-api-key": "YOUR_API_KEY",\n' +
+      '    "x-project-id": "YOUR_PROJECT_ID",\n' +
+      "}\n" +
+      'payload = json.loads("""' +
+      payloadJson +
+      '""")\n\n' +
+      "response = requests.post(url, headers=headers, json=payload)\n" +
+      "print(response.json())"
+    );
+  }
+
+  function renderJavaScriptSnippet(endpointPath, payload) {
+    return (
+      "const url = 'https://api.zerogpu.ai" +
+      endpointPath +
+      "';\n" +
+      "const headers = {\n" +
+      "  'content-type': 'application/json',\n" +
+      "  'x-api-key': 'YOUR_API_KEY',\n" +
+      "  'x-project-id': 'YOUR_PROJECT_ID'\n" +
+      "};\n" +
+      "const payload = " +
+      prettyJson(payload) +
+      ";\n\n" +
+      "fetch(url, {\n" +
+      "  method: 'POST',\n" +
+      "  headers,\n" +
+      "  body: JSON.stringify(payload)\n" +
+      "})\n" +
+      "  .then(response => response.json())\n" +
+      "  .then(data => console.log(data))\n" +
+      "  .catch(error => console.error('Error:', error));"
+    );
+  }
+
+  function renderRustSnippet(endpointPath, payload) {
+    return (
+      "use reqwest::Client;\nuse serde_json::Value;\n\n" +
+      "#[tokio::main]\n" +
+      "async fn main() -> Result<(), Box<dyn std::error::Error>> {\n" +
+      "    let client = Client::new();\n\n" +
+      '    let payload: Value = serde_json::from_str(r#"\n' +
+      prettyJson(payload) +
+      '\n"#)?;\n\n' +
+      "    let response = client\n" +
+      '        .post("https://api.zerogpu.ai' +
+      endpointPath +
+      '")\n' +
+      '        .header("content-type", "application/json")\n' +
+      '        .header("x-api-key", "YOUR_API_KEY")\n' +
+      '        .header("x-project-id", "YOUR_PROJECT_ID")\n' +
+      "        .json(&payload)\n" +
+      "        .send()\n" +
+      "        .await?;\n\n" +
+      "    let body = response.text().await?;\n" +
+      '    println!("{}", body);\n' +
+      "    Ok(())\n" +
+      "}"
+    );
+  }
+
+  function renderGoSnippet(endpointPath, payload) {
+    return (
+      "package main\n\n" +
+      "import (\n" +
+      '  "bytes"\n  "fmt"\n  "io"\n  "net/http"\n)\n\n' +
+      "func main() {\n" +
+      '  url := "https://api.zerogpu.ai' +
+      endpointPath +
+      '"\n\n' +
+      "  payloadBytes := []byte(`" +
+      prettyJson(payload) +
+      "`)\n\n" +
+      '  req, err := http.NewRequest("POST", url, bytes.NewBuffer(payloadBytes))\n' +
+      "  if err != nil {\n    panic(err)\n  }\n\n" +
+      '  req.Header.Set("content-type", "application/json")\n' +
+      '  req.Header.Set("x-api-key", "YOUR_API_KEY")\n' +
+      '  req.Header.Set("x-project-id", "YOUR_PROJECT_ID")\n\n' +
+      "  client := &http.Client{}\n" +
+      "  res, err := client.Do(req)\n" +
+      "  if err != nil {\n    panic(err)\n  }\n" +
+      "  defer res.Body.Close()\n\n" +
+      "  body, _ := io.ReadAll(res.Body)\n" +
+      "  fmt.Println(string(body))\n" +
+      "}"
+    );
+  }
+
+  function renderRubySnippet(endpointPath, payload) {
+    return (
+      "require 'net/http'\nrequire 'uri'\n\n" +
+      "uri = URI.parse('https://api.zerogpu.ai" +
+      endpointPath +
+      "')\n" +
+      "http = Net::HTTP.new(uri.host, uri.port)\n" +
+      "http.use_ssl = (uri.scheme == 'https')\n\n" +
+      "request = Net::HTTP::Post.new(uri.request_uri)\n" +
+      "request['content-type'] = 'application/json'\n" +
+      "request['x-api-key'] = 'YOUR_API_KEY'\n" +
+      "request['x-project-id'] = 'YOUR_PROJECT_ID'\n\n" +
+      "request.body = <<~'JSON'\n" +
+      prettyJson(payload) +
+      "\nJSON\n\n" +
+      "response = http.request(request)\n" +
+      "puts response.body"
+    );
+  }
+
+  function getPlaygroundPayload(model, format, selectedUsecaseKey) {
+    var pricing = model.pricing || {};
+    var usecases = model.modelUsecases || {};
+    var selectedUsecase = selectedUsecaseKey ? usecases[selectedUsecaseKey] : null;
+    if (format === "chat") {
+      var chatPayload =
+        (selectedUsecase && selectedUsecase.sample_chat_completions_body) ||
+        pricing.sample_chat_completions_body ||
+        {
+          model: model.modelId,
+          messages: [{ role: "user", content: "Your input text here..." }],
+        };
+      return { endpoint: "/v1/chat/completions", payload: { ...chatPayload, model: model.modelId } };
+    }
+    var responsePayload =
+      (selectedUsecase && selectedUsecase.sample_responses_body) ||
+      pricing.sample_responses_body ||
+      {
+        text: { format: { type: "text" } },
+        input: [{ role: "user", content: "Your input text here..." }],
+        model: model.modelId,
+      };
+    return { endpoint: "/v1/responses", payload: { ...responsePayload, model: model.modelId } };
+  }
+
+  function tryInitModelPlayground() {
+    var containers = document.querySelectorAll("[data-zgpu-model-playground]");
+    if (!containers || containers.length === 0) return;
+
+    containers.forEach(function (container) {
+      if (container.getAttribute("data-zgpu-playground-init") === "1") return;
+      var modelId = container.getAttribute("data-zgpu-model-playground");
+      if (!modelId) return;
+      container.setAttribute("data-zgpu-playground-init", "1");
+      container.innerHTML = "Loading examples...";
+
+      getModels()
+        .then(function (models) {
+          var visibleModels = getVisibleModels(models);
+          var model = visibleModels.find(function (item) {
+            return String(item.modelId) === String(modelId);
+          });
+          if (!model) {
+            container.textContent = "Model data not found.";
+            return;
+          }
+
+          container.innerHTML = "";
+          var wrap = document.createElement("div");
+          wrap.style.display = "grid";
+          wrap.style.gap = "14px";
+
+          var controls = document.createElement("div");
+          controls.style.display = "grid";
+          controls.style.gridTemplateColumns = "repeat(auto-fit, minmax(220px, 1fr))";
+          controls.style.gap = "12px";
+
+          var langWrap = document.createElement("label");
+          langWrap.textContent = "Select Language";
+          langWrap.style.display = "grid";
+          langWrap.style.gap = "6px";
+          var langSelect = document.createElement("select");
+          ["cURL", "Python", "JavaScript", "Rust", "Go", "Ruby"].forEach(function (lang) {
+            var opt = document.createElement("option");
+            opt.value = lang.toLowerCase();
+            opt.textContent = lang;
+            langSelect.appendChild(opt);
+          });
+          langWrap.appendChild(langSelect);
+          controls.appendChild(langWrap);
+
+          var formatWrap = document.createElement("label");
+          formatWrap.textContent = "OpenAI Format";
+          formatWrap.style.display = "grid";
+          formatWrap.style.gap = "6px";
+          var formatSelect = document.createElement("select");
+          [
+            { value: "responses", label: "Responses" },
+            { value: "chat", label: "Chat Completions" },
+          ].forEach(function (fmt) {
+            var opt = document.createElement("option");
+            opt.value = fmt.value;
+            opt.textContent = fmt.label;
+            formatSelect.appendChild(opt);
+          });
+          formatWrap.appendChild(formatSelect);
+          controls.appendChild(formatWrap);
+          wrap.appendChild(controls);
+
+          var usecases = model.modelUsecases && typeof model.modelUsecases === "object"
+            ? Object.entries(model.modelUsecases).filter(function (entry) {
+                return entry[1] && typeof entry[1] === "object";
+              })
+            : [];
+          var usecaseRow = null;
+          var usecaseDescription = null;
+          var selectedUsecaseKey = usecases.length > 0 ? usecases[0][0] : null;
+          if (usecases.length > 0) {
+            var usecaseTitle = document.createElement("div");
+            usecaseTitle.textContent = "Select Use Case";
+            wrap.appendChild(usecaseTitle);
+            usecaseRow = document.createElement("div");
+            usecaseRow.style.display = "flex";
+            usecaseRow.style.gap = "8px";
+            usecaseRow.style.flexWrap = "wrap";
+            usecases.forEach(function (entry, idx) {
+              var key = entry[0];
+              var value = entry[1];
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.textContent = textOrNA(value.usecase_display_name || key);
+              btn.setAttribute("data-usecase-key", key);
+              btn.style.borderRadius = "999px";
+              btn.style.border = "1px solid var(--border, #374151)";
+              btn.style.padding = "4px 10px";
+              btn.style.background = idx === 0 ? "rgba(34,197,94,0.16)" : "transparent";
+              btn.style.cursor = "pointer";
+              btn.addEventListener("click", function () {
+                selectedUsecaseKey = key;
+                Array.prototype.forEach.call(
+                  usecaseRow.querySelectorAll("button"),
+                  function (node) {
+                    node.style.background = "transparent";
+                  }
+                );
+                btn.style.background = "rgba(34,197,94,0.16)";
+                render();
+              });
+              usecaseRow.appendChild(btn);
+            });
+            wrap.appendChild(usecaseRow);
+            usecaseDescription = document.createElement("div");
+            usecaseDescription.style.color = "var(--muted, #6b7280)";
+            usecaseDescription.style.fontSize = "0.95rem";
+            wrap.appendChild(usecaseDescription);
+          }
+
+          var bodyTitle = document.createElement("h3");
+          bodyTitle.textContent = "Request Body (JSON)";
+          wrap.appendChild(bodyTitle);
+          var bodyPre = document.createElement("pre");
+          var bodyCode = document.createElement("code");
+          bodyPre.appendChild(bodyCode);
+          wrap.appendChild(bodyPre);
+
+          var snippetHeader = document.createElement("div");
+          snippetHeader.style.display = "flex";
+          snippetHeader.style.justifyContent = "space-between";
+          snippetHeader.style.alignItems = "center";
+          var snippetTitle = document.createElement("h3");
+          snippetTitle.textContent = "Code Snippet";
+          snippetTitle.style.margin = "0";
+          snippetHeader.appendChild(snippetTitle);
+          var copyBtn = document.createElement("button");
+          copyBtn.type = "button";
+          copyBtn.textContent = "Copy";
+          copyBtn.style.border = "1px solid var(--border, #374151)";
+          copyBtn.style.padding = "4px 10px";
+          copyBtn.style.borderRadius = "8px";
+          copyBtn.style.cursor = "pointer";
+          snippetHeader.appendChild(copyBtn);
+          wrap.appendChild(snippetHeader);
+
+          var snippetPre = document.createElement("pre");
+          var snippetCode = document.createElement("code");
+          snippetPre.appendChild(snippetCode);
+          wrap.appendChild(snippetPre);
+
+          var currentSnippet = "";
+          function render() {
+            var format = formatSelect.value;
+            var lang = langSelect.value;
+            var selectedUsecase =
+              usecases.length > 0 && selectedUsecaseKey
+                ? model.modelUsecases[selectedUsecaseKey]
+                : null;
+            if (usecaseDescription && selectedUsecase) {
+              usecaseDescription.textContent = textOrNA(selectedUsecase.description);
+            }
+            var payloadInfo = getPlaygroundPayload(model, format, selectedUsecaseKey);
+            bodyCode.textContent = prettyJson(payloadInfo.payload);
+
+            if (lang === "python") {
+              currentSnippet = renderPythonSnippet(payloadInfo.endpoint, payloadInfo.payload);
+            } else if (lang === "javascript") {
+              currentSnippet = renderJavaScriptSnippet(payloadInfo.endpoint, payloadInfo.payload);
+            } else if (lang === "rust") {
+              currentSnippet = renderRustSnippet(payloadInfo.endpoint, payloadInfo.payload);
+            } else if (lang === "go") {
+              currentSnippet = renderGoSnippet(payloadInfo.endpoint, payloadInfo.payload);
+            } else if (lang === "ruby") {
+              currentSnippet = renderRubySnippet(payloadInfo.endpoint, payloadInfo.payload);
+            } else {
+              currentSnippet = renderCurlSnippet(payloadInfo.endpoint, payloadInfo.payload);
+            }
+            snippetCode.textContent = currentSnippet;
+          }
+
+          langSelect.addEventListener("change", render);
+          formatSelect.addEventListener("change", render);
+          copyBtn.addEventListener("click", function () {
+            if (!navigator.clipboard) return;
+            navigator.clipboard.writeText(currentSnippet);
+            copyBtn.textContent = "Copied";
+            setTimeout(function () {
+              copyBtn.textContent = "Copy";
+            }, 1200);
+          });
+
+          render();
+          container.appendChild(wrap);
+        })
+        .catch(function (error) {
+          container.textContent =
+            "Unable to load playground right now. " + (error && error.message ? error.message : String(error));
+        });
+    });
+  }
+
   function normalizeTaskCategory(model) {
     var raw = textOrNA(model.taskDisplayName || model.taskType).toLowerCase();
     if (
@@ -651,6 +1025,7 @@
     tryInitModelCatalog();
     tryInitModelCategoryPage();
     tryInitModelDetailPage();
+    tryInitModelPlayground();
   }
 
   if (document.readyState === "loading") {
