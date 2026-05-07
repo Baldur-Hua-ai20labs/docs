@@ -755,6 +755,20 @@
     return null;
   }
 
+  function isAdTechModel(model) {
+    if (!model) return false;
+    var modelId = textOrNA(model.modelId).toLowerCase();
+    var modelType = textOrNA(model.modelType).toLowerCase();
+    if (modelId.indexOf("iab") >= 0 || modelType.indexOf("iab") >= 0) return true;
+
+    var useCases = Array.isArray(model.pricing && model.pricing.use_cases)
+      ? model.pricing.use_cases
+      : [];
+    return useCases.some(function (uc) {
+      return textOrNA(uc).toLowerCase().indexOf("ad tech") >= 0;
+    });
+  }
+
   function renderLibraryByTask(models, targetEl) {
     targetEl.innerHTML = "";
     var sectionOrder = [
@@ -842,6 +856,9 @@
 
       var visibleModels = getVisibleModels(models);
       var categoryModels = visibleModels.filter(function (model) {
+        if (category === "Ad-Tech") {
+          return isAdTechModel(model);
+        }
         return normalizeTaskCategory(model) === category;
       });
 
