@@ -111,21 +111,6 @@
           "icon": "globe"
         },
         {
-          "anchor": "GitHub",
-          "href": "https://github.com/zerogpu",
-          "icon": "github"
-        },
-        {
-          "anchor": "Discord",
-          "href": "https://discord.gg/Ad5KZvAyky",
-          "icon": "discord"
-        },
-        {
-          "anchor": "X",
-          "href": "https://x.com/ZeroGPU_AI",
-          "icon": "x-twitter"
-        },
-        {
           "anchor": "Platform",
           "href": "https://platform.zerogpu.ai/",
           "icon": "rocket"
@@ -150,20 +135,22 @@
   "navbar": {
     "links": [
       {
-        "label": "Website",
-        "href": "https://zerogpu.ai"
+        "label": "",
+        "href": "https://zerogpu.ai",
+        "icon": "globe"
       },
       {
-        "label": "GitHub",
-        "href": "https://github.com/zerogpu"
+        "label": "",
+        "href": "https://github.com/zerogpu",
+        "icon": "github"
       },
       {
-        "label": "Discord",
+        "label": "",
         "href": "https://discord.gg/Ad5KZvAyky",
         "icon": "discord"
       },
       {
-        "label": "X",
+        "label": "",
         "href": "https://x.com/ZeroGPU_AI",
         "icon": "x-twitter"
       }

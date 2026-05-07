@@ -375,6 +375,54 @@
     }
   }
 
+  function escapeHtml(value) {
+    return String(value)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function simpleHighlight(code, lang) {
+    var html = escapeHtml(code);
+
+    // Strings
+    html = html.replace(/"([^"\\]|\\.)*"/g, '<span style="color:#a5d6ff;">$&</span>');
+
+    // Comments
+    if (lang === "javascript" || lang === "go" || lang === "rust") {
+      html = html.replace(/\/\/.*/g, '<span style="color:#7f8c8d;">$&</span>');
+    } else if (lang === "python" || lang === "ruby" || lang === "bash") {
+      html = html.replace(/#.*/g, '<span style="color:#7f8c8d;">$&</span>');
+    }
+
+    // Numbers
+    html = html.replace(/\b\d+(\.\d+)?\b/g, '<span style="color:#f7c46c;">$&</span>');
+
+    // Booleans/null
+    html = html.replace(/\b(true|false|null)\b/g, '<span style="color:#d19a66;">$1</span>');
+
+    // Language keywords
+    var keywordsByLang = {
+      json: /\b(true|false|null)\b/g,
+      bash: /\b(curl|echo|export|if|then|fi)\b/g,
+      python: /\b(import|from|as|def|class|return|if|else|for|while|in|try|except|with|True|False|None)\b/g,
+      javascript: /\b(const|let|var|function|return|if|else|for|while|try|catch|new|await|async)\b/g,
+      rust: /\b(use|fn|let|mut|async|await|pub|impl|struct|enum|match|if|else|return|Result|Ok)\b/g,
+      go: /\b(package|import|func|var|const|if|else|for|range|return|type|struct)\b/g,
+      ruby: /\b(require|def|end|if|else|elsif|do|class|module|begin|rescue|puts)\b/g,
+    };
+    var kwRegex = keywordsByLang[lang];
+    if (kwRegex) {
+      html = html.replace(kwRegex, '<span style="color:#c792ea;">$&</span>');
+    }
+
+    return html;
+  }
+
+  function setHighlightedCode(codeEl, lang, raw) {
+    codeEl.innerHTML = simpleHighlight(raw, lang);
+  }
+
   function shellEscapeSingleQuoted(value) {
     return String(value).replace(/'/g, "'\"'\"'");
   }
@@ -691,22 +739,29 @@
               usecaseDescription.textContent = textOrNA(selectedUsecase.description);
             }
             var payloadInfo = getPlaygroundPayload(model, format, selectedUsecaseKey);
-            bodyCode.textContent = prettyJson(payloadInfo.payload);
+            setHighlightedCode(bodyCode, "json", prettyJson(payloadInfo.payload));
 
+            var snippetLang = "bash";
             if (lang === "python") {
               currentSnippet = renderPythonSnippet(payloadInfo.endpoint, payloadInfo.payload);
+              snippetLang = "python";
             } else if (lang === "javascript") {
               currentSnippet = renderJavaScriptSnippet(payloadInfo.endpoint, payloadInfo.payload);
+              snippetLang = "javascript";
             } else if (lang === "rust") {
               currentSnippet = renderRustSnippet(payloadInfo.endpoint, payloadInfo.payload);
+              snippetLang = "rust";
             } else if (lang === "go") {
               currentSnippet = renderGoSnippet(payloadInfo.endpoint, payloadInfo.payload);
+              snippetLang = "go";
             } else if (lang === "ruby") {
               currentSnippet = renderRubySnippet(payloadInfo.endpoint, payloadInfo.payload);
+              snippetLang = "ruby";
             } else {
               currentSnippet = renderCurlSnippet(payloadInfo.endpoint, payloadInfo.payload);
+              snippetLang = "bash";
             }
-            snippetCode.textContent = currentSnippet;
+            setHighlightedCode(snippetCode, snippetLang, currentSnippet);
           }
 
           langSelect.addEventListener("change", render);
