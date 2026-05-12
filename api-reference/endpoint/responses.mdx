@@ -5,7 +5,16 @@ description: "Send input to an AI model and receive a response."
 
 ## `POST /v1/responses`
 
-Send a list of input messages to an AI model and receive a generated response.
+Send input to an AI model and receive a generated response.
+
+### `input` shape {#input-shape}
+
+Depending on the model, `input` may be:
+
+- a **plain string** (common for many production models), or
+- an **array of message objects** with `role` (`user` or `system`) and `content` (string).
+
+Use the format your model expects; if you get `400` with `invalid_type` on `input`, switch between these shapes.
 
 ### Request headers
 
@@ -20,15 +29,20 @@ Send a list of input messages to an AI model and receive a generated response.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `model` | string | Yes | The model identifier (available from your dashboard) |
-| `input` | array | Yes | Array of input message objects |
+| `input` | string **or** array | Yes | Plain text, or list of input message objects (model-dependent) |
 | `text` | object | No | Response format configuration |
+| `metadata` | object | No | Optional model-specific parameters (e.g. PII `mask`, `usecase`) when the model supports them |
 
-#### Input message object
+See also [Chat completions](/api-reference/endpoint/chat-completions) for the `messages` route.
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `role` | string | The role of the message author: `user` or `system` |
 | `content` | string | The content of the message |
+
+#### Plain string `input`
+
+When `input` is a string, send the full user text or document as a single JSON string value.
 
 #### Text format object
 
@@ -122,6 +136,20 @@ fetch(url, {
 ```
 
 </CodeGroup>
+
+### Example: string `input`
+
+Some models expect `input` as a single string instead of a message list:
+
+```json
+{
+  "model": "YOUR_MODEL",
+  "input": "Your full prompt or document text here...",
+  "text": {
+    "format": { "type": "text" }
+  }
+}
+```
 
 ### Example response
 

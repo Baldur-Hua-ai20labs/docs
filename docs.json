@@ -72,7 +72,8 @@
           {
             "group": "Endpoints",
             "pages": [
-              "api-reference/endpoint/responses"
+              "api-reference/endpoint/responses",
+              "api-reference/endpoint/chat-completions"
             ]
           },
           {
