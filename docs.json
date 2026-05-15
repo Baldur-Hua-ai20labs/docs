@@ -98,6 +98,7 @@
               "cookbook/demos",
               "cookbook/summarize-text",
               "cookbook/iab-classification",
+              "cookbook/data-extraction",
               "cookbook/batch-requests"
             ]
           }
