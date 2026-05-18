@@ -99,6 +99,7 @@
               "cookbook/summarize-text",
               "cookbook/iab-classification",
               "cookbook/data-extraction",
+              "cookbook/data-extraction-tutorial",
               "cookbook/batch-requests"
             ]
           }
