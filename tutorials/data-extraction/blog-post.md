@@ -110,7 +110,7 @@ See the [cookbook PII section](https://docs.zerogpu.ai/cookbook/data-extraction#
 
 ## Run the example dataset in minutes
 
-We shipped a tutorial bundle in the [ZeroGPU docs repo](https://github.com/zerogpu/docs/tree/main/tutorials/data-extraction):
+Example data and scripts live in the [ZeroGPU docs repo](https://github.com/zerogpu/docs/tree/main/tutorials/data-extraction):
 
 - `dataset/resumes.jsonl` (six synthetic resumes)
 - `dataset/profiles.jsonl` (six synthetic profile snippets)
