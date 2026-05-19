@@ -33,7 +33,9 @@ The [Responses](/api-reference/endpoint/responses) and [Chat completions](/api-r
 
 Requests go **directly from your browser** to the ZeroGPU API (`proxy` is disabled so custom headers reach our servers). If the browser blocks the request (CORS), use the cURL snippet or an SDK from your backend instead.
 
-The playground is generated from our [OpenAPI specification](https://github.com/zerogpu/docs/blob/main/openapi/zerogpu.openapi.yaml). See [Mintlify playground docs](https://www.mintlify.com/docs/api-playground/overview) for customization options.
+Use the **model** dropdown and the **request example** selector in the playground to load a body tuned for each catalog model. The spec is generated from the live model catalog (`node scripts/generate-openapi.mjs`).
+
+OpenAPI source: [openapi/zerogpu.openapi.json](https://github.com/zerogpu/docs/blob/main/openapi/zerogpu.openapi.json). See [Mintlify playground docs](https://www.mintlify.com/docs/api-playground/overview) for customization options.
 
 ## Available endpoints
 

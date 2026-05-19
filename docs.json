@@ -14,9 +14,10 @@
       "proxy": false
     },
     "examples": {
-      "languages": ["curl", "python", "javascript"],
+      "languages": ["curl", "python", "javascript", "rust", "go", "ruby"],
       "defaults": "required",
-      "prefill": true
+      "prefill": true,
+      "autogenerate": true
     },
     "mdx": {
       "server": "https://api.zerogpu.ai/v1"
