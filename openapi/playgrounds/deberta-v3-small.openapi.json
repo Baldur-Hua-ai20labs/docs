@@ -208,20 +208,10 @@
             "description": "Model identifier (fixed for this playground)."
           },
           "input": {
-            "description": "Model-dependent input. Plain string or message list with role and content.",
-            "oneOf": [
-              {
-                "type": "string",
-                "minLength": 1
-              },
-              {
-                "type": "array",
-                "minItems": 1,
-                "items": {
-                  "$ref": "#/components/schemas/InputMessage"
-                }
-              }
-            ]
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "description": "Text or document content to send to the model."
           },
           "text": {
             "$ref": "#/components/schemas/TextResponseConfig"
@@ -274,7 +264,10 @@
             ]
           },
           "content": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "description": "Message text."
           }
         }
       },
@@ -297,7 +290,10 @@
             ]
           },
           "content": {
-            "type": "string"
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "description": "Message text."
           }
         }
       },

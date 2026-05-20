@@ -79,6 +79,55 @@ function collectRouteExamples(model, field, fallbackBody) {
   return examples;
 }
 
+function inputTypesInExamples(examples) {
+  const types = new Set();
+  for (const ex of Object.values(examples)) {
+    const input = ex?.value?.input;
+    if (typeof input === "string") types.add("string");
+    if (Array.isArray(input)) types.add("array");
+  }
+  return types;
+}
+
+/** Mintlify renders `format: textarea` as a multi-line field (not a one-line input). */
+function buildResponsesInputSchema(examples) {
+  const types = inputTypesInExamples(examples);
+  if (types.size === 1 && types.has("string")) {
+    return {
+      type: "string",
+      minLength: 1,
+      format: "textarea",
+      description: "Text or document content to send to the model.",
+    };
+  }
+  if (types.size === 1 && types.has("array")) {
+    return {
+      type: "array",
+      minItems: 1,
+      description: "Message list with role and content.",
+      items: { $ref: "#/components/schemas/InputMessage" },
+    };
+  }
+  return {
+    description:
+      "Model-dependent input. Plain string or message list with role and content.",
+    oneOf: [
+      { type: "string", minLength: 1, format: "textarea" },
+      {
+        type: "array",
+        minItems: 1,
+        items: { $ref: "#/components/schemas/InputMessage" },
+      },
+    ],
+  };
+}
+
+const textareaString = {
+  type: "string",
+  minLength: 1,
+  format: "textarea",
+};
+
 function buildExamples(entries) {
   const examples = {};
   for (const entry of entries) {
@@ -143,7 +192,7 @@ function sharedComponents() {
             description:
               "Model-dependent input. Plain string or message list with role and content.",
             oneOf: [
-              { type: "string", minLength: 1 },
+              { ...textareaString, description: "Plain text or document body." },
               {
                 type: "array",
                 minItems: 1,
@@ -174,7 +223,7 @@ function sharedComponents() {
         required: ["role", "content"],
         properties: {
           role: { type: "string", enum: ["system", "user", "assistant"] },
-          content: { type: "string" },
+          content: { ...textareaString, description: "Message text." },
         },
       },
       ChatCompletionResponse: { type: "object", additionalProperties: true },
@@ -183,7 +232,7 @@ function sharedComponents() {
         required: ["role", "content"],
         properties: {
           role: { type: "string", enum: ["user", "system"] },
-          content: { type: "string" },
+          content: { ...textareaString, description: "Message text." },
         },
       },
       TextResponseConfig: {
@@ -322,6 +371,12 @@ function buildModelPlaygroundOpenApi(model) {
 
   if (operations.length === 0) return null;
 
+  const components = sharedComponents();
+  if (Object.keys(responsesExamples).length > 0) {
+    components.schemas.CreateResponseRequest.properties.input =
+      buildResponsesInputSchema(responsesExamples);
+  }
+
   return {
     openapi: "3.1.0",
     info: {
@@ -336,7 +391,7 @@ function buildModelPlaygroundOpenApi(model) {
     servers: [{ url: "https://api.zerogpu.ai/v1", description: "Production" }],
     security: [{ ApiKey: [], ProjectId: [] }],
     paths,
-    components: sharedComponents(),
+    components,
     "x-zgpu-operations": operations,
   };
 }
