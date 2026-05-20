@@ -39,11 +39,11 @@
                     "properties": {
                       "model": {
                         "type": "string",
-                        "enum": [
-                          "deberta-v3-small"
-                        ],
+                        "const": "deberta-v3-small",
                         "default": "deberta-v3-small",
-                        "example": "deberta-v3-small"
+                        "example": "deberta-v3-small",
+                        "readOnly": true,
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
                       }
                     }
                   }
@@ -119,11 +119,11 @@
                     "properties": {
                       "model": {
                         "type": "string",
-                        "enum": [
-                          "deberta-v3-small"
-                        ],
+                        "const": "deberta-v3-small",
                         "default": "deberta-v3-small",
-                        "example": "deberta-v3-small"
+                        "example": "deberta-v3-small",
+                        "readOnly": true,
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
                       }
                     }
                   }
@@ -205,7 +205,11 @@
         "properties": {
           "model": {
             "type": "string",
-            "description": "Model identifier (fixed for this playground)."
+            "const": "deberta-v3-small",
+            "default": "deberta-v3-small",
+            "example": "deberta-v3-small",
+            "readOnly": true,
+            "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
           },
           "input": {
             "type": "string",

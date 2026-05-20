@@ -259,12 +259,28 @@ function sharedComponents() {
   };
 }
 
-function fixedModelProperty(modelId) {
+function fixedModelProperty(modelId, description) {
   return {
     type: "string",
-    enum: [modelId],
+    const: modelId,
     default: modelId,
     example: modelId,
+    readOnly: true,
+    description:
+      description ||
+      "Model identifier (fixed for this playground). Use request examples to change use cases.",
+  };
+}
+
+function requestBodySchemaWithFixedModel(baseRef, modelId, description) {
+  return {
+    allOf: [
+      { $ref: baseRef },
+      {
+        type: "object",
+        properties: { model: fixedModelProperty(modelId, description) },
+      },
+    ],
   };
 }
 
@@ -290,15 +306,10 @@ function buildModelPlaygroundOpenApi(model) {
           required: true,
           content: {
             "application/json": {
-              schema: {
-                allOf: [
-                  { $ref: "#/components/schemas/CreateResponseRequest" },
-                  {
-                    type: "object",
-                    properties: { model: fixedModelProperty(modelId) },
-                  },
-                ],
-              },
+              schema: requestBodySchemaWithFixedModel(
+                "#/components/schemas/CreateResponseRequest",
+                modelId
+              ),
               examples: responsesExamples,
             },
           },
@@ -382,6 +393,7 @@ function buildModelPlaygroundOpenApi(model) {
 
   const components = sharedComponents();
   if (Object.keys(responsesExamples).length > 0) {
+    components.schemas.CreateResponseRequest.properties.model = fixedModelProperty(modelId);
     components.schemas.CreateResponseRequest.properties.input =
       buildResponsesInputSchema(responsesExamples);
   }
@@ -457,13 +469,15 @@ function buildMainOpenApiDocument(models) {
       }
     : undefined;
 
+  const defaultResponsesModelId = firstResponses?.modelId || "gliner2-base-v1";
+  const responsesModelDescription =
+    "Model identifier (fixed on this page). Open a [model page](/platform/model-catalog) for a dedicated playground with other models.";
+
   const components = sharedComponents();
-  components.schemas.CreateResponseRequest.properties.model = {
-    type: "string",
-    description:
-      "Model identifier. Open a [model page](/platform/model-catalog) for a dedicated playground with the correct body for that model.",
-    example: firstResponses?.modelId || "gliner2-base-v1",
-  };
+  components.schemas.CreateResponseRequest.properties.model = fixedModelProperty(
+    defaultResponsesModelId,
+    responsesModelDescription
+  );
   components.schemas.CreateChatCompletionRequest.properties.model = {
     type: "string",
     description:
@@ -503,7 +517,11 @@ function buildMainOpenApiDocument(models) {
             required: true,
             content: {
               "application/json": {
-                schema: { $ref: "#/components/schemas/CreateResponseRequest" },
+                schema: requestBodySchemaWithFixedModel(
+                  "#/components/schemas/CreateResponseRequest",
+                  defaultResponsesModelId,
+                  responsesModelDescription
+                ),
                 ...(responsesExamples ? { examples: responsesExamples } : {}),
               },
             },

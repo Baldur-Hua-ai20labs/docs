@@ -39,11 +39,11 @@
                     "properties": {
                       "model": {
                         "type": "string",
-                        "enum": [
-                          "LFM2.5-1.2B-Thinking"
-                        ],
+                        "const": "LFM2.5-1.2B-Thinking",
                         "default": "LFM2.5-1.2B-Thinking",
-                        "example": "LFM2.5-1.2B-Thinking"
+                        "example": "LFM2.5-1.2B-Thinking",
+                        "readOnly": true,
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
                       }
                     }
                   }
@@ -118,11 +118,11 @@
                     "properties": {
                       "model": {
                         "type": "string",
-                        "enum": [
-                          "LFM2.5-1.2B-Thinking"
-                        ],
+                        "const": "LFM2.5-1.2B-Thinking",
                         "default": "LFM2.5-1.2B-Thinking",
-                        "example": "LFM2.5-1.2B-Thinking"
+                        "example": "LFM2.5-1.2B-Thinking",
+                        "readOnly": true,
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
                       }
                     }
                   }
@@ -200,7 +200,11 @@
         "properties": {
           "model": {
             "type": "string",
-            "description": "Model identifier (fixed for this playground)."
+            "const": "LFM2.5-1.2B-Thinking",
+            "default": "LFM2.5-1.2B-Thinking",
+            "example": "LFM2.5-1.2B-Thinking",
+            "readOnly": true,
+            "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
           },
           "input": {
             "type": "string",

@@ -39,11 +39,11 @@
                     "properties": {
                       "model": {
                         "type": "string",
-                        "enum": [
-                          "gliner-multi-pii-v1"
-                        ],
+                        "const": "gliner-multi-pii-v1",
                         "default": "gliner-multi-pii-v1",
-                        "example": "gliner-multi-pii-v1"
+                        "example": "gliner-multi-pii-v1",
+                        "readOnly": true,
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
                       }
                     }
                   }
@@ -137,11 +137,11 @@
                     "properties": {
                       "model": {
                         "type": "string",
-                        "enum": [
-                          "gliner-multi-pii-v1"
-                        ],
+                        "const": "gliner-multi-pii-v1",
                         "default": "gliner-multi-pii-v1",
-                        "example": "gliner-multi-pii-v1"
+                        "example": "gliner-multi-pii-v1",
+                        "readOnly": true,
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
                       }
                     }
                   }
@@ -243,7 +243,11 @@
         "properties": {
           "model": {
             "type": "string",
-            "description": "Model identifier (fixed for this playground)."
+            "const": "gliner-multi-pii-v1",
+            "default": "gliner-multi-pii-v1",
+            "example": "gliner-multi-pii-v1",
+            "readOnly": true,
+            "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
           },
           "input": {
             "type": "string",

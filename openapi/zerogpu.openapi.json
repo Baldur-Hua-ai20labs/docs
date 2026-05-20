@@ -36,7 +36,24 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/CreateResponseRequest"
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateResponseRequest"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "model": {
+                        "type": "string",
+                        "const": "zlm-v1-iab-classify-edge-enriched",
+                        "default": "zlm-v1-iab-classify-edge-enriched",
+                        "example": "zlm-v1-iab-classify-edge-enriched",
+                        "readOnly": true,
+                        "description": "Model identifier (fixed on this page). Open a [model page](/platform/model-catalog) for a dedicated playground with other models."
+                      }
+                    }
+                  }
+                ]
               },
               "examples": {
                 "default": {
@@ -187,8 +204,11 @@
         "properties": {
           "model": {
             "type": "string",
-            "description": "Model identifier. Open a [model page](/platform/model-catalog) for a dedicated playground with the correct body for that model.",
-            "example": "zlm-v1-iab-classify-edge-enriched"
+            "const": "zlm-v1-iab-classify-edge-enriched",
+            "default": "zlm-v1-iab-classify-edge-enriched",
+            "example": "zlm-v1-iab-classify-edge-enriched",
+            "readOnly": true,
+            "description": "Model identifier (fixed on this page). Open a [model page](/platform/model-catalog) for a dedicated playground with other models."
           },
           "input": {
             "description": "Model-dependent input. Plain string or message list with role and content.",
