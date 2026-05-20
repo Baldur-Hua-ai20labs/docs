@@ -5,7 +5,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/zlm-v1-iab-classify-edge-enriched",
+    "displayName": "zlm-v1-iab-classify-edge-enriched"
   },
   "zlm-v1-iab-classify-edge": {
     "spec": "openapi/playgrounds/zlm-v1-iab-classify-edge.openapi.json",
@@ -13,7 +15,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/zlm-v1-iab-classify-edge",
+    "displayName": "zlm-v1-iab-classify-edge"
   },
   "zlm-v1-followup-questions-edge": {
     "spec": "openapi/playgrounds/zlm-v1-followup-questions-edge.openapi.json",
@@ -21,7 +25,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/zlm-v1-followup-questions-edge",
+    "displayName": "zlm-v1-followup-questions-edge"
   },
   "gliner-multi-pii-v1": {
     "spec": "openapi/playgrounds/gliner-multi-pii-v1.openapi.json",
@@ -29,7 +35,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/gliner-multi-pii-v1",
+    "displayName": "gliner-multi-pii-v1"
   },
   "gliner2-base-v1": {
     "spec": "openapi/playgrounds/gliner2-base-v1.openapi.json",
@@ -37,7 +45,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/gliner2-base-v1",
+    "displayName": "gliner2-base-v1"
   },
   "deberta-v3-small": {
     "spec": "openapi/playgrounds/deberta-v3-small.openapi.json",
@@ -45,7 +55,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/deberta-v3-small",
+    "displayName": "deberta-v3-small"
   },
   "t5-small": {
     "spec": "openapi/playgrounds/t5-small.openapi.json",
@@ -53,7 +65,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/t5-small",
+    "displayName": "t5-small"
   },
   "LFM2.5-1.2B-Thinking": {
     "spec": "openapi/playgrounds/LFM2_5-1_2B-Thinking.openapi.json",
@@ -61,7 +75,9 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/lfm2-5-1-2b-thinking",
+    "displayName": "LFM2.5-1.2B-Thinking"
   },
   "LFM2.5-1.2B-Instruct": {
     "spec": "openapi/playgrounds/LFM2_5-1_2B-Instruct.openapi.json",
@@ -69,6 +85,8 @@
       "POST /responses",
       "POST /chat/completions"
     ],
-    "primary": "POST /responses"
+    "primary": "POST /responses",
+    "page": "models/lfm2-5-1-2b-instruct",
+    "displayName": "LFM2.5-1.2B-Instruct"
   }
 }

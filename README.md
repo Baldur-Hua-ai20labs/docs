@@ -86,7 +86,7 @@ mint dev
 
 Preview at `http://localhost:3000` (or the port Mintlify reports).
 
-**API playground:** Each **model page** has its own Mintlify playground (`openapi/playgrounds/*.openapi.json`). API Reference endpoint pages stay generic. Regenerate from the catalog:
+**API playground:** Each **model** has a live playground under **API Reference → Endpoints → By model** (and on its catalog page). Specs live in `openapi/playgrounds/*.openapi.json`; `docs.json` nav is updated by the generator. Regenerate from the catalog:
 
 ```bash
 node scripts/generate-openapi.mjs

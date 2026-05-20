@@ -15,10 +15,19 @@ const docsRoot = process.cwd();
 const openapiPath = path.join(docsRoot, "openapi", "zerogpu.openapi.json");
 const playgroundsDir = path.join(docsRoot, "openapi", "playgrounds");
 const manifestPath = path.join(docsRoot, "snippets", "model-playgrounds.json");
+const modelsIndexPath = path.join(docsRoot, "api-reference", "models", "index.mdx");
+const docsJsonPath = path.join(docsRoot, "docs.json");
 const fallbackPath = path.join(docsRoot, "snippets", "model-catalog-fallback.json");
 
 function exampleKey(modelId) {
   return String(modelId).replace(/[^a-zA-Z0-9_-]/g, "_");
+}
+
+function slugify(value) {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
 }
 
 function playgroundFileName(modelId) {
@@ -603,11 +612,68 @@ async function writeModelPlaygrounds(models) {
       spec: relPath,
       operations,
       primary: operations[0],
+      page: `models/${slugify(model.modelId)}`,
+      displayName: model.modelDisplayName || model.modelId,
     };
   }
 
   await writeFile(manifestPath, JSON.stringify(manifest, null, 2) + "\n", "utf8");
-  return Object.keys(manifest).length;
+  return manifest;
+}
+
+async function writeModelsIndexPage(manifest) {
+  await mkdir(path.dirname(modelsIndexPath), { recursive: true });
+
+  const entries = Object.entries(manifest).sort(([, a], [, b]) =>
+    (a.displayName || "").localeCompare(b.displayName || "", undefined, { sensitivity: "base" })
+  );
+
+  const cards = entries
+    .map(
+      ([modelId, entry]) =>
+        `  <Card title="${String(entry.displayName).replace(/"/g, '\\"')}" href="/${entry.page}">\n    Live playground for \`${modelId}\` with use-case request examples.\n  </Card>`
+    )
+    .join("\n");
+
+  const mdx = `---
+title: "Model playgrounds"
+description: "Interactive API playgrounds per catalog model, under API Reference."
+---
+
+Each model has its own playground with a fixed model ID and **request examples** for that model's use cases (JSON extraction, NER, classification, and so on). Open a model below or from the [model catalog](/platform/model-catalog).
+
+<CardGroup cols={2}>
+${cards}
+</CardGroup>
+
+For generic \`POST /v1/responses\` and \`POST /v1/chat/completions\` shapes, see [Responses](/api-reference/endpoint/responses) and [Chat completions](/api-reference/endpoint/chat-completions).
+`;
+
+  await writeFile(modelsIndexPath, mdx, "utf8");
+}
+
+async function updateApiReferenceNav(manifest) {
+  const docs = JSON.parse(await readFile(docsJsonPath, "utf8"));
+  const apiTab = docs.navigation?.tabs?.find((tab) => tab.tab === "API Reference");
+  if (!apiTab) throw new Error("API Reference tab not found in docs.json");
+
+  const endpointsGroup = apiTab.groups?.find((group) => group.group === "Endpoints");
+  if (!endpointsGroup) throw new Error("Endpoints group not found in docs.json");
+
+  const modelPages = Object.values(manifest)
+    .sort((a, b) => (a.displayName || "").localeCompare(b.displayName || "", undefined, { sensitivity: "base" }))
+    .map((entry) => entry.page);
+
+  endpointsGroup.pages = [
+    "api-reference/endpoint/responses",
+    "api-reference/endpoint/chat-completions",
+    {
+      group: "By model",
+      pages: ["api-reference/models/index", ...modelPages],
+    },
+  ];
+
+  await writeFile(docsJsonPath, JSON.stringify(docs, null, 2) + "\n", "utf8");
 }
 
 async function main() {
@@ -615,12 +681,16 @@ async function main() {
   const mainDoc = buildMainOpenApiDocument(models);
   await writeFile(openapiPath, JSON.stringify(mainDoc, null, 2) + "\n", "utf8");
 
-  const playgroundCount = await writeModelPlaygrounds(models);
+  const manifest = await writeModelPlaygrounds(models);
+  await writeModelsIndexPage(manifest);
+  await updateApiReferenceNav(manifest);
 
   process.stdout.write(
     `Wrote ${openapiPath}\n` +
-      `Wrote ${playgroundCount} model playground spec(s) in openapi/playgrounds/\n` +
-      `Wrote ${manifestPath}\n`
+      `Wrote ${Object.keys(manifest).length} model playground spec(s) in openapi/playgrounds/\n` +
+      `Wrote ${manifestPath}\n` +
+      `Wrote ${modelsIndexPath}\n` +
+      `Updated API Reference → Endpoints → By model in docs.json\n`
   );
 }
 
