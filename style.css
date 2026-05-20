@@ -1,0 +1,12 @@
+/* Tall text areas for API playground model input (Mintlify form builder). */
+textarea[data-zgpu-playground-longtext="1"] {
+  min-height: 280px !important;
+  height: auto !important;
+  max-height: 60vh;
+  resize: vertical !important;
+  width: 100% !important;
+  line-height: 1.5 !important;
+  white-space: pre-wrap !important;
+  overflow: auto !important;
+  field-sizing: content;
+}

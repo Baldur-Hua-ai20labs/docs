@@ -310,7 +310,8 @@
             "type": "string",
             "minLength": 1,
             "format": "textarea",
-            "description": "Text or document content to send to the model."
+            "maxLength": 131072,
+            "description": "Multi-line text or document content to send to the model."
           },
           "instructions": {
             "type": "string"
@@ -363,6 +364,7 @@
             "type": "string",
             "minLength": 1,
             "format": "textarea",
+            "maxLength": 131072,
             "description": "Message text."
           }
         }
@@ -389,6 +391,7 @@
             "type": "string",
             "minLength": 1,
             "format": "textarea",
+            "maxLength": 131072,
             "description": "Message text."
           }
         }

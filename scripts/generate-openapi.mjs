@@ -113,7 +113,8 @@ function buildResponsesInputSchema(examples) {
       type: "string",
       minLength: 1,
       format: "textarea",
-      description: "Text or document content to send to the model.",
+      maxLength: 131072,
+      description: "Multi-line text or document content to send to the model.",
     };
   }
   if (types.size === 1 && types.has("array")) {
@@ -142,6 +143,8 @@ const textareaString = {
   type: "string",
   minLength: 1,
   format: "textarea",
+  maxLength: 131072,
+  description: "Multi-line text. Use a tall text area in the playground (not a single-line input).",
 };
 
 function buildExamples(entries) {

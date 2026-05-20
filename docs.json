@@ -13,6 +13,9 @@
       "display": "interactive",
       "proxy": false
     },
+    "params": {
+      "expanded": "all"
+    },
     "examples": {
       "languages": [
         "curl",

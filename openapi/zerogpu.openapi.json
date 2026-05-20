@@ -197,6 +197,7 @@
                 "type": "string",
                 "minLength": 1,
                 "format": "textarea",
+                "maxLength": 131072,
                 "description": "Plain text or document body."
               },
               {
@@ -261,6 +262,7 @@
             "type": "string",
             "minLength": 1,
             "format": "textarea",
+            "maxLength": 131072,
             "description": "Message text."
           }
         }
@@ -287,6 +289,7 @@
             "type": "string",
             "minLength": 1,
             "format": "textarea",
+            "maxLength": 131072,
             "description": "Message text."
           }
         }
