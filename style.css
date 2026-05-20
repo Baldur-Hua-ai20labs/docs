@@ -1,12 +1,33 @@
-/* Tall text areas for API playground model input (Mintlify form builder). */
-textarea[data-zgpu-playground-longtext="1"] {
-  min-height: 280px !important;
-  height: auto !important;
-  max-height: 60vh;
-  resize: vertical !important;
+/* API playground: full-width tall editors for model `input` (and chat `content`). */
+
+.zgpu-longtext-field-host {
   width: 100% !important;
+  max-width: 100% !important;
+  flex: 1 1 100% !important;
+}
+
+.zgpu-longtext-field {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.zgpu-longtext-editor,
+textarea[data-zgpu-playground-longtext="1"] {
+  display: block !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  min-height: 320px !important;
+  max-height: 65vh !important;
+  height: auto !important;
+  resize: vertical !important;
   line-height: 1.5 !important;
   white-space: pre-wrap !important;
   overflow: auto !important;
+  word-break: break-word !important;
   field-sizing: content;
+}
+
+/* Mintlify param rows: let long-text field span the full row when possible */
+.zgpu-longtext-field-host:has(.zgpu-longtext-editor) {
+  grid-column: 1 / -1;
 }
