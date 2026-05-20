@@ -185,14 +185,12 @@
       "ApiKey": {
         "type": "apiKey",
         "in": "header",
-        "name": "x-api-key",
-        "description": "ZeroGPU API key from the dashboard (starts with zgpu-)"
+        "name": "x-api-key"
       },
       "ProjectId": {
         "type": "apiKey",
         "in": "header",
-        "name": "x-project-id",
-        "description": "Project UUID from the dashboard"
+        "name": "x-project-id"
       }
     },
     "schemas": {

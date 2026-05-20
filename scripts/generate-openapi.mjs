@@ -189,13 +189,11 @@ function sharedComponents() {
         type: "apiKey",
         in: "header",
         name: "x-api-key",
-        description: "ZeroGPU API key from the dashboard (starts with zgpu-)",
       },
       ProjectId: {
         type: "apiKey",
         in: "header",
         name: "x-project-id",
-        description: "Project UUID from the dashboard",
       },
     },
     schemas: {
