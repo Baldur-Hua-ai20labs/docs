@@ -36,7 +36,7 @@ with `purpose=batch`, then reference its ID when you call
 | `custom_id` | string | **Yes** | Your identifier for this request. Must be non-empty and **unique within the batch**. Returned verbatim in the corresponding output or error line so you can match results to inputs. |
 | `method` | string | **Yes** | HTTP method, case-insensitive. Only `POST` (any case) is accepted today. |
 | `url` | string | **Yes** | Must be `/v1/chat/completions`, the [only batchable endpoint](/api-reference/batch/supported-endpoints). **All lines in a single batch must share the same `url`**, and it must match the `endpoint` field on the create call. |
-| `body` | object | **Yes** | The request body that would be sent to the synchronous endpoint. See [supported endpoints](/api-reference/batch/supported-endpoints)(/api-reference/batch/supported-endpoints) for the shape. The field `stream: true` is rejected. |
+| `body` | object | **Yes** | The request body that would be sent to the synchronous endpoint. See [Supported endpoints](/api-reference/batch/supported-endpoints) for the shape. The field `stream: true` is rejected. |
 
 ### Validation rules
 
@@ -72,7 +72,7 @@ The service performs all of the following checks at `POST /v1/batches` time
 {"custom_id":"req-3","method":"POST","url":"/v1/chat/completions","body":{"model":"<model-id>","messages":[{"role":"user","content":"What is the capital of Italy?"}]}}
 ```
 
-See [supported endpoints](/api-reference/batch/supported-endpoints)(/api-reference/batch/supported-endpoints) for the
+See [Supported endpoints](/api-reference/batch/supported-endpoints) for the
 `/v1/chat/completions` body schema.
 
 ---
@@ -112,7 +112,7 @@ order of lines in the input file, match results to inputs by `custom_id`.
 | `response.request_id` | string \| null | The synchronous request id (`req_…`) of the underlying call to the orchestration API. Useful for cross-referencing logs. `null` if the upstream service didn't surface a request id. |
 | `response.body` | object | The same JSON body the synchronous endpoint would have returned for this request. |
 
-See [supported endpoints](/api-reference/batch/supported-endpoints)(/api-reference/batch/supported-endpoints) for the exact
+See [Supported endpoints](/api-reference/batch/supported-endpoints) for the exact
 `response.body` shape (OpenAI `chat.completion`).
 
 ### Example, chat completions output
@@ -247,7 +247,7 @@ Output and error lines are <em>not</em> guaranteed to appear in input
 
 <CardGroup cols={2}>
   <Card title="Supported endpoints →" href="/api-reference/batch/supported-endpoints">
-    Body and response shape for <code>/v1/chat/completions</code>.
+    Body and response shape for `/v1/chat/completions`.
   </Card>
   <Card title="Examples →" href="/api-reference/batch/examples">
     Full end-to-end walkthrough in curl and Python.

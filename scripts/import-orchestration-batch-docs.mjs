@@ -51,6 +51,19 @@ function escapeAttr(s) {
   return String(s).replace(/"/g, '\\"');
 }
 
+function formatLinkLabel(slug) {
+  const names = {
+    errors: "Errors reference",
+    "jsonl-format": "JSONL format",
+    "supported-endpoints": "Supported endpoints",
+    "files-api": "Files API",
+    "batches-api": "Batches API",
+    "getting-started": "Quickstart",
+    examples: "Examples",
+  };
+  return names[slug] || slug.replace(/-/g, " ");
+}
+
 function mapHref(href) {
   if (!href) return href;
   if (href.startsWith("#/")) {
@@ -110,11 +123,35 @@ function convertCards(inner) {
   }
   if (!cards.length) return inner;
   const cols = cards.length >= 3 ? 2 : 2;
-  const lines = cards.map(
-    (c) =>
-      `  <Card title="${escapeAttr(c.title)}" href="${c.href}">\n    ${c.body}\n  </Card>`
-  );
+  const lines = cards.map((c) => {
+    const body = c.body.replace(/<code>/g, "`").replace(/<\/code>/g, "`");
+    return `  <Card title="${escapeAttr(c.title)}" href="${c.href}">\n    ${body}\n  </Card>`;
+  });
   return `<CardGroup cols={${cols}}>\n${lines.join("\n")}\n</CardGroup>`;
+}
+
+function tabCodeLabel(name) {
+  const n = name.trim().toLowerCase();
+  if (n === "bash" || n === "curl") return "cURL";
+  if (n === "python") return "Python";
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+function convertDocsifyTabs(text) {
+  return text.replace(/<!-- tabs:start -->\n([\s\S]*?)<!-- tabs:end -->/g, (_, inner) => {
+    const blocks = [];
+    const sectionRe = /#### \*\*([^*]+)\*\*\s*\n+([\s\S]*?)(?=\n#### \*\*|\s*$)/g;
+    let m;
+    while ((m = sectionRe.exec(inner))) {
+      const codeMatch = m[2].trim().match(/```(\w*)\n([\s\S]*?)```/);
+      if (!codeMatch) continue;
+      const lang = codeMatch[1] || "bash";
+      const label = tabCodeLabel(m[1]);
+      blocks.push(`\`\`\`${lang} ${label}\n${codeMatch[2].trim()}\n\`\`\``);
+    }
+    if (!blocks.length) return inner;
+    return `<CodeGroup>\n\n${blocks.join("\n\n")}\n\n</CodeGroup>`;
+  });
 }
 
 function convertCallouts(text) {
@@ -147,6 +184,7 @@ function convertMarkdownBody(raw, slug) {
   text = replaceCardsDivs(text);
 
   text = convertCallouts(text);
+  text = convertDocsifyTabs(text);
 
   text = text.replace(
     /## <span class="verb (\w+)">(\w+)<\/span> `([^`]+)` — ([^\n]+)/g,
@@ -154,16 +192,21 @@ function convertMarkdownBody(raw, slug) {
   );
   text = text.replace(/<span class="verb \w+">(\w+)<\/span>/g, "$1");
 
-  // Markdown links to sibling .md files
-  text = text.replace(/\]\(\.\/([^)]+\.md)(#[^)]*)?\)/g, (_, file, hash = "") => {
-    const base = `/api-reference/batch/${file.replace(/\.md$/, "")}`;
-    return `](${base}${hash || ""})`;
-  });
-  text = text.replace(/\]\(([^/)]+\.md)(#[^)]*)?\)/g, (_, file, hash = "") => {
-    if (file.startsWith("http")) return `](${file}${hash || ""})`;
-    return `](${mapHref(file)}${hash || ""})`;
-  });
+  // Markdown links to sibling .md files (single pass to avoid duplicate URLs)
+  text = text.replace(
+    /\[([^\]]+)\]\(([^)]+\.md)(#[^)]*)?\)/g,
+    (_, label, file, hash = "") => {
+      if (file.startsWith("http")) return `[${label}](${file}${hash || ""})`;
+      const slug = file.replace(/^\.\//, "").replace(/\.md$/, "");
+      const textLabel = label.endsWith(".md") ? formatLinkLabel(slug) : label;
+      return `[${textLabel}](/api-reference/batch/${slug}${hash || ""})`;
+    }
+  );
   text = text.replace(/\]\(#\/([^)]+)\)/g, (_, slugPath) => `](${mapHref(`#/${slugPath}`)})`);
+  text = text.replace(
+    /\]\((\/api-reference\/batch\/[^)]+)\)\(\/api-reference\/batch\/[^)]+\)/g,
+    "]($1)"
+  );
 
   // Table default cells
   text = text.replace(/\| — \|/g, "| - |");
@@ -173,11 +216,6 @@ function convertMarkdownBody(raw, slug) {
   // "Response — 200 OK" became "Response. 200 OK" after dash normalization.
   text = text.replace(/### Response\. (`?\d)/g, "### Response: $1");
   text = text.replace(/### Response — /g, "### Response: ");
-
-  text = text.replace(
-    /\[(errors|files-api|batches-api|jsonl-format|supported-endpoints|getting-started|examples)\.md\]/gi,
-    (_, name) => `[${name.replace(/-/g, " ")}](/api-reference/batch/${name})`
-  );
 
   if (slug === "examples") {
     text = text.replace(
