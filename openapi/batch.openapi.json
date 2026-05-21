@@ -1,0 +1,238 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ZeroGPU Batch & Files API",
+    "version": "1.0",
+    "description": "Asynchronous batch inference via `POST /v1/batches` and JSONL file upload via `POST /v1/files`. Wire-compatible with OpenAI's batch and files APIs."
+  },
+  "servers": [
+    {
+      "url": "https://api.zerogpu.ai",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "ApiKey": [],
+      "ProjectId": []
+    }
+  ],
+  "paths": {
+    "/v1/batches": {
+      "post": {
+        "operationId": "createBatch",
+        "summary": "Create a batch",
+        "description": "Submit a batch from an uploaded JSONL input file. Returns immediately with `status: in_progress`.",
+        "tags": ["Batches"],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/CreateBatchRequest" },
+              "examples": {
+                "chatCompletions": {
+                  "summary": "Chat completions batch",
+                  "value": {
+                    "input_file_id": "file-abc123",
+                    "endpoint": "/v1/chat/completions",
+                    "completion_window": "24h",
+                    "metadata": { "job": "docs-playground" }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Batch accepted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Batch" }
+              }
+            }
+          },
+          "400": { "description": "Invalid request or JSONL validation failed" },
+          "401": { "description": "Missing authentication headers" },
+          "403": { "description": "Invalid credentials" },
+          "404": { "description": "Input file not found" },
+          "429": { "description": "Insufficient quota" },
+          "500": { "description": "Internal server error" }
+        }
+      },
+      "get": {
+        "operationId": "listBatches",
+        "summary": "List batches",
+        "tags": ["Batches"],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 20 }
+          },
+          {
+            "name": "after",
+            "in": "query",
+            "schema": { "type": "string" },
+            "description": "Cursor: `last_id` from the previous page"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch list",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/BatchList" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}": {
+      "get": {
+        "operationId": "retrieveBatch",
+        "summary": "Retrieve a batch",
+        "description": "Poll batch status and live `request_counts` while in progress.",
+        "tags": ["Batches"],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" },
+            "example": "batch_01HZX..."
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch object",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Batch" }
+              }
+            }
+          },
+          "404": { "description": "Batch not found" }
+        }
+      }
+    },
+    "/v1/batches/{batch_id}/cancel": {
+      "post": {
+        "operationId": "cancelBatch",
+        "summary": "Cancel a batch",
+        "tags": ["Batches"],
+        "parameters": [
+          {
+            "name": "batch_id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Batch cancellation requested",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/Batch" }
+              }
+            }
+          },
+          "409": { "description": "Batch already terminal" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      },
+      "ProjectId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-project-id"
+      }
+    },
+    "schemas": {
+      "CreateBatchRequest": {
+        "type": "object",
+        "required": ["input_file_id", "endpoint"],
+        "properties": {
+          "input_file_id": {
+            "type": "string",
+            "description": "ID from `POST /v1/files` with `purpose=batch`."
+          },
+          "endpoint": {
+            "type": "string",
+            "enum": ["/v1/chat/completions"],
+            "default": "/v1/chat/completions",
+            "description": "Must match the `url` on every JSONL line."
+          },
+          "completion_window": {
+            "type": "string",
+            "enum": ["24h"],
+            "default": "24h"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Optional tags echoed back on retrieve."
+          }
+        }
+      },
+      "Batch": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "object": { "type": "string", "enum": ["batch"] },
+          "endpoint": { "type": "string" },
+          "status": {
+            "type": "string",
+            "enum": [
+              "validating",
+              "in_progress",
+              "finalizing",
+              "completed",
+              "failed",
+              "expired",
+              "cancelling",
+              "cancelled"
+            ]
+          },
+          "input_file_id": { "type": "string" },
+          "output_file_id": { "type": "string", "nullable": true },
+          "error_file_id": { "type": "string", "nullable": true },
+          "completion_window": { "type": "string" },
+          "created_at": { "type": "integer" },
+          "expires_at": { "type": "integer" },
+          "request_counts": {
+            "type": "object",
+            "properties": {
+              "total": { "type": "integer" },
+              "completed": { "type": "integer" },
+              "failed": { "type": "integer" }
+            }
+          },
+          "metadata": { "type": "object", "additionalProperties": true }
+        }
+      },
+      "BatchList": {
+        "type": "object",
+        "properties": {
+          "object": { "type": "string", "enum": ["list"] },
+          "data": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Batch" }
+          },
+          "first_id": { "type": "string", "nullable": true },
+          "last_id": { "type": "string", "nullable": true },
+          "has_more": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}

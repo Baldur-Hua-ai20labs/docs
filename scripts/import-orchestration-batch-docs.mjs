@@ -31,6 +31,8 @@ const FILE_MAP = [
 const BATCH_PAGES = [
   "api-reference/batch/index",
   "api-reference/batch/getting-started",
+  "api-reference/batch/create-batch",
+  "api-reference/batch/retrieve-batch",
   "api-reference/batch/files-api",
   "api-reference/batch/batches-api",
   "api-reference/batch/jsonl-format",
@@ -217,6 +219,10 @@ function convertMarkdownBody(raw, slug) {
   text = text.replace(/### Response\. (`?\d)/g, "### Response: $1");
   text = text.replace(/### Response — /g, "### Response: ");
 
+  if (slug === "getting-started") {
+    text = text.replace(/\n## End-to-end flow[\s\S]*?(?=\n---\n\n## 1\.)/, "\n\n---\n");
+  }
+
   if (slug === "examples") {
     text = text.replace(
       /- \*\*No cancel\*\*:[\s\S]*?abandon a\s+batch\.\n/,
@@ -225,6 +231,7 @@ function convertMarkdownBody(raw, slug) {
   }
 
   if (slug === "index") {
+    text = text.replace(/\n## How it works[\s\S]*?(?=\n## Quick facts)/, "\n");
     text = text.replace(
       /The five endpoints you can target from a batch[^\n]*/i,
       "The only batchable endpoint (`/v1/chat/completions`) and its body/response shape."

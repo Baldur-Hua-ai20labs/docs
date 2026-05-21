@@ -21,31 +21,13 @@ rate limits.
   <Card title="Examples" href="/api-reference/batch/examples">
     End-to-end walkthroughs in `curl` and the Python `openai` SDK.
   </Card>
+  <Card title="Create batch (playground)" href="/api-reference/batch/create-batch">
+    Try `POST /v1/batches` after you have an input file id.
+  </Card>
+  <Card title="Retrieve batch (playground)" href="/api-reference/batch/retrieve-batch">
+    Poll `GET /v1/batches/{batch_id}` for status and file ids.
+  </Card>
 </CardGroup>
-
-
-## How it works
-
-```mermaid
-flowchart LR
-    C(["Client"])
-    F["/v1/files"]
-    B["/v1/batches"]
-    C -- "1. upload input.jsonl" --> F
-    C -- "2. create batch" --> B
-    B -. "reads at create time" .-> F
-    C -- "3. poll status" --> B
-    C -- "4. download output / errors" --> F
-```
-
-Every batch follows the same four-step lifecycle:
-
-1. **Upload** a JSONL input file via `POST /v1/files`.
-2. **Create** the batch via `POST /v1/batches`, referencing the file ID.
-3. **Poll** `GET /v1/batches/{id}` until `status` is `completed` (or
-   `expired`).
-4. **Download** the output and error files via
-   `GET /v1/files/{id}/content`.
 
 ## Quick facts
 

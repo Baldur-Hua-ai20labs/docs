@@ -121,6 +121,8 @@
             "pages": [
               "api-reference/batch/index",
               "api-reference/batch/getting-started",
+              "api-reference/batch/create-batch",
+              "api-reference/batch/retrieve-batch",
               "api-reference/batch/files-api",
               "api-reference/batch/batches-api",
               "api-reference/batch/jsonl-format",

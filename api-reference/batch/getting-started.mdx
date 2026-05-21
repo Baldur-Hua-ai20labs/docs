@@ -43,30 +43,6 @@ The Batch and Files endpoints live under these hostnames:
 - `POST   /v1/files`, `GET /v1/files`, `GET /v1/files/{id}`, `GET /v1/files/{id}/content`, `DELETE /v1/files/{id}`
 - `POST   /v1/batches`, `GET /v1/batches`, `GET /v1/batches/{batch_id}`
 
-## End-to-end flow
-
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Client
-    participant Files as /v1/files
-    participant Batches as /v1/batches
-    Client->>Files: POST /v1/files (input.jsonl, purpose=batch)
-    Files-->>Client: { id: file-abc..., status: processed }
-    Client->>Batches: POST /v1/batches (input_file_id, endpoint)
-    Batches-->>Client: { id: batch_..., status: in_progress }
-    loop until terminal
-        Client->>Batches: GET /v1/batches/{id}
-        Batches-->>Client: { status, request_counts }
-    end
-    Client->>Files: GET /v1/files/{output_file_id}/content
-    Files-->>Client: JSONL bytes
-    Client->>Files: GET /v1/files/{error_file_id}/content
-    Files-->>Client: JSONL bytes
-```
-
----
-
 ## 1. Build the input JSONL
 
 Every batch is driven by a JSONL file where each line is one inference
