@@ -120,7 +120,7 @@ boilerplate below. No heading.>
 
 Paste this as the second opening paragraph on every integration page so messaging stays consistent. Confirm with the user before changing wording in a one-off page.
 
-> ZeroGPU is a serverless inference platform for nano language models, small, specialized models that run cheaply and quickly behind a single OpenAI-compatible API. It hosts a catalog of models tuned for chat, classification, structured extraction, PII detection, and IAB tagging, with geo-aware routing and a managed Batch API so teams can ship production AI features without standing up GPU infrastructure.
+> ZeroGPU is an ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
 
 ## Steps
 

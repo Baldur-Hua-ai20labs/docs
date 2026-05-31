@@ -10,7 +10,7 @@ description: "Use ZeroGPU's nano language models as a drop-in LLM provider in La
 
 LangChain is an open-source framework for building applications powered by large language models. It provides composable building blocks for prompts, chains, agents, retrieval, and tool use, with first-class support for OpenAI-compatible providers. Teams use LangChain to wire LLMs into production pipelines without rewriting glue code for every model vendor.
 
-ZeroGPU is a serverless inference platform for nano language models, small, specialized models that run cheaply and quickly behind a single OpenAI-compatible API. It hosts a catalog of models tuned for chat, classification, structured extraction, PII detection, and IAB tagging, with geo-aware routing and a managed Batch API so teams can ship production AI features without standing up GPU infrastructure.
+ZeroGPU is an ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
 
 ## Overview
 

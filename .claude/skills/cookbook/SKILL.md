@@ -41,7 +41,7 @@ These appear in the intro bullets and in the Highlights recap, **word-for-word i
 
 **ZeroGPU blurb** (use in both the intro bullets and the Highlights recap):
 
-> **ZeroGPU**: A serverless inference platform for nano language models, small specialized models that run cheaply and quickly behind a single OpenAI-compatible API. It hosts a catalog of models tuned for chat, classification, structured extraction, PII detection, and IAB tagging, with geo-aware routing and a managed Batch API so teams can ship production AI features without standing up GPU infrastructure.
+> **ZeroGPU**: An ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
 
 **OpenAI blurb** (when OpenAI is in the stack):
 
@@ -75,7 +75,7 @@ This link is mandatory.>
 In this notebook, you'll explore:
 
 - **<Framework>**: <1-2 sentence description of the framework and what role it plays here.>
-- **ZeroGPU**: A serverless inference platform for nano language models, small specialized models that run cheaply and quickly behind a single OpenAI-compatible API. It hosts a catalog of models tuned for chat, classification, structured extraction, PII detection, and IAB tagging, with geo-aware routing and a managed Batch API so teams can ship production AI features without standing up GPU infrastructure.
+- **ZeroGPU**: An ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
 - **<Other tool, e.g. OpenAI>**: <canonical description, see "ZeroGPU canonical text" above for OpenAI.>
 - **<Other tool, e.g. AgentOps>**: <description.>
 
@@ -159,7 +159,7 @@ through ZeroGPU's OpenAI-compatible surface.>
 
 ## <emoji> Access <Capability> with ZeroGPU
 
-ZeroGPU is a serverless inference platform for nano language models, small specialized models that run cheaply and quickly behind a single OpenAI-compatible API. It hosts a catalog of models tuned for chat, classification, structured extraction, PII detection, and IAB tagging, with geo-aware routing and a managed Batch API so teams can ship production AI features without standing up GPU infrastructure. In this section, we will <briefly state the standalone demo, e.g. "redact PII from a support ticket as an example.">
+ZeroGPU is an ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default. In this section, we will <briefly state the standalone demo, e.g. "redact PII from a support ticket as an example.">
 
 ```python Python
 <minimal standalone call to ZeroGPU showing the headline capability, usually
@@ -214,7 +214,7 @@ This notebook has guided you through setting up and running a <Framework> workfl
 Key tools utilized in this notebook include:
 
 - **<Framework>**: <same description as the intro bullet, verbatim.>
-- **ZeroGPU**: A serverless inference platform for nano language models, small specialized models that run cheaply and quickly behind a single OpenAI-compatible API. It hosts a catalog of models tuned for chat, classification, structured extraction, PII detection, and IAB tagging, with geo-aware routing and a managed Batch API so teams can ship production AI features without standing up GPU infrastructure.
+- **ZeroGPU**: An ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
 - **<Other tool>**: <same description as the intro bullet, verbatim.>
 - **<Other tool>**: <same description as the intro bullet, verbatim.>
 
@@ -271,7 +271,7 @@ For the full reference, see the [Claude Code plugin integration guide](/integrat
 In this notebook, you'll explore:
 
 - **Claude Code**: Anthropic's agentic coding tool that runs Claude directly in your terminal, with file editing, command execution, and a plugin system that extends sessions with custom slash commands and skills.
-- **ZeroGPU**: A serverless inference platform for nano language models, small specialized models that run cheaply and quickly behind a single OpenAI-compatible API. It hosts a catalog of models tuned for chat, classification, structured extraction, PII detection, and IAB tagging, with geo-aware routing and a managed Batch API so teams can ship production AI features without standing up GPU infrastructure.
+- **ZeroGPU**: An ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
 ```
 
 Notice the ZeroGPU bullet uses the canonical blurb verbatim, only the Claude Code bullet is freshly written for this scenario, and the second paragraph links straight to `/integrations/claude-code-plugin` so the reader can find the full documentation in one click.
