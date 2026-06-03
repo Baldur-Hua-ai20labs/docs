@@ -1,0 +1,5 @@
+# Claude Code config (skills, agents) - not part of the published docs
+.claude/
+
+# Generated YouTube video descriptions - not part of the published docs
+.youtube/
