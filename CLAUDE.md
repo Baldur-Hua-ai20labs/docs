@@ -35,9 +35,7 @@ All scripts must be run from the repo root (`docs/`); several resolve paths agai
 
 **Adding/removing a model:** It will flow through automatically on the next catalog fetch, rerun `generate-openapi.mjs` then `generate-model-pages.mjs`, then add the new `models/<slug>` entry to the **By model** group in `docs.json` (the generator does not edit that nav list).
 
-**Runtime JS (`*.js` at repo root):** Mintlify auto-loads every `.js` file in the repo globally as a `<script>` on all pages, there is no MDX-level `<script>` include. Currently:
-- `model-catalog-bootstrap.js`, fetches the live catalog client-side and hydrates the catalog table on `platform/model-catalog`.
-- `playground-model-lock.js`, locks the `model` field on per-model playgrounds and converts Responses `input` into a textarea. Loads `style.css` for related tweaks.
+**Runtime JS/CSS:** None. Mintlify auto-loads every root `.js` file globally as a `<script>` on all pages, but the repo currently ships no custom runtime scripts or stylesheets. The previous client-side catalog hydration (`model-catalog-bootstrap.js`) and playground tweaks (`playground-model-lock.js` + `style.css`) were removed and are being rebuilt from scratch. Pages render as static MDX; the per-model playgrounds use Mintlify's stock OpenAPI playground.
 
 ## Conventions
 
