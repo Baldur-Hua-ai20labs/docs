@@ -86,31 +86,19 @@ mint dev
 
 Preview at `http://localhost:3000` (or the port Mintlify reports).
 
-**API playground:** Each **model** has a live playground under **API Reference → Endpoints → By model** (and on its catalog page). Specs live in `openapi/playgrounds/*.openapi.json`; `docs.json` nav is updated by the generator. Regenerate from the catalog:
+**API playground:** Each **model** has a live playground under **API Reference → Endpoints → By model** (and on its catalog page). Specs live in `openapi/playgrounds/*.openapi.json` and the `docs.json` nav is maintained by hand. These files are committed and edited directly, there is no longer a generator.
 
-```bash
-node scripts/generate-openapi.mjs
-node scripts/generate-model-pages.mjs
-node scripts/import-orchestration-batch-docs.mjs   # from ../orchestration-api/docs/batch
-```
+**Batch & Files playgrounds** use `openapi/batch.openapi.json` (hand-maintained; all `/v1/files` and `/v1/batches` paths). Playground pages: `api-reference/batch/upload-file.mdx`, `list-files.mdx`, `retrieve-file.mdx`, `download-file.mdx`, `delete-file.mdx`, `create-batch.mdx`, `retrieve-batch.mdx`, `list-batches.mdx`, `cancel-batch.mdx`. The prose reference pages under `api-reference/batch/` are also hand-maintained.
 
-**Batch & Files playgrounds** use `openapi/batch.openapi.json` (hand-maintained; all `/v1/files` and `/v1/batches` paths). Playground pages: `api-reference/batch/upload-file.mdx`, `list-files.mdx`, `retrieve-file.mdx`, `download-file.mdx`, `delete-file.mdx`, `create-batch.mdx`, `retrieve-batch.mdx`, `list-batches.mdx`, `cancel-batch.mdx`. Prose reference pages are imported from `orchestration-api/docs/batch/`; re-import injects playground cards on `files-api` and `batches-api`.
-
-Docs use ASCII hyphens only (no em/en dashes). After editing prose, run `node scripts/normalize-dashes.mjs` to catch any `-` or `-` characters (it avoids turning them into awkward colons).
+Docs use ASCII hyphens only (no em/en dashes). Check this by hand when editing prose.
 
 See `openapi/zerogpu.openapi.json` and `api` in `docs.json`. Validate with `mint validate`.
 
 ### Submitting changes
 
 1. Edit `.mdx` or `.md` files in this repo.
-2. Regenerate model detail pages from API metadata:
-
-```bash
-node scripts/generate-model-pages.mjs
-```
-
-3. Run `mint dev` to confirm the site builds.
-4. Open a pull request with a clear description.
+2. Run `mint dev` to confirm the site builds.
+3. Open a pull request with a clear description.
 
 [Mintlify docs](https://mintlify.com/docs) for configuration and components.
 

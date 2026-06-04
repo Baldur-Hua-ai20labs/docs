@@ -235,7 +235,7 @@ These are the things that make a page read like a ZeroGPU cookbook rather than g
 - **Show outputs.** After any code cell whose output is meaningful (an agent reply, a search result, a final summary), include an unlabeled fenced block beneath it with a realistic example output. Outputs may include emojis, casual phrasing, and the framework's own logs (e.g. `🖇 AgentOps: Replay: ...`), they are part of the reader's expected experience.
 - **🎉 outros.** After the "Access <Capability> with ZeroGPU" demo and at the end of the main scenario, include a single `🎉 ...` sentence summarizing what just happened.
 - **Always link to the canonical reference doc up front.** The opening paragraph must point the reader to the full reference page for the thing the cookbook builds on (integration page, model page, endpoint page). The cookbook covers *one task*; the reference covers the *full surface*.
-- **ASCII hyphens only.** Per repo convention, no em or en dashes anywhere in prose. After writing, run `node scripts/normalize-dashes.mjs` to catch any that slipped in.
+- **ASCII hyphens only.** Per repo convention, no em or en dashes anywhere in prose. Check by hand after writing and fix any that slipped in.
 - **No invented URLs.** Use only URLs the user supplied or canonical pages (the ZeroGPU dashboard above, the standard YouTube embed URL pattern, the integration page slug). Do not fabricate Colab links, video IDs, or dashboard URLs.
 - **Video section always present.** The `## 🎥 Watch the Video Guide` section is never omitted. When the user supplies a YouTube video ID, embed the iframe. When they do not, keep the heading and write `Video walkthrough coming soon.` as the body, never a placeholder ID or a fabricated embed URL. (The Colab link, by contrast, stays optional and is dropped entirely when absent.)
 - **Final "🌟 Highlights" recap.** Always end with the Highlights section. The bullet list there mirrors the intro bullet list, same tools, same descriptions, intentionally repeated so a reader who skipped to the end gets the same framing.
@@ -251,7 +251,7 @@ These are the things that make a page read like a ZeroGPU cookbook rather than g
    </Card>
    ```
    Use icons already on the index (`rocket`, `file-text`, `tags`, `database`, `graduation-cap`, `layers`).
-4. Run `node scripts/normalize-dashes.mjs` from the repo root and fix anything it flags.
+4. Check for em/en dashes by hand and replace them with ASCII hyphens.
 5. Run `mint validate` to confirm `docs.json` parses.
 6. If `mint dev` is running, the page will hot-reload at `http://localhost:3000/cookbook/<slug>`.
 
