@@ -166,7 +166,8 @@
             "group": "Integrations",
             "pages": [
               "integrations/index",
-              "integrations/claude-code-plugin"
+              "integrations/claude-code-plugin",
+              "integrations/langchain"
             ]
           }
         ]
