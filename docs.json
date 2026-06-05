@@ -183,7 +183,8 @@
           {
             "group": "Integrations",
             "pages": [
-              "cookbook/claude-code-csv-sanitizer"
+              "cookbook/claude-code-csv-sanitizer",
+              "cookbook/langchain-resume-screening"
             ]
           }
         ]
