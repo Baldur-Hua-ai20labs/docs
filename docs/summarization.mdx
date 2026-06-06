@@ -1,0 +1,59 @@
+---
+title: "Summarization"
+description: "Models tuned to condense long content into concise summaries."
+---
+
+Summarization models take long passages and return a short, faithful summary. Send the text as `input` to `POST /v1/responses` and read the summary from the response output.
+
+| Model | Params | Max tokens | Input /1M | Output /1M |
+| --- | --- | --- | --- | --- |
+| [`llama-3.1-8b-instruct-fast`](/models/llama-3-1-8b-instruct-fast) | 3B | 131,072 | $0.05 | $0.40 |
+
+## llama-3.1-8b-instruct-fast
+
+The Meta Llama 3.1 collection of multilingual large language models is a collection of pretrained and instruction tuned generative models in 8B, 70B and 405B sizes (text in/text out). The instruction tuned text only models are optimized for multilingual dialogue use cases and outperform many available open source and closed chat models on common industry benchmarks. Ideal for summarization and intent detection.
+
+**References:** [Model docs](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) - [Terms](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct/blob/main/LICENSE) - [Privacy](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct/blob/main/LICENSE)
+
+### Request
+
+<CodeGroup>
+
+```bash cURL wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "llama-3.1-8b-instruct-fast",
+    "input": "NASA announced that its Artemis III mission is now scheduled for late 2026, marking the first time astronauts will land on the lunar surface since Apollo 17 in 1972. The mission will send a crew of four to the Moon aboard the Orion spacecraft, with two astronauts descending to the south pole using SpaceX Starship as a lunar lander."
+  }'
+```
+
+```python Python wrap
+import requests
+
+resp = requests.post(
+    "https://api.zerogpu.ai/v1/responses",
+    headers={
+        "content-type": "application/json",
+        "x-api-key": "YOUR_API_KEY",
+        "x-project-id": "YOUR_PROJECT_ID",
+    },
+    json={
+        "model": "llama-3.1-8b-instruct-fast",
+        "input": "NASA announced that its Artemis III mission is now scheduled for late 2026, marking the first time astronauts will land on the lunar surface since Apollo 17 in 1972. The mission will send a crew of four to the Moon aboard the Orion spacecraft, with two astronauts descending to the south pole using SpaceX Starship as a lunar lander.",
+    },
+)
+print(resp.json())
+```
+
+</CodeGroup>
+
+### Response
+
+The summary is returned as `output_text` inside the standard [Responses API](/api-reference/endpoint/responses) envelope.
+
+```text wrap
+NASA's Artemis III mission is now scheduled for late 2026, marking the first lunar landing since Apollo 17 in 1972, with a crew of four astronauts aboard the Orion spacecraft, including two who will descend to the Moon's south pole using the SpaceX Starship as a lunar lander.
+```

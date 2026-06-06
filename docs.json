@@ -58,15 +58,10 @@
             "group": "Models",
             "pages": [
               "docs/model-catalog",
-              "models/ad-tech",
-              "models/text-classification",
-              "models/text-generation",
-              "models/pii",
-              "models/summarization",
-              "models/moderation",
-              "models/query-routing",
-              "models/translation",
-              "models/document-parsing"
+              "docs/text-classification",
+              "docs/text-generation",
+              "docs/pii",
+              "docs/summarization"
             ]
           },
           {

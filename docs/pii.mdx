@@ -1,0 +1,324 @@
+---
+title: "PII"
+description: "Multilingual PII detection, redaction, and schema-driven extraction models."
+---
+
+PII models detect, redact, and extract personally identifiable information and other structured entities from text. Both models below run on CPU for privacy-preserving workflows and select a behavior through the `metadata.usecase` field.
+
+| Model | Params | Max tokens | Input /1M | Output /1M |
+| --- | --- | --- | --- | --- |
+| [`gliner-multi-pii-v1`](/models/gliner-multi-pii-v1) | 300M | 512 | $0.20 | $0.40 |
+| [`gliner2-base-v1`](/models/gliner2-base-v1) | 205M | 512 | $0.20 | $0.40 |
+
+## gliner-multi-pii-v1
+
+GLiNER Multi PII v1 is a multilingual PII detection and redaction model based on the GLiNER architecture. It identifies 40+ entity types (identity, contact, government IDs, financial, medical, organization, demographic, travel, network, and vehicle) across six European languages (English, French, German, Spanish, Italian, Portuguese). Built for zero-shot label prompting, it accepts custom label sets at inference time.
+
+**References:** [Model docs](https://github.com/fastino-ai/GLiNER2/blob/main/README.md) - [Terms](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE) - [Privacy](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE)
+
+### Redaction
+
+Set `metadata.usecase` to `redact` and `metadata.mask` to `label` to replace detected PII in place with `[LABEL]` placeholders.
+
+<CodeGroup>
+
+```bash cURL wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner-multi-pii-v1",
+    "input": "Hello Jane Doe, this is John Doe reaching out regarding my recent order. If you need any additional details, feel free to call me at 415-555-0134 during business hours. You can also email me at hi@example.com, and I will respond as soon as possible.",
+    "metadata": { "mask": "label", "usecase": "redact" }
+  }'
+```
+
+```python Python wrap
+import requests
+
+resp = requests.post(
+    "https://api.zerogpu.ai/v1/responses",
+    headers={
+        "content-type": "application/json",
+        "x-api-key": "YOUR_API_KEY",
+        "x-project-id": "YOUR_PROJECT_ID",
+    },
+    json={
+        "model": "gliner-multi-pii-v1",
+        "input": "Hello Jane Doe, this is John Doe reaching out regarding my recent order. If you need any additional details, feel free to call me at 415-555-0134 during business hours. You can also email me at hi@example.com, and I will respond as soon as possible.",
+        "metadata": {"mask": "label", "usecase": "redact"},
+    },
+)
+print(resp.json())
+```
+
+</CodeGroup>
+
+```json wrap
+{
+  "redacted_text": "Hello [PERSON], this is [PERSON] reaching out regarding my recent order. If you need any additional details, feel free to call me at [PHONE_NUMBER] during business hours. You can also email me at [EMAIL], and I will respond as soon as possible.",
+  "entities": [
+    { "text": "Jane Doe", "label": "person", "start": 6, "end": 14, "score": 0.9982 },
+    { "text": "John Doe", "label": "person", "start": 24, "end": 32, "score": 0.9981 },
+    { "text": "415-555-0134", "label": "phone number", "start": 133, "end": 145, "score": 0.9725 },
+    { "text": "hi@example.com", "label": "email", "start": 194, "end": 208, "score": 0.9812 }
+  ],
+  "entities_by_label": {
+    "person": ["Jane Doe", "John Doe"],
+    "phone number": ["415-555-0134"],
+    "email": ["hi@example.com"]
+  }
+}
+```
+
+### Extraction
+
+Set `metadata.usecase` to `extract-pii` to detect PII without modifying the source text. Narrow results with `categories` and a confidence `threshold`.
+
+<CodeGroup>
+
+```bash cURL wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner-multi-pii-v1",
+    "input": "Contact John Doe at john@example.com or +1-415-555-0134.",
+    "metadata": { "usecase": "extract-pii", "threshold": 0.5, "categories": ["identity", "contact"] }
+  }'
+```
+
+```python Python wrap
+import requests
+
+resp = requests.post(
+    "https://api.zerogpu.ai/v1/responses",
+    headers={
+        "content-type": "application/json",
+        "x-api-key": "YOUR_API_KEY",
+        "x-project-id": "YOUR_PROJECT_ID",
+    },
+    json={
+        "model": "gliner-multi-pii-v1",
+        "input": "Contact John Doe at john@example.com or +1-415-555-0134.",
+        "metadata": {"usecase": "extract-pii", "threshold": 0.5, "categories": ["identity", "contact"]},
+    },
+)
+print(resp.json())
+```
+
+</CodeGroup>
+
+```json wrap
+{
+  "entities": [
+    { "text": "John Doe", "label": "person", "start": 8, "end": 16, "score": 0.9989 },
+    { "text": "john@example.com", "label": "email", "start": 20, "end": 36, "score": 0.9776 },
+    { "text": "+1-415-555-0134", "label": "phone number", "start": 40, "end": 55, "score": 0.9714 }
+  ],
+  "entities_by_label": {
+    "person": ["John Doe"],
+    "email": ["john@example.com"],
+    "phone number": ["+1-415-555-0134"]
+  }
+}
+```
+
+## gliner2-base-v1
+
+GLiNER2 extends the original GLiNER architecture to support multi-task information extraction with a schema-driven interface. Unlike traditional NER models trained on fixed label sets, GLiNER2 accepts arbitrary entity types at inference time, making it adaptable to new domains without fine-tuning. It supports named entity recognition, structured JSON extraction, and classification within a unified framework, guided by natural language schema definitions.
+
+**References:** [Model docs](https://github.com/fastino-ai/GLiNER2/blob/main/README.md) - [Terms](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE) - [Privacy](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE)
+
+### Entity extraction
+
+Set `metadata.usecase` to `ner` and pass your own `labels` to extract named entities.
+
+<CodeGroup>
+
+```bash cURL wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner2-base-v1",
+    "input": "The application is built with Python 3.11 and uses PostgreSQL 15 for storage. It runs on Kubernetes with Docker containers and communicates via gRPC.",
+    "metadata": {
+      "labels": ["programming language", "database", "technology", "protocol"],
+      "usecase": "ner",
+      "threshold": 0.3
+    }
+  }'
+```
+
+```python Python wrap
+import requests
+
+resp = requests.post(
+    "https://api.zerogpu.ai/v1/responses",
+    headers={
+        "content-type": "application/json",
+        "x-api-key": "YOUR_API_KEY",
+        "x-project-id": "YOUR_PROJECT_ID",
+    },
+    json={
+        "model": "gliner2-base-v1",
+        "input": "The application is built with Python 3.11 and uses PostgreSQL 15 for storage. It runs on Kubernetes with Docker containers and communicates via gRPC.",
+        "metadata": {
+            "labels": ["programming language", "database", "technology", "protocol"],
+            "usecase": "ner",
+            "threshold": 0.3,
+        },
+    },
+)
+print(resp.json())
+```
+
+</CodeGroup>
+
+```json wrap
+{
+  "entities": {
+    "programming language": ["Python 3.11"],
+    "database": ["PostgreSQL 15"],
+    "technology": ["Kubernetes", "Docker", "gRPC"],
+    "protocol": ["gRPC"]
+  }
+}
+```
+
+### Structured JSON extraction
+
+Set `metadata.usecase` to `json` and define a `schema` of `field::type::description` entries to pull structured records out of free text.
+
+<CodeGroup>
+
+```bash cURL wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner2-base-v1",
+    "input": "Best regards, John Smith, Senior Software Engineer at Acme Corp. Phone: (555) 123-4567, Email: john.smith@acme.com, Office: 123 Main Street, Suite 400, San Francisco, CA 94105",
+    "metadata": {
+      "schema": {
+        "contact": [
+          "name::str::Full name",
+          "title::str::Job title",
+          "company::str::Company name",
+          "phone::str::Phone number",
+          "email::str::Email address",
+          "address::str::Office address"
+        ]
+      },
+      "usecase": "json"
+    }
+  }'
+```
+
+```python Python wrap
+import requests
+
+resp = requests.post(
+    "https://api.zerogpu.ai/v1/responses",
+    headers={
+        "content-type": "application/json",
+        "x-api-key": "YOUR_API_KEY",
+        "x-project-id": "YOUR_PROJECT_ID",
+    },
+    json={
+        "model": "gliner2-base-v1",
+        "input": "Best regards, John Smith, Senior Software Engineer at Acme Corp. Phone: (555) 123-4567, Email: john.smith@acme.com, Office: 123 Main Street, Suite 400, San Francisco, CA 94105",
+        "metadata": {
+            "schema": {
+                "contact": [
+                    "name::str::Full name",
+                    "title::str::Job title",
+                    "company::str::Company name",
+                    "phone::str::Phone number",
+                    "email::str::Email address",
+                    "address::str::Office address",
+                ]
+            },
+            "usecase": "json",
+        },
+    },
+)
+print(resp.json())
+```
+
+</CodeGroup>
+
+```json wrap
+{
+  "data": {
+    "contact": [
+      {
+        "name": "John Smith",
+        "title": "Senior Software Engineer",
+        "company": "Acme Corp",
+        "phone": "(555) 123-4567",
+        "email": "john.smith@acme.com",
+        "address": null
+      }
+    ]
+  }
+}
+```
+
+### Classification
+
+Set `metadata.usecase` to `classification` and supply a `schema` mapping each axis to its allowed labels.
+
+<CodeGroup>
+
+```bash cURL wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner2-base-v1",
+    "input": "I absolutely love this product! The quality is outstanding and the customer service was incredibly helpful.",
+    "metadata": {
+      "schema": { "sentiment": ["positive", "negative", "neutral"] },
+      "usecase": "classification"
+    }
+  }'
+```
+
+```python Python wrap
+import requests
+
+resp = requests.post(
+    "https://api.zerogpu.ai/v1/responses",
+    headers={
+        "content-type": "application/json",
+        "x-api-key": "YOUR_API_KEY",
+        "x-project-id": "YOUR_PROJECT_ID",
+    },
+    json={
+        "model": "gliner2-base-v1",
+        "input": "I absolutely love this product! The quality is outstanding and the customer service was incredibly helpful.",
+        "metadata": {
+            "schema": {"sentiment": ["positive", "negative", "neutral"]},
+            "usecase": "classification",
+        },
+    },
+)
+print(resp.json())
+```
+
+</CodeGroup>
+
+```json wrap
+{
+  "classification": {
+    "sentiment": "positive"
+  }
+}
+```
