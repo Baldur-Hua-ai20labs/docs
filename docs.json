@@ -88,6 +88,16 @@
               "integrations/index",
               "integrations/claude-code-plugin"
             ]
+          },
+          {
+            "group": "Official SDKs",
+            "pages": [
+              "integrations/python",
+              "integrations/javascript",
+              "integrations/rust",
+              "integrations/go",
+              "integrations/ruby"
+            ]
           }
         ]
       },
@@ -141,16 +151,6 @@
               "api-reference/batch/supported-endpoints",
               "api-reference/batch/examples",
               "api-reference/batch/errors"
-            ]
-          },
-          {
-            "group": "SDK Examples",
-            "pages": [
-              "sdks/python",
-              "sdks/javascript",
-              "sdks/rust",
-              "sdks/go",
-              "sdks/ruby"
             ]
           }
         ]
@@ -232,6 +232,10 @@
     }
   },
   "redirects": [
+    {
+      "source": "/sdks/:slug",
+      "destination": "/integrations/:slug"
+    },
     {
       "source": "/platform/model-catalog",
       "destination": "/docs/model-catalog"
