@@ -215,10 +215,10 @@ export const PricingTable = () => {
   const cols = {
     display: "grid",
     gridTemplateColumns:
-      "minmax(0,2.2fr) minmax(0,1.4fr) minmax(0,0.7fr) minmax(0,1fr) minmax(0,0.9fr) minmax(0,0.9fr)",
-    gap: "1rem",
+      "minmax(0,3.4fr) minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.2fr) minmax(0,1.2fr)",
+    gap: "1.75rem",
     alignItems: "center",
-    minWidth: "760px",
+    minWidth: "920px",
   };
   return (
     <div className="not-prose w-full overflow-x-auto text-base">
@@ -238,11 +238,11 @@ export const PricingTable = () => {
           key={m.modelId}
           href={"/models/" + modelSlug(m.modelId)}
           style={cols}
-          className="border-b border-zinc-950/5 py-3.5 no-underline dark:border-white/5"
+          className="border-b border-zinc-950/5 py-4 no-underline dark:border-white/5"
         >
           <div className="flex items-center gap-2 font-medium text-zinc-950 dark:text-white">
             <ModelLogo src={pricingOf(m).favicon_url} alt={m.modelId} size={26} />
-            <code className="whitespace-nowrap text-sm">{m.modelId}</code>
+            <code className="break-words text-sm">{m.modelId}</code>
           </div>
           <div className="text-zinc-600 dark:text-zinc-300">{m.taskDisplayName}</div>
           <div className="text-zinc-600 dark:text-zinc-300">{m.parameters}</div>

@@ -3,7 +3,7 @@ title: "PII"
 description: "Multilingual PII detection, redaction, and schema-driven extraction models."
 ---
 
-PII models detect, redact, and extract personally identifiable information and other structured entities from text. Both models below run on CPU for privacy-preserving workflows and select a behavior through the `metadata.usecase` field.
+PII models detect, redact, and extract personally identifiable information and other structured entities from text. Both models below run on CPU for privacy-preserving workflows and select a behavior through the `metadata.usecase` field. Each request is shown for both the [Responses API](/api-reference/endpoint/responses) and the OpenAI-compatible [Chat Completions API](/api-reference/endpoint/chat-completions).
 
 | Model | Params | Max tokens | Input /1M | Output /1M |
 | --- | --- | --- | --- | --- |
@@ -22,7 +22,7 @@ Set `metadata.usecase` to `redact` and `metadata.mask` to `label` to replace det
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -30,27 +30,31 @@ curl https://api.zerogpu.ai/v1/responses \
   -d '{
     "model": "gliner-multi-pii-v1",
     "input": "Hello Jane Doe, this is John Doe reaching out regarding my recent order. If you need any additional details, feel free to call me at 415-555-0134 during business hours. You can also email me at hi@example.com, and I will respond as soon as possible.",
-    "metadata": { "mask": "label", "usecase": "redact" }
+    "metadata": {
+      "mask": "label",
+      "usecase": "redact"
+    }
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "gliner-multi-pii-v1",
-        "input": "Hello Jane Doe, this is John Doe reaching out regarding my recent order. If you need any additional details, feel free to call me at 415-555-0134 during business hours. You can also email me at hi@example.com, and I will respond as soon as possible.",
-        "metadata": {"mask": "label", "usecase": "redact"},
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner-multi-pii-v1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Hello Jane Doe, this is John Doe reaching out regarding my recent order. If you need any additional details, feel free to call me at 415-555-0134 during business hours. You can also email me at hi@example.com, and I will respond as soon as possible."
+      }
+    ],
+    "metadata": {
+      "mask": "label",
+      "usecase": "redact"
+    }
+  }'
 ```
 
 </CodeGroup>
@@ -78,7 +82,7 @@ Set `metadata.usecase` to `extract-pii` to detect PII without modifying the sour
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -86,27 +90,39 @@ curl https://api.zerogpu.ai/v1/responses \
   -d '{
     "model": "gliner-multi-pii-v1",
     "input": "Contact John Doe at john@example.com or +1-415-555-0134.",
-    "metadata": { "usecase": "extract-pii", "threshold": 0.5, "categories": ["identity", "contact"] }
+    "metadata": {
+      "usecase": "extract-pii",
+      "threshold": 0.5,
+      "categories": [
+        "identity",
+        "contact"
+      ]
+    }
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "gliner-multi-pii-v1",
-        "input": "Contact John Doe at john@example.com or +1-415-555-0134.",
-        "metadata": {"usecase": "extract-pii", "threshold": 0.5, "categories": ["identity", "contact"]},
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner-multi-pii-v1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Contact John Doe at john@example.com or +1-415-555-0134."
+      }
+    ],
+    "metadata": {
+      "usecase": "extract-pii",
+      "threshold": 0.5,
+      "categories": [
+        "identity",
+        "contact"
+      ]
+    }
+  }'
 ```
 
 </CodeGroup>
@@ -138,7 +154,7 @@ Set `metadata.usecase` to `ner` and pass your own `labels` to extract named enti
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -147,34 +163,42 @@ curl https://api.zerogpu.ai/v1/responses \
     "model": "gliner2-base-v1",
     "input": "The application is built with Python 3.11 and uses PostgreSQL 15 for storage. It runs on Kubernetes with Docker containers and communicates via gRPC.",
     "metadata": {
-      "labels": ["programming language", "database", "technology", "protocol"],
+      "labels": [
+        "programming language",
+        "database",
+        "technology",
+        "protocol"
+      ],
       "usecase": "ner",
       "threshold": 0.3
     }
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "gliner2-base-v1",
-        "input": "The application is built with Python 3.11 and uses PostgreSQL 15 for storage. It runs on Kubernetes with Docker containers and communicates via gRPC.",
-        "metadata": {
-            "labels": ["programming language", "database", "technology", "protocol"],
-            "usecase": "ner",
-            "threshold": 0.3,
-        },
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner2-base-v1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "The application is built with Python 3.11 and uses PostgreSQL 15 for storage. It runs on Kubernetes with Docker containers and communicates via gRPC."
+      }
+    ],
+    "metadata": {
+      "labels": [
+        "programming language",
+        "database",
+        "technology",
+        "protocol"
+      ],
+      "usecase": "ner",
+      "threshold": 0.3
+    }
+  }'
 ```
 
 </CodeGroup>
@@ -196,7 +220,7 @@ Set `metadata.usecase` to `json` and define a `schema` of `field::type::descript
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -220,35 +244,33 @@ curl https://api.zerogpu.ai/v1/responses \
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "gliner2-base-v1",
-        "input": "Best regards, John Smith, Senior Software Engineer at Acme Corp. Phone: (555) 123-4567, Email: john.smith@acme.com, Office: 123 Main Street, Suite 400, San Francisco, CA 94105",
-        "metadata": {
-            "schema": {
-                "contact": [
-                    "name::str::Full name",
-                    "title::str::Job title",
-                    "company::str::Company name",
-                    "phone::str::Phone number",
-                    "email::str::Email address",
-                    "address::str::Office address",
-                ]
-            },
-            "usecase": "json",
-        },
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner2-base-v1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Best regards, John Smith, Senior Software Engineer at Acme Corp. Phone: (555) 123-4567, Email: john.smith@acme.com, Office: 123 Main Street, Suite 400, San Francisco, CA 94105"
+      }
+    ],
+    "metadata": {
+      "schema": {
+        "contact": [
+          "name::str::Full name",
+          "title::str::Job title",
+          "company::str::Company name",
+          "phone::str::Phone number",
+          "email::str::Email address",
+          "address::str::Office address"
+        ]
+      },
+      "usecase": "json"
+    }
+  }'
 ```
 
 </CodeGroup>
@@ -276,7 +298,7 @@ Set `metadata.usecase` to `classification` and supply a `schema` mapping each ax
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -285,32 +307,42 @@ curl https://api.zerogpu.ai/v1/responses \
     "model": "gliner2-base-v1",
     "input": "I absolutely love this product! The quality is outstanding and the customer service was incredibly helpful.",
     "metadata": {
-      "schema": { "sentiment": ["positive", "negative", "neutral"] },
+      "schema": {
+        "sentiment": [
+          "positive",
+          "negative",
+          "neutral"
+        ]
+      },
       "usecase": "classification"
     }
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "gliner2-base-v1",
-        "input": "I absolutely love this product! The quality is outstanding and the customer service was incredibly helpful.",
-        "metadata": {
-            "schema": {"sentiment": ["positive", "negative", "neutral"]},
-            "usecase": "classification",
-        },
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "gliner2-base-v1",
+    "messages": [
+      {
+        "role": "user",
+        "content": "I absolutely love this product! The quality is outstanding and the customer service was incredibly helpful."
+      }
+    ],
+    "metadata": {
+      "schema": {
+        "sentiment": [
+          "positive",
+          "negative",
+          "neutral"
+        ]
+      },
+      "usecase": "classification"
+    }
+  }'
 ```
 
 </CodeGroup>

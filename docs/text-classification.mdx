@@ -3,7 +3,7 @@ title: "Text Classification"
 description: "Edge models that map text to labels, IAB taxonomy, and audience signals."
 ---
 
-Text classification models map a passage to predefined labels or categories. ZeroGPU offers IAB taxonomy classifiers tuned for ad tech plus a general zero-shot classifier where you supply the candidate labels.
+Text classification models map a passage to predefined labels or categories. ZeroGPU offers IAB taxonomy classifiers tuned for ad tech plus a general zero-shot classifier where you supply the candidate labels. Each request is shown for both the [Responses API](/api-reference/endpoint/responses) and the OpenAI-compatible [Chat Completions API](/api-reference/endpoint/chat-completions).
 
 | Model | Params | Max tokens | Input /1M | Output /1M |
 | --- | --- | --- | --- | --- |
@@ -21,7 +21,7 @@ ZeroGPU's IAB taxonomy classifier is purpose-built for real-time content categor
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -32,22 +32,20 @@ curl https://api.zerogpu.ai/v1/responses \
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "zlm-v1-iab-classify-edge",
-        "input": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment.",
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+      }
+    ]
+  }'
 ```
 
 </CodeGroup>
@@ -87,7 +85,7 @@ The enriched variant of ZeroGPU's IAB classifier goes beyond standard taxonomy l
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -98,22 +96,20 @@ curl https://api.zerogpu.ai/v1/responses \
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "zlm-v1-iab-classify-edge-enriched",
-        "input": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment.",
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge-enriched",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+      }
+    ]
+  }'
 ```
 
 </CodeGroup>
@@ -165,7 +161,7 @@ In addition to scored `audience` and `content` categories, the enriched model re
 
 ## deberta-v3-small
 
-Microsoft's DeBERTa-v3-small uses a disentangled attention mechanism that separately encodes content and position, giving it a major edge in understanding context compared to models of similar size. With ELECTRA-style pre-training and gradient-disentangled embedding sharing, it punches well above its weight on NLU benchmarks. Pass your candidate labels as `instructions` for zero-shot classification.
+Microsoft's DeBERTa-v3-small uses a disentangled attention mechanism that separately encodes content and position, giving it a major edge in understanding context compared to models of similar size. With ELECTRA-style pre-training and gradient-disentangled embedding sharing, it punches well above its weight on NLU benchmarks. Pass your candidate labels via `instructions` (Responses API) or a system message (Chat Completions) for zero-shot classification.
 
 **References:** [Model docs](https://github.com/microsoft/DeBERTa/tree/master/docs) - [Terms](https://github.com/microsoft/DeBERTa/blob/master/SECURITY.md) - [Privacy](https://github.com/microsoft/DeBERTa/blob/master/LICENSE)
 
@@ -173,7 +169,7 @@ Microsoft's DeBERTa-v3-small uses a disentangled attention mechanism that separa
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -185,23 +181,24 @@ curl https://api.zerogpu.ai/v1/responses \
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "deberta-v3-small",
-        "input": "Apple is expected to unveil its next-generation M5 chip at WWDC this June, promising a 40% boost in GPU performance and a new dedicated AI core for on-device machine learning tasks.",
-        "instructions": "[sports, finance, politics, technology]",
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "deberta-v3-small",
+    "messages": [
+      {
+        "role": "system",
+        "content": "[sports, finance, politics, technology]"
+      },
+      {
+        "role": "user",
+        "content": "Apple is expected to unveil its next-generation M5 chip at WWDC this June, promising a 40% boost in GPU performance and a new dedicated AI core for on-device machine learning tasks."
+      }
+    ]
+  }'
 ```
 
 </CodeGroup>

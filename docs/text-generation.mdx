@@ -3,7 +3,7 @@ title: "Text Generation"
 description: "Edge generative models for conversation, reasoning, and follow-up prompts."
 ---
 
-Text generation models produce new text from an input prompt. ZeroGPU offers conversational and reasoning models from Liquid AI plus a purpose-built follow-up question generator, all tuned for low-latency edge deployment.
+Text generation models produce new text from an input prompt. ZeroGPU offers conversational and reasoning models from Liquid AI plus a purpose-built follow-up question generator. Each request is shown for both the [Responses API](/api-reference/endpoint/responses) and the OpenAI-compatible [Chat Completions API](/api-reference/endpoint/chat-completions).
 
 | Model | Params | Max tokens | Input /1M | Output /1M |
 | --- | --- | --- | --- | --- |
@@ -13,7 +13,7 @@ Text generation models produce new text from an input prompt. ZeroGPU offers con
 
 ## LFM2.5-1.2B-Instruct
 
-Liquid AI's LFM2.5-1.2B-Instruct is a hybrid architecture model purpose-built for on-device deployment, trained on 28 trillion tokens with multi-stage reinforcement learning. It delivers best-in-class instruction following and native tool-calling at the 1B scale. Its hybrid design gives it significantly faster inference with lower memory usage compared to transformer-only models of the same size. Supports 8 languages including English, Chinese, Japanese, and Spanish. Pass a system prompt via `instructions`.
+Liquid AI's LFM2.5-1.2B-Instruct is a hybrid architecture model purpose-built for on-device deployment, trained on 28 trillion tokens with multi-stage reinforcement learning. It delivers best-in-class instruction following and native tool-calling at the 1B scale. Its hybrid design gives it significantly faster inference with lower memory usage compared to transformer-only models of the same size. Supports 8 languages including English, Chinese, Japanese, and Spanish. Pass a system prompt via `instructions` (Responses API) or a system message (Chat Completions).
 
 **References:** [Model docs](https://docs.liquid.ai/deployment/on-device/android/ai-agent-usage-guide#text-models) - [Terms](https://www.liquid.ai/terms-conditions) - [Privacy](https://www.liquid.ai/lfm-license)
 
@@ -21,7 +21,7 @@ Liquid AI's LFM2.5-1.2B-Instruct is a hybrid architecture model purpose-built fo
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -33,23 +33,24 @@ curl https://api.zerogpu.ai/v1/responses \
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "LFM2.5-1.2B-Instruct",
-        "input": "I just completed a 5K run in 28 minutes. Give me a short motivational follow-up message.",
-        "instructions": "You are a friendly in-app assistant for a fitness app.",
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "LFM2.5-1.2B-Instruct",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a friendly in-app assistant for a fitness app."
+      },
+      {
+        "role": "user",
+        "content": "I just completed a 5K run in 28 minutes. Give me a short motivational follow-up message."
+      }
+    ]
+  }'
 ```
 
 </CodeGroup>
@@ -72,7 +73,7 @@ Liquid AI's LFM2.5-1.2B-Thinking is a hybrid architecture reasoning model built 
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -83,22 +84,20 @@ curl https://api.zerogpu.ai/v1/responses \
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "LFM2.5-1.2B-Thinking",
-        "input": "What is the capital of Japan",
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "LFM2.5-1.2B-Thinking",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the capital of Japan"
+      }
+    ]
+  }'
 ```
 
 </CodeGroup>
@@ -125,7 +124,7 @@ ZeroGPU's follow-up question generator is fine-tuned specifically to generate co
 
 <CodeGroup>
 
-```bash cURL wrap
+```bash Responses API wrap
 curl https://api.zerogpu.ai/v1/responses \
   -H "content-type: application/json" \
   -H "x-api-key: YOUR_API_KEY" \
@@ -136,22 +135,20 @@ curl https://api.zerogpu.ai/v1/responses \
   }'
 ```
 
-```python Python wrap
-import requests
-
-resp = requests.post(
-    "https://api.zerogpu.ai/v1/responses",
-    headers={
-        "content-type": "application/json",
-        "x-api-key": "YOUR_API_KEY",
-        "x-project-id": "YOUR_PROJECT_ID",
-    },
-    json={
-        "model": "zlm-v1-followup-questions-edge",
-        "input": "Electric vehicles are gaining popularity worldwide as battery costs drop and charging infrastructure expands. Most modern EVs offer a range of 250 to 350 miles on a single charge, and fast-charging stations can replenish 80% of battery capacity in under 30 minutes.",
-    },
-)
-print(resp.json())
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-followup-questions-edge",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Electric vehicles are gaining popularity worldwide as battery costs drop and charging infrastructure expands. Most modern EVs offer a range of 250 to 350 miles on a single charge, and fast-charging stations can replenish 80% of battery capacity in under 30 minutes."
+      }
+    ]
+  }'
 ```
 
 </CodeGroup>
