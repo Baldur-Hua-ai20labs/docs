@@ -239,10 +239,6 @@
             "type": "string",
             "example": "[sports, finance, politics]",
             "description": "Candidate categories for zero-shot classification, passed as a comma-separated array (e.g. `[sports, finance, politics]`). A maximum of 10 categories is supported; response time increases with the number of categories provided."
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": true
           }
         }
       },
@@ -266,10 +262,6 @@
             "items": {
               "$ref": "#/components/schemas/ChatMessage"
             }
-          },
-          "metadata": {
-            "type": "object",
-            "additionalProperties": true
           }
         }
       },
