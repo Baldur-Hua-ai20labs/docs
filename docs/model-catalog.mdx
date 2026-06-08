@@ -1,0 +1,256 @@
+---
+title: "Model Catalog"
+description: "Browse ZeroGPU models, compare pricing, and pick the model ID to call."
+---
+
+The **Model Catalog** lets you browse every available ZeroGPU model and compare **pricing** across the tasks you care about. It's useful when you're selecting which `model` identifier to send to `POST /v1/responses`.
+
+Sections on this page: [At a glance](#at-a-glance) (pricing table), [Detailed model cards](#detailed-model-cards), and [Model library by task](#model-library-by-task).
+
+{/*
+  Model data is fetched once on app load by the global custom script
+  /zgpu-models-init.js and cached on window.__zgpuModels. The useModels() hook
+  below just reads that cached variable (reused across navigation, refetched
+  only on a hard refresh). It renders nothing until the fetch resolves.
+*/}
+
+{/*
+  Reads the model data cached on window by /zgpu-models-init.js (already sorted
+  by display priority there). Three cases: data already present -> use it;
+  fetch still in flight -> await the promise; store not created yet (component
+  mounted before the script ran) -> wait for the "zgpu:models-loaded" event.
+*/}
+export const useModels = () => {
+  const [models, setModels] = useState(() => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    return store.data || [];
+  });
+  useEffect(() => {
+    let active = true;
+    const apply = (d) => {
+      if (active && d && d.length) setModels(d);
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      apply(store.data);
+    } else if (store && store.promise) {
+      store.promise.then(apply);
+    } else {
+      const onLoaded = () => apply((window.__zgpuModels || {}).data);
+      window.addEventListener("zgpu:models-loaded", onLoaded);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", onLoaded);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  return models;
+};
+
+export const modelSlug = (id) => id.toLowerCase().replace(/\./g, "-");
+export const taskSlug = (t) => t.toLowerCase().replace(/\s+/g, "-");
+export const fmtNum = (n) => (typeof n === "number" ? n.toLocaleString("en-US") : n);
+export const fmtPrice = (n) => (typeof n === "number" ? "$" + n.toFixed(2) : "-");
+export const cleanText = (s) => (s || "").replace(/\s+/g, " ").trim();
+export const cleanUrl = (u) => (u || "").replace(/\s+/g, "");
+export const pricingOf = (m) => (m && m.pricing) || {};
+
+{/*
+  Rendered as a <span> with a CSS background-image rather than an <img> on
+  purpose: Mintlify auto-wraps <img> in zero-width zoom <span>s that collapse
+  the logo inside flex layouts. Inline styles also sidestep Tailwind JIT.
+*/}
+export const ModelLogo = ({ src, alt, size }) => {
+  const url = cleanUrl(src);
+  if (!url) return null;
+  const px = (size || 40) + "px";
+  return (
+    <span
+      role="img"
+      aria-label={alt || ""}
+      className="inline-block shrink-0 rounded-md border border-zinc-950/10 bg-white dark:border-white/10"
+      style={{
+        width: px,
+        height: px,
+        backgroundImage: 'url("' + url + '")',
+        backgroundSize: "72%",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    />
+  );
+};
+
+export const Badge = ({ children }) => (
+  <span className="rounded-full bg-zinc-950/[0.06] px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-white/10 dark:text-zinc-300">
+    {children}
+  </span>
+);
+
+{/*
+  Rendered as a CSS grid of <div>/<a> rows rather than a <table>: Mintlify
+  auto-wraps raw <table> elements in a full-bleed scroll container (negative
+  margin + page-padding + per-cell min-width) that clips the left edge. A grid
+  with fr columns always fits the content column, so it never clips or scrolls.
+*/}
+export const PricingTable = () => {
+  const models = useModels();
+  const cols = {
+    display: "grid",
+    gridTemplateColumns:
+      "minmax(0,3.4fr) minmax(0,1.5fr) minmax(0,1fr) minmax(0,1.3fr) minmax(0,1.2fr) minmax(0,1.2fr)",
+    gap: "1.75rem",
+    alignItems: "center",
+    minWidth: "920px",
+  };
+  return (
+    <div className="not-prose w-full overflow-x-auto text-base">
+      <div
+        style={cols}
+        className="border-b border-zinc-950/10 pb-3 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:text-zinc-400"
+      >
+        <div>Model</div>
+        <div>Task</div>
+        <div>Params</div>
+        <div className="text-right">Max tokens</div>
+        <div className="text-right">Input /1M</div>
+        <div className="text-right">Output /1M</div>
+      </div>
+      {models.map((m) => (
+        <a
+          key={m.modelId}
+          href={"/api-reference/models/" + modelSlug(m.modelId)}
+          style={cols}
+          className="border-b border-zinc-950/5 py-4 no-underline dark:border-white/5"
+        >
+          <div className="flex items-center gap-2 font-medium text-zinc-950 dark:text-white">
+            <ModelLogo src={pricingOf(m).favicon_url} alt={m.modelId} size={26} />
+            <code className="break-words text-sm">{m.modelId}</code>
+          </div>
+          <div className="text-zinc-600 dark:text-zinc-300">{m.taskDisplayName}</div>
+          <div className="text-zinc-600 dark:text-zinc-300">{m.parameters}</div>
+          <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtNum(m.maxTokens)}</div>
+          <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtPrice(pricingOf(m).input_per_1m_tokens)}</div>
+          <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtPrice(pricingOf(m).output_per_1m_tokens)}</div>
+        </a>
+      ))}
+    </div>
+  );
+};
+
+export const ModelCards = () => {
+  const models = useModels();
+  return (
+    <div className="not-prose grid grid-cols-1 gap-4 md:grid-cols-2">
+      {models.map((m) => {
+        const p = pricingOf(m);
+        return (
+          <a
+            key={m.modelId}
+            href={"/api-reference/models/" + modelSlug(m.modelId)}
+            className="group flex flex-col rounded-2xl border border-zinc-950/10 bg-white/40 p-5 no-underline transition-all hover:-translate-y-0.5 hover:border-zinc-950/30 hover:shadow-sm dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-white/30"
+          >
+            <div className="flex items-center gap-3">
+              <ModelLogo src={p.favicon_url} alt={m.modelId} size={44} />
+              <div className="min-w-0">
+                <div className="break-all font-semibold text-zinc-950 dark:text-white">{m.modelId}</div>
+                <span className="mt-1 inline-block rounded-full bg-zinc-950/[0.06] px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-white/10 dark:text-zinc-300">
+                  {m.taskDisplayName}
+                </span>
+              </div>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              <Badge>{m.parameters} params</Badge>
+              <Badge>{fmtNum(m.maxTokens)} max tokens</Badge>
+              <Badge>{fmtPrice(p.input_per_1m_tokens)} in /1M</Badge>
+              <Badge>{fmtPrice(p.output_per_1m_tokens)} out /1M</Badge>
+            </div>
+            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-zinc-600 dark:text-zinc-300">
+              {cleanText(p.description)}
+            </p>
+          </a>
+        );
+      })}
+    </div>
+  );
+};
+
+{/*
+  Reads the "model library by task" grouping prebuilt on app load by
+  /zgpu-models-init.js (window.__zgpuModels.byTask): an ordered array of
+  { task, models }. Same window/promise/event timing as useModels.
+*/}
+export const useByTask = () => {
+  const [groups, setGroups] = useState(() => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    return store.byTask || [];
+  });
+  useEffect(() => {
+    let active = true;
+    const apply = () => {
+      const store = window.__zgpuModels || {};
+      if (active && store.byTask) setGroups(store.byTask);
+    };
+    const store = window.__zgpuModels;
+    if (store && store.byTask) {
+      apply();
+    } else if (store && store.promise) {
+      store.promise.then(apply);
+    } else {
+      window.addEventListener("zgpu:models-loaded", apply);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", apply);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  return groups;
+};
+
+export const ModelLibrary = () => {
+  const groups = useByTask();
+  return (
+    <div className="not-prose grid grid-cols-1 gap-4 md:grid-cols-2">
+      {groups.map(({ task, models }) => (
+        <a
+          key={task}
+          href={"/docs/" + taskSlug(task)}
+          className="flex flex-col rounded-2xl border border-zinc-950/10 bg-white/40 p-5 no-underline transition-all hover:-translate-y-0.5 hover:border-zinc-950/30 hover:shadow-sm dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-white/30"
+        >
+          <div className="flex items-center justify-between gap-2">
+            <div className="font-semibold text-zinc-950 dark:text-white">{task}</div>
+            <span className="shrink-0 rounded-full bg-zinc-950/[0.06] px-2 py-0.5 text-[11px] font-medium text-zinc-600 dark:bg-white/10 dark:text-zinc-300">
+              {models.length} {models.length === 1 ? "model" : "models"}
+            </span>
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            {models.map((m) => (
+              <ModelLogo key={m.modelId} src={pricingOf(m).favicon_url} alt={m.modelId} size={28} />
+            ))}
+          </div>
+          <p className="mt-3 text-xs text-zinc-500 dark:text-zinc-400">
+            {models.map((m) => m.modelId).join(", ")}
+          </p>
+        </a>
+      ))}
+    </div>
+  );
+};
+
+## At a glance
+
+<PricingTable />
+
+## Detailed model cards
+
+<ModelCards />
+
+## Model library by task
+
+<ModelLibrary />

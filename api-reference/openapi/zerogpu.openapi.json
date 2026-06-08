@@ -1,0 +1,530 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "ZeroGPU API",
+    "version": "1.0",
+    "description": "REST API for ZeroGPU model inference: `POST /v1/responses` and `POST /v1/chat/completions` (model-dependent).\nAuthentication uses `x-api-key` and `x-project-id` headers on every request.\nDocumentation: https://docs.zerogpu.ai\n\n**Per-model playgrounds** are listed on [Model playgrounds](/api-reference/models) with request examples for each model's use cases.\nThese endpoint pages show a generic shape only."
+  },
+  "servers": [
+    {
+      "url": "https://api.zerogpu.ai/v1",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "ApiKey": [],
+      "ProjectId": []
+    }
+  ],
+  "paths": {
+    "/responses": {
+      "post": {
+        "operationId": "createResponse",
+        "summary": "Create response",
+        "tags": [
+          "Responses"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateResponseRequest"
+              },
+              "example": {
+                "model": "llama-3.1-8b-instruct-fast",
+                "input": "NASA announced that its Artemis III mission is now scheduled for late 2026, marking the first time astronauts will land on the lunar surface since Apollo 17 in 1972. The mission will send a crew of four to the Moon aboard the Orion spacecraft, with two astronauts descending to the south pole using SpaceX Starship as a lunar lander. Scientists are particularly excited about exploring permanently shadowed craters that may contain water ice, which could be critical for sustaining long-term human presence on the Moon."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
+                },
+                "example": {
+                  "id": "resp_abc123",
+                  "object": "response",
+                  "created": 1710000000,
+                  "model": "llama-3.1-8b-instruct-fast",
+                  "output": [
+                    {
+                      "type": "message",
+                      "role": "assistant",
+                      "content": [
+                        {
+                          "type": "output_text",
+                          "text": "Artemis III, slated for late 2026, will return astronauts to the Moon for the first time since 1972, landing two crew at the south pole to study shadowed craters that may hold water ice."
+                        }
+                      ]
+                    }
+                  ],
+                  "usage": {
+                    "input_tokens": 112,
+                    "output_tokens": 44,
+                    "total_tokens": 156
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid body)"
+          },
+          "401": {
+            "description": "Unauthorized (invalid or missing API key)"
+          },
+          "403": {
+            "description": "Forbidden (invalid project ID or permissions)"
+          },
+          "420": {
+            "description": "Input exceeds model token limit (context_length_exceeded)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": {
+                    "code": "context_length_exceeded",
+                    "message": "Input exceeds the model's maximum token limit."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/chat/completions": {
+      "post": {
+        "operationId": "createChatCompletion",
+        "summary": "Chat-completions style inference",
+        "description": "OpenAI-compatible chat body for models that use the messages route.",
+        "tags": [
+          "Chat"
+        ],
+        "x-mint": {
+          "metadata": {
+            "title": "Chat completions",
+            "sidebarTitle": "Chat completions",
+            "description": "Chat-style inference for models that use the messages route."
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateChatCompletionRequest"
+              },
+              "example": {
+                "model": "llama-3.1-8b-instruct-fast",
+                "messages": [
+                  {
+                    "role": "user",
+                    "content": "NASA announced that its Artemis III mission is now scheduled for late 2026, marking the first time astronauts will land on the lunar surface since Apollo 17 in 1972. The mission will send a crew of four to the Moon aboard the Orion spacecraft, with two astronauts descending to the south pole using SpaceX Starship as a lunar lander. Scientists are particularly excited about exploring permanently shadowed craters that may contain water ice, which could be critical for sustaining long-term human presence on the Moon."
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionResponse"
+                },
+                "example": {
+                  "id": "chatcmpl_abc123",
+                  "object": "chat.completion",
+                  "created": 1710000000,
+                  "model": "llama-3.1-8b-instruct-fast",
+                  "choices": [
+                    {
+                      "index": 0,
+                      "message": {
+                        "role": "assistant",
+                        "content": "Artemis III, slated for late 2026, will return astronauts to the Moon for the first time since 1972, landing two crew at the south pole to study shadowed craters that may hold water ice."
+                      },
+                      "finish_reason": "stop"
+                    }
+                  ],
+                  "usage": {
+                    "prompt_tokens": 112,
+                    "completion_tokens": 44,
+                    "total_tokens": 156
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request (invalid body)"
+          },
+          "401": {
+            "description": "Unauthorized (invalid or missing API key)"
+          },
+          "403": {
+            "description": "Forbidden (invalid project ID or permissions)"
+          },
+          "420": {
+            "description": "Input exceeds model token limit (context_length_exceeded)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                },
+                "example": {
+                  "error": {
+                    "code": "context_length_exceeded",
+                    "message": "Input exceeds the model's maximum token limit."
+                  }
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key",
+        "description": "Your ZeroGPU API key. Create one in the dashboard under API keys. Send it on every request."
+      },
+      "ProjectId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-project-id",
+        "description": "The UUID of the project the request is billed to. Find it in the dashboard project settings."
+      }
+    },
+    "schemas": {
+      "CreateResponseRequest": {
+        "type": "object",
+        "required": [
+          "model",
+          "input"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model identifier. Open a [model page](/api-reference/models) for a dedicated playground with the correct body for that model.",
+            "enum": [
+              "llama-3.1-8b-instruct-fast",
+              "LFM2.5-1.2B-Instruct",
+              "LFM2.5-1.2B-Thinking",
+              "deberta-v3-small",
+              "gliner2-base-v1",
+              "gliner-multi-pii-v1",
+              "zlm-v1-iab-classify-edge",
+              "zlm-v1-iab-classify-edge-enriched"
+            ],
+            "example": "llama-3.1-8b-instruct-fast"
+          },
+          "input": {
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "maxLength": 131072,
+            "description": "The text or document to send, as a plain string."
+          },
+          "text": {
+            "type": "object",
+            "description": "Response format configuration.",
+            "properties": {
+              "format": {
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "Output format for the response, for example `text`.",
+                    "example": "text"
+                  }
+                }
+              }
+            }
+          },
+          "instructions": {
+            "type": "string",
+            "description": "Optional system-style instructions applied on top of `input`, for models that support them."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Optional model-specific parameters, passed through to the model. For example, PII models accept `mask` and `usecase`. See the relevant [model page](/api-reference/models) for supported keys."
+          }
+        }
+      },
+      "CreateChatCompletionRequest": {
+        "type": "object",
+        "required": [
+          "model",
+          "messages"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "description": "Model identifier. Open a [model page](/api-reference/models) for a dedicated playground with the correct body for that model.",
+            "enum": [
+              "llama-3.1-8b-instruct-fast",
+              "LFM2.5-1.2B-Instruct",
+              "LFM2.5-1.2B-Thinking",
+              "deberta-v3-small",
+              "gliner2-base-v1",
+              "gliner-multi-pii-v1",
+              "zlm-v1-iab-classify-edge",
+              "zlm-v1-iab-classify-edge-enriched"
+            ],
+            "example": "llama-3.1-8b-instruct-fast"
+          },
+          "messages": {
+            "type": "array",
+            "minItems": 1,
+            "description": "Ordered list of messages making up the conversation so far.",
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true,
+            "description": "Optional model-specific parameters, passed through to the model. For example, PII models accept `mask` and `usecase`. See the relevant [model page](/api-reference/models) for supported keys."
+          }
+        }
+      },
+      "ChatMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "description": "Role of the message author.",
+            "enum": [
+              "system",
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "maxLength": 131072,
+            "description": "The message text."
+          }
+        }
+      },
+      "ChatCompletionResponse": {
+        "type": "object",
+        "description": "An OpenAI-compatible chat completion.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the completion.",
+            "example": "chatcmpl_abc123"
+          },
+          "object": {
+            "type": "string",
+            "description": "Object type. Always `chat.completion`.",
+            "example": "chat.completion"
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp (seconds) when the completion was created.",
+            "example": 1710000000
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used for inference.",
+            "example": "llama-3.1-8b-instruct-fast"
+          },
+          "choices": {
+            "type": "array",
+            "description": "List of completion choices.",
+            "items": {
+              "$ref": "#/components/schemas/ChatChoice"
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/ChatUsage"
+          }
+        }
+      },
+      "ChatChoice": {
+        "type": "object",
+        "description": "A single completion choice.",
+        "properties": {
+          "index": {
+            "type": "integer",
+            "description": "Position of this choice in the list.",
+            "example": 0
+          },
+          "message": {
+            "$ref": "#/components/schemas/ChatMessage"
+          },
+          "finish_reason": {
+            "type": "string",
+            "description": "Why the model stopped generating, for example `stop` or `length`.",
+            "example": "stop"
+          }
+        }
+      },
+      "ChatUsage": {
+        "type": "object",
+        "description": "Token usage statistics for the request.",
+        "properties": {
+          "prompt_tokens": {
+            "type": "integer",
+            "description": "Number of tokens in the prompt.",
+            "example": 112
+          },
+          "completion_tokens": {
+            "type": "integer",
+            "description": "Number of tokens in the generated completion.",
+            "example": 44
+          },
+          "total_tokens": {
+            "type": "integer",
+            "description": "Total tokens consumed (prompt plus completion).",
+            "example": 156
+          }
+        }
+      },
+      "Response": {
+        "type": "object",
+        "description": "The generated model response.",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "Unique identifier for the response.",
+            "example": "resp_abc123"
+          },
+          "object": {
+            "type": "string",
+            "description": "Object type. Always `response`.",
+            "example": "response"
+          },
+          "created": {
+            "type": "integer",
+            "description": "Unix timestamp (seconds) when the response was created.",
+            "example": 1710000000
+          },
+          "model": {
+            "type": "string",
+            "description": "The model used for inference.",
+            "example": "llama-3.1-8b-instruct-fast"
+          },
+          "output": {
+            "type": "array",
+            "description": "Output message objects produced by the model.",
+            "items": {
+              "$ref": "#/components/schemas/OutputMessage"
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/Usage"
+          }
+        }
+      },
+      "OutputMessage": {
+        "type": "object",
+        "description": "A single output item from the model.",
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "Output item type.",
+            "example": "message"
+          },
+          "role": {
+            "type": "string",
+            "description": "Author of the output. Always `assistant`.",
+            "example": "assistant"
+          },
+          "content": {
+            "type": "array",
+            "description": "Content parts that make up the message.",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Content part type.",
+                  "example": "output_text"
+                },
+                "text": {
+                  "type": "string",
+                  "description": "The generated text.",
+                  "example": "Artemis III, slated for late 2026, will return astronauts to the Moon for the first time since 1972."
+                }
+              }
+            }
+          }
+        }
+      },
+      "Usage": {
+        "type": "object",
+        "description": "Token usage statistics for the request.",
+        "properties": {
+          "input_tokens": {
+            "type": "integer",
+            "description": "Number of tokens in the input.",
+            "example": 112
+          },
+          "output_tokens": {
+            "type": "integer",
+            "description": "Number of tokens generated.",
+            "example": 44
+          },
+          "total_tokens": {
+            "type": "integer",
+            "description": "Total tokens consumed (input plus output).",
+            "example": 156
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "description": "Error payload returned on a failed request.",
+        "properties": {
+          "error": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "Machine-readable error code, for example `context_length_exceeded`.",
+                "example": "context_length_exceeded"
+              },
+              "message": {
+                "type": "string",
+                "description": "Human-readable description of the error.",
+                "example": "Input exceeds the model's maximum token limit."
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

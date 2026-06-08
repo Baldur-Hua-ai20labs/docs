@@ -1,0 +1,47 @@
+---
+title: "llama-3.1-8b-instruct-fast"
+sidebarTitle: "Summarization"
+description: "Model details for llama-3.1-8b-instruct-fast."
+openapi: "api-reference/openapi/playgrounds/llama-3_1-8b-instruct-fast.openapi.json POST /responses"
+---
+
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="llama-3.1-8b-instruct-fast" />
+
+**References:** [Model docs](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) • [Terms](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct/blob/main/LICENSE) • [Privacy](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct/blob/main/LICENSE)

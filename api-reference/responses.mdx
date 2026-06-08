@@ -1,0 +1,9 @@
+---
+title: "Responses"
+description: "Send input to an AI model and receive a response."
+openapi: "api-reference/openapi/zerogpu.openapi.json POST /responses"
+---
+
+One endpoint for every model. Pass text or a document as `input`; what comes back depends on the model: generated text, a classification, extracted fields, redacted output, and more. The `input` and `output` shapes vary by model, so open a [model page](/api-reference/models) for a prefilled playground. For the `messages`-style route, see [Chat completions](/api-reference/chat-completions).
+
+Install the official SDK from [npm](https://www.npmjs.com/package/zerogpu-api) or [PyPI](https://pypi.org/project/zerogpu-api/) (`pip install zerogpu-api`). Source: [zerogpu/SDK](https://github.com/zerogpu/SDK). Handle errors the same way as [API error codes](/docs/production-patterns#handle-status-codes-explicitly).

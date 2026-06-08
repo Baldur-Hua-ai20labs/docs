@@ -1,0 +1,251 @@
+---
+title: "Ad Tech"
+description: "Edge IAB classifiers that map content to taxonomy, audience, and intent signals for programmatic advertising."
+---
+
+{/*
+  Inline pricing table: reads Params / Max tokens / Input pricing for the given
+  model ids from the live data cached on window.__zgpuModels by
+  /zgpu-models-init.js. Output pricing is static (default "$0.40").
+*/}
+
+export const ModelPricingTable = ({ models, output }) => {
+  const ids = (models || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const outPrice = output || "$0.40";
+
+  const fmtNum = (n) =>
+    typeof n === "number" ? n.toLocaleString("en-US") : n != null ? n : "-";
+  const fmtPrice = (n) => (typeof n === "number" ? "$" + n.toFixed(2) : "-");
+  const slug = (id) => id.toLowerCase().replace(/\./g, "-");
+
+  const readById = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const map = {};
+    (store.data || []).forEach((m) => {
+      map[m.modelId] = m;
+    });
+    return map;
+  };
+
+  const [byId, setById] = useState(readById);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setById(readById());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const cols = {
+    display: "grid",
+    gridTemplateColumns:
+      "minmax(0,2.6fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr)",
+    gap: "1.5rem",
+    alignItems: "center",
+    minWidth: "640px",
+  };
+
+  return (
+    <div className="not-prose w-full overflow-x-auto text-base">
+      <div
+        style={cols}
+        className="border-b border-zinc-950/10 pb-3 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:text-zinc-400"
+      >
+        <div>Model</div>
+        <div>Params</div>
+        <div className="text-right">Max tokens</div>
+        <div className="text-right">Input /1M</div>
+        <div className="text-right">Output /1M</div>
+      </div>
+      {ids.map((id) => {
+        const m = byId[id] || {};
+        const p = m.pricing || {};
+        return (
+          <a
+            key={id}
+            href={"/api-reference/models/" + slug(id)}
+            style={cols}
+            className="border-b border-zinc-950/5 py-4 no-underline dark:border-white/5"
+          >
+            <div className="font-medium text-zinc-950 dark:text-white">
+              <code className="break-words text-sm">{id}</code>
+            </div>
+            <div className="text-zinc-600 dark:text-zinc-300">{m.parameters || "-"}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtNum(m.maxTokens)}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtPrice(p.input_per_1m_tokens)}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{outPrice}</div>
+          </a>
+        );
+      })}
+    </div>
+  );
+};
+
+Ad tech models map content to the IAB Content Taxonomy and the audience signals that programmatic advertising runs on. ZeroGPU offers a base IAB classifier tuned for real-time categorization at the edge plus an enriched variant that adds topics, keywords, and inferred intent. Each request is shown for both the [Responses API](/api-reference/responses) and the OpenAI-compatible [Chat Completions API](/api-reference/chat-completions).
+
+<ModelPricingTable models="zlm-v1-iab-classify-edge,zlm-v1-iab-classify-edge-enriched" />
+
+## zlm-v1-iab-classify-edge
+
+ZeroGPU's IAB taxonomy classifier is purpose-built for real-time content categorization at the edge. It maps text to the IAB Content Taxonomy, the industry standard used across programmatic advertising, enabling instant, low-latency content classification without roundtrips to a centralized server. At 90M parameters on ONNX, it's optimized for the high-volume, sub-millisecond classification that ad tech and content platforms demand.
+
+**References:** [Terms](https://zerogpu.ai/terms) - [Privacy](https://zerogpu.ai/privacy-policy)
+
+### Request
+
+<CodeGroup>
+
+```bash Responses API wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge",
+    "input": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+  }'
+```
+
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+### Response
+
+Returns IAB `audience` categories plus `content` matches across taxonomy versions, each with a confidence score.
+
+```json wrap
+{
+  "audience": [
+    { "name": "Technology & Computing", "score": 0.7686 },
+    { "name": "Consumer Electronics", "score": 0.7206 },
+    { "name": "65-69", "score": 0.5950 }
+  ],
+  "content": {
+    "iab_1_0": [
+      { "name": "Cell Phones", "score": 0.7597 },
+      { "name": "Technology & Computing", "score": 0.7387 }
+    ],
+    "iab_2_2": [
+      { "name": "Smartphones", "score": 0.7597 },
+      { "name": "Wearable Technology", "score": 0.7387 },
+      { "name": "Technology & Computing", "score": 0.7109 }
+    ]
+  }
+}
+```
+
+## zlm-v1-iab-classify-edge-enriched
+
+The enriched variant of ZeroGPU's IAB classifier goes beyond standard taxonomy labels by producing multi-signal outputs, giving you richer, more actionable classification data per inference call. You get not just a category, but layered context signals that downstream systems can use for better targeting, filtering, and personalization. Same 90M-parameter ONNX architecture as the base classifier, so it runs at the same edge-native speeds.
+
+**References:** [Terms](https://zerogpu.ai/terms) - [Privacy](https://zerogpu.ai/privacy-policy)
+
+### Request
+
+<CodeGroup>
+
+```bash Responses API wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge-enriched",
+    "input": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+  }'
+```
+
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge-enriched",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+### Response
+
+In addition to scored `audience` and `content` categories, the enriched model returns taxonomy codes and parent IDs, plus `topics`, `keywords`, and an inferred `user_intent`.
+
+```json wrap
+{
+  "audience": [
+    {
+      "id": 687,
+      "parent_id": 206,
+      "name": "Technology & Computing",
+      "tier1_name": "Interest",
+      "tier2_name": "Technology & Computing",
+      "score": 0.7686
+    },
+    {
+      "id": 703,
+      "parent_id": 687,
+      "name": "Consumer Electronics",
+      "tier1_name": "Interest",
+      "tier2_name": "Technology & Computing",
+      "tier3_name": "Consumer Electronics",
+      "score": 0.7206
+    }
+  ],
+  "content": {
+    "iab_1_0": [
+      { "code": "IAB19-6", "name": "Cell Phones", "tier": 2, "parent_code": "IAB19", "score": 0.7597 },
+      { "code": "IAB19", "name": "Technology & Computing", "tier": 1, "parent_code": null, "score": 0.7387 }
+    ]
+  },
+  "topics": [
+    { "name": "smartphones", "score": 0.7597 },
+    { "name": "wearable technology", "score": 0.7387 },
+    { "name": "technology & computing", "score": 0.7109 }
+  ],
+  "keywords": ["technology", "reshaped", "everyday", "routines", "quietly", "weaving", "rhythm", "itself", "life", "into"],
+  "user_intent": {
+    "name": "mastering technology quietly reshaped rhythm everyday life",
+    "category": "informational",
+    "score": 0.5
+  }
+}
+```
