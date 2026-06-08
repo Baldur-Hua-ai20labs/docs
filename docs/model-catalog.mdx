@@ -5,7 +5,7 @@ description: "Browse ZeroGPU models, compare pricing, and pick the model ID to c
 
 The **Model Catalog** lets you browse every available ZeroGPU model and compare **pricing** across the tasks you care about. It's useful when you're selecting which `model` identifier to send to `POST /v1/responses`.
 
-Sections on this page: [At a glance](#at-a-glance) (pricing table), [Detailed model cards](#detailed-model-cards), [Model library by task](#model-library-by-task), and [Using a model from the catalog in an API request](#using-a-model-from-the-catalog-in-an-api-request).
+Sections on this page: [At a glance](#at-a-glance) (pricing table), [Detailed model cards](#detailed-model-cards), and [Model library by task](#model-library-by-task).
 
 export const ZGPU_MODELS_URL = "https://api-dashboard.zerogpu.ai/api/models";
 
@@ -276,6 +276,29 @@ export const ModelCards = () => {
   );
 };
 
+{/*
+  Curated cross-task grouping: the IAB classify models are surfaced as their
+  own "Ad Tech" card in addition to their native Text Classification group.
+*/}
+export const AD_TECH_MODELS = [
+  "zlm-v1-iab-classify-edge",
+  "zlm-v1-iab-classify-edge-enriched",
+];
+
+{/*
+  Card order follows the Models group in docs.json (Text Classification,
+  Text Generation, PII, Summarization). The curated Ad Tech card has no
+  docs.json page slot, so it leads as the featured grouping. Any task not
+  listed here falls to the end in priority order.
+*/}
+export const TASK_ORDER = [
+  "Ad Tech",
+  "Text Classification",
+  "Text Generation",
+  "PII",
+  "Summarization",
+];
+
 export const ModelLibrary = () => {
   const models = useModels();
   const order = [];
@@ -286,6 +309,18 @@ export const ModelLibrary = () => {
       order.push(m.taskDisplayName);
     }
     byTask[m.taskDisplayName].push(m);
+  });
+  const adTech = AD_TECH_MODELS
+    .map((id) => models.find((m) => m.modelId === id))
+    .filter(Boolean);
+  if (adTech.length) {
+    byTask["Ad Tech"] = adTech;
+    order.push("Ad Tech");
+  }
+  order.sort((a, b) => {
+    const ia = TASK_ORDER.indexOf(a);
+    const ib = TASK_ORDER.indexOf(b);
+    return (ia === -1 ? TASK_ORDER.length : ia) - (ib === -1 ? TASK_ORDER.length : ib);
   });
   return (
     <div className="not-prose grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -326,15 +361,3 @@ export const ModelLibrary = () => {
 ## Model library by task
 
 <ModelLibrary />
-
-## Using a model from the catalog in an API request
-
-Once you've picked a model card, copy the **Model ID** and set it in your request:
-
-```json
-{
-  "model": "zlm-v1-iab-classify-edge"
-}
-```
-
-The rest of the request (headers and `input`) follows the standard `POST /v1/responses` format.

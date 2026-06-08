@@ -59,6 +59,7 @@
             "group": "Models",
             "pages": [
               "docs/model-catalog",
+              "docs/ad-tech",
               "docs/text-classification",
               "docs/text-generation",
               "docs/pii",

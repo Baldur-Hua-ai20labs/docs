@@ -1,0 +1,159 @@
+---
+title: "Ad Tech"
+description: "Edge IAB classifiers that map content to taxonomy, audience, and intent signals for programmatic advertising."
+---
+
+Ad tech models map content to the IAB Content Taxonomy and the audience signals that programmatic advertising runs on. ZeroGPU offers a base IAB classifier tuned for real-time categorization at the edge plus an enriched variant that adds topics, keywords, and inferred intent. Each request is shown for both the [Responses API](/api-reference/responses) and the OpenAI-compatible [Chat Completions API](/api-reference/chat-completions).
+
+| Model | Params | Max tokens | Input /1M | Output /1M |
+| --- | --- | --- | --- | --- |
+| [`zlm-v1-iab-classify-edge`](/api-reference/models/zlm-v1-iab-classify-edge) | 90M | 400 | $0.05 | $0.40 |
+| [`zlm-v1-iab-classify-edge-enriched`](/api-reference/models/zlm-v1-iab-classify-edge-enriched) | 90M | 400 | $0.05 | $0.40 |
+
+## zlm-v1-iab-classify-edge
+
+ZeroGPU's IAB taxonomy classifier is purpose-built for real-time content categorization at the edge. It maps text to the IAB Content Taxonomy, the industry standard used across programmatic advertising, enabling instant, low-latency content classification without roundtrips to a centralized server. At 90M parameters on ONNX, it's optimized for the high-volume, sub-millisecond classification that ad tech and content platforms demand.
+
+**References:** [Terms](https://zerogpu.ai/terms) - [Privacy](https://zerogpu.ai/privacy-policy)
+
+### Request
+
+<CodeGroup>
+
+```bash Responses API wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge",
+    "input": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+  }'
+```
+
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+### Response
+
+Returns IAB `audience` categories plus `content` matches across taxonomy versions, each with a confidence score.
+
+```json wrap
+{
+  "audience": [
+    { "name": "Technology & Computing", "score": 0.7686 },
+    { "name": "Consumer Electronics", "score": 0.7206 },
+    { "name": "65-69", "score": 0.5950 }
+  ],
+  "content": {
+    "iab_1_0": [
+      { "name": "Cell Phones", "score": 0.7597 },
+      { "name": "Technology & Computing", "score": 0.7387 }
+    ],
+    "iab_2_2": [
+      { "name": "Smartphones", "score": 0.7597 },
+      { "name": "Wearable Technology", "score": 0.7387 },
+      { "name": "Technology & Computing", "score": 0.7109 }
+    ]
+  }
+}
+```
+
+## zlm-v1-iab-classify-edge-enriched
+
+The enriched variant of ZeroGPU's IAB classifier goes beyond standard taxonomy labels by producing multi-signal outputs, giving you richer, more actionable classification data per inference call. You get not just a category, but layered context signals that downstream systems can use for better targeting, filtering, and personalization. Same 90M-parameter ONNX architecture as the base classifier, so it runs at the same edge-native speeds.
+
+**References:** [Terms](https://zerogpu.ai/terms) - [Privacy](https://zerogpu.ai/privacy-policy)
+
+### Request
+
+<CodeGroup>
+
+```bash Responses API wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge-enriched",
+    "input": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+  }'
+```
+
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "zlm-v1-iab-classify-edge-enriched",
+    "messages": [
+      {
+        "role": "user",
+        "content": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment."
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+### Response
+
+In addition to scored `audience` and `content` categories, the enriched model returns taxonomy codes and parent IDs, plus `topics`, `keywords`, and an inferred `user_intent`.
+
+```json wrap
+{
+  "audience": [
+    {
+      "id": 687,
+      "parent_id": 206,
+      "name": "Technology & Computing",
+      "tier1_name": "Interest",
+      "tier2_name": "Technology & Computing",
+      "score": 0.7686
+    },
+    {
+      "id": 703,
+      "parent_id": 687,
+      "name": "Consumer Electronics",
+      "tier1_name": "Interest",
+      "tier2_name": "Technology & Computing",
+      "tier3_name": "Consumer Electronics",
+      "score": 0.7206
+    }
+  ],
+  "content": {
+    "iab_1_0": [
+      { "code": "IAB19-6", "name": "Cell Phones", "tier": 2, "parent_code": "IAB19", "score": 0.7597 },
+      { "code": "IAB19", "name": "Technology & Computing", "tier": 1, "parent_code": null, "score": 0.7387 }
+    ]
+  },
+  "topics": [
+    { "name": "smartphones", "score": 0.7597 },
+    { "name": "wearable technology", "score": 0.7387 },
+    { "name": "technology & computing", "score": 0.7109 }
+  ],
+  "keywords": ["technology", "reshaped", "everyday", "routines", "quietly", "weaving", "rhythm", "itself", "life", "into"],
+  "user_intent": {
+    "name": "mastering technology quietly reshaped rhythm everyday life",
+    "category": "informational",
+    "score": 0.5
+  }
+}
+```
