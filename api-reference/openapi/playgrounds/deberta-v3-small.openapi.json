@@ -53,7 +53,8 @@
                   "summary": "Default",
                   "value": {
                     "input": "Apple is expected to unveil its next-generation M5 chip at WWDC this June, promising a 40% boost in GPU performance and a new dedicated AI core for on-device machine learning tasks.",
-                    "model": "deberta-v3-small"
+                    "model": "deberta-v3-small",
+                    "instructions": "[sports, finance, politics]"
                   }
                 }
               }
@@ -233,6 +234,11 @@
             "format": "textarea",
             "maxLength": 131072,
             "description": "Multi-line text or document content to send to the model."
+          },
+          "instructions": {
+            "type": "string",
+            "example": "[sports, finance, politics]",
+            "description": "Candidate categories for zero-shot classification, passed as a comma-separated array (e.g. `[sports, finance, politics]`). A maximum of 10 categories is supported; response time increases with the number of categories provided."
           },
           "metadata": {
             "type": "object",
