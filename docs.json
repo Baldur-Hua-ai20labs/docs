@@ -7,7 +7,7 @@
     "light": "#4ADE80",
     "dark": "#16A34A"
   },
-  "favicon": "/assets/logo/favicon.ico",
+  "favicon": "/assets/favicon.ico",
   "contextual": {
     "options": [
       "copy",
@@ -201,8 +201,8 @@
     }
   },
   "logo": {
-    "light": "/assets/logo/zerogpu-docs-logo-light.png",
-    "dark": "/assets/logo/zerogpu-docs-logo-dark.png"
+    "light": "/assets/zerogpu-docs-logo-light.png",
+    "dark": "/assets/zerogpu-docs-logo-dark.png"
   },
   "navbar": {
     "links": [
