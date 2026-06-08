@@ -5,6 +5,43 @@ description: "Model details for deberta-v3-small."
 openapi: "api-reference/openapi/playgrounds/deberta-v3-small.openapi.json POST /responses"
 ---
 
-> Microsoft's DeBERTa-v3-small uses a disentangled attention mechanism that separately encodes content and position giving it a major edge in understanding context compared to models of similar size. With ELECTRA-style pre-training and gradient-disentangled embedding sharing, it punches well above its weight on NLU benchmarks, outperforming many frontier models on classification and inference tasks. It's one of the most efficient classifiers you can run at the edge. Ideal for high-throughput classification workloads where every millisecond and every cent matters.
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="deberta-v3-small" />
 
 **References:** [Model docs](https://github.com/microsoft/DeBERTa/tree/master/docs) • [Terms](https://github.com/microsoft/DeBERTa/blob/master/SECURITY.md) • [Privacy](https://github.com/microsoft/DeBERTa/blob/master/LICENSE)

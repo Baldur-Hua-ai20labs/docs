@@ -3,12 +3,104 @@ title: "PII"
 description: "Multilingual PII detection, redaction, and schema-driven extraction models."
 ---
 
+{/*
+  Inline pricing table: reads Params / Max tokens / Input pricing for the given
+  model ids from the live data cached on window.__zgpuModels by
+  /zgpu-models-init.js. Output pricing is static (default "$0.40").
+*/}
+
+export const ModelPricingTable = ({ models, output }) => {
+  const ids = (models || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const outPrice = output || "$0.40";
+
+  const fmtNum = (n) =>
+    typeof n === "number" ? n.toLocaleString("en-US") : n != null ? n : "-";
+  const fmtPrice = (n) => (typeof n === "number" ? "$" + n.toFixed(2) : "-");
+  const slug = (id) => id.toLowerCase().replace(/\./g, "-");
+
+  const readById = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const map = {};
+    (store.data || []).forEach((m) => {
+      map[m.modelId] = m;
+    });
+    return map;
+  };
+
+  const [byId, setById] = useState(readById);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setById(readById());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const cols = {
+    display: "grid",
+    gridTemplateColumns:
+      "minmax(0,2.6fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr)",
+    gap: "1.5rem",
+    alignItems: "center",
+    minWidth: "640px",
+  };
+
+  return (
+    <div className="not-prose w-full overflow-x-auto text-base">
+      <div
+        style={cols}
+        className="border-b border-zinc-950/10 pb-3 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:text-zinc-400"
+      >
+        <div>Model</div>
+        <div>Params</div>
+        <div className="text-right">Max tokens</div>
+        <div className="text-right">Input /1M</div>
+        <div className="text-right">Output /1M</div>
+      </div>
+      {ids.map((id) => {
+        const m = byId[id] || {};
+        const p = m.pricing || {};
+        return (
+          <a
+            key={id}
+            href={"/api-reference/models/" + slug(id)}
+            style={cols}
+            className="border-b border-zinc-950/5 py-4 no-underline dark:border-white/5"
+          >
+            <div className="font-medium text-zinc-950 dark:text-white">
+              <code className="break-words text-sm">{id}</code>
+            </div>
+            <div className="text-zinc-600 dark:text-zinc-300">{m.parameters || "-"}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtNum(m.maxTokens)}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtPrice(p.input_per_1m_tokens)}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{outPrice}</div>
+          </a>
+        );
+      })}
+    </div>
+  );
+};
+
 PII models detect, redact, and extract personally identifiable information and other structured entities from text. Both models below run on CPU for privacy-preserving workflows and select a behavior through the `metadata.usecase` field. Each request is shown for both the [Responses API](/api-reference/responses) and the OpenAI-compatible [Chat Completions API](/api-reference/chat-completions).
 
-| Model | Params | Max tokens | Input /1M | Output /1M |
-| --- | --- | --- | --- | --- |
-| [`gliner-multi-pii-v1`](/api-reference/models/gliner-multi-pii-v1) | 300M | 512 | $0.20 | $0.40 |
-| [`gliner2-base-v1`](/api-reference/models/gliner2-base-v1) | 205M | 512 | $0.20 | $0.40 |
+<ModelPricingTable models="gliner-multi-pii-v1,gliner2-base-v1" />
 
 ## gliner-multi-pii-v1
 

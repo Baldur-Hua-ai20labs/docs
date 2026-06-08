@@ -5,6 +5,43 @@ description: "Model details for gliner-multi-pii-v1."
 openapi: "api-reference/openapi/playgrounds/gliner-multi-pii-v1.openapi.json POST /responses"
 ---
 
-> GLiNER Multi PII v1 is a multilingual PII detection and redaction model based on the GLiNER architecture. It identifies 40+ personally identifiable information entity types, identity, contact, government IDs, financial, medical, organization, demographic, travel, network, and vehicle, across six European languages (English, French, German, Spanish, Italian, Portuguese). Built for zero-shot label prompting, it accepts custom label sets at inference time and supports curated PII catalogues, redaction with label or character masks, and generic NER with user-supplied labels. Runs efficiently on CPU for privacy-preserving PII workflows.
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="gliner-multi-pii-v1" />
 
 **References:** [Model docs](https://github.com/fastino-ai/GLiNER2/blob/main/README.md) • [Terms](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE) • [Privacy](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE)

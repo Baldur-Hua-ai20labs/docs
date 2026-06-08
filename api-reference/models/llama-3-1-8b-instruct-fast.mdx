@@ -5,6 +5,43 @@ description: "Model details for llama-3.1-8b-instruct-fast."
 openapi: "api-reference/openapi/playgrounds/llama-3_1-8b-instruct-fast.openapi.json POST /responses"
 ---
 
-> The Meta Llama 3.1 collection of multilingual large language models (LLMs) is a collection of pretrained and instruction tuned generative models in 8B, 70B and 405B sizes (text in/text out). The Llama 3.1 instruction tuned text only models (8B, 70B, 405B) are optimized for multilingual dialogue use cases and outperform many of the available open source and closed chat models on common industry benchmarks.
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="llama-3.1-8b-instruct-fast" />
 
 **References:** [Model docs](https://huggingface.co/meta-llama/Llama-3.1-8B-Instruct) • [Terms](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct/blob/main/LICENSE) • [Privacy](https://huggingface.co/meta-llama/Llama-3.1-70B-Instruct/blob/main/LICENSE)

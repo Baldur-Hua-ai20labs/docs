@@ -5,6 +5,43 @@ description: "Model details for LFM2.5-1.2B-Thinking."
 openapi: "api-reference/openapi/playgrounds/LFM2_5-1_2B-Thinking.openapi.json POST /responses"
 ---
 
-> Liquid AI's LFM2.5-1.2B-Thinking is a hybrid architecture reasoning model built for deep, step-by-step problem solving at the 1B scale. It generates explicit reasoning traces before producing a final answer working through math, logic, and multi-step tasks the way a human would on paper delivering thinking-model performance without the compute overhead that typically comes with it. Its hybrid SSM-attention design keeps inference fast and memory usage low, making it one of the most capable small reasoning models available for constrained environments.
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="LFM2.5-1.2B-Thinking" />
 
 **References:** [Model docs](https://docs.liquid.ai/deployment/on-device/android/ai-agent-usage-guide#text-models) • [Terms](https://www.liquid.ai/terms-conditions) • [Privacy](https://www.liquid.ai/lfm-license)

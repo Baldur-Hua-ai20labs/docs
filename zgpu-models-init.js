@@ -25,6 +25,52 @@
   // Already fetched (or fetching) this page load -> nothing to do.
   if (store.data || store.promise) return;
 
+  // Build the "model library by task" grouping: models grouped by task, plus a
+  // curated "Ad Tech" group, ordered to match the docs Models nav. Returns an
+  // ordered array of { task, models } so consumers just map over it.
+  function buildByTask(models) {
+    var AD_TECH_MODELS = [
+      "zlm-v1-iab-classify-edge",
+      "zlm-v1-iab-classify-edge-enriched",
+    ];
+    var TASK_ORDER = [
+      "Ad Tech",
+      "Text Classification",
+      "Text Generation",
+      "PII",
+      "Summarization",
+    ];
+    var order = [];
+    var byTask = {};
+    models.forEach(function (m) {
+      if (!byTask[m.taskDisplayName]) {
+        byTask[m.taskDisplayName] = [];
+        order.push(m.taskDisplayName);
+      }
+      byTask[m.taskDisplayName].push(m);
+    });
+    var adTech = AD_TECH_MODELS.map(function (id) {
+      return models.find(function (m) {
+        return m.modelId === id;
+      });
+    }).filter(Boolean);
+    if (adTech.length) {
+      byTask["Ad Tech"] = adTech;
+      order.push("Ad Tech");
+    }
+    order.sort(function (a, b) {
+      var ia = TASK_ORDER.indexOf(a);
+      var ib = TASK_ORDER.indexOf(b);
+      return (
+        (ia === -1 ? TASK_ORDER.length : ia) -
+        (ib === -1 ? TASK_ORDER.length : ib)
+      );
+    });
+    return order.map(function (t) {
+      return { task: t, models: byTask[t] };
+    });
+  }
+
   store.promise = fetch(ZGPU_MODELS_URL)
     .then(function (r) {
       return r.json();
@@ -38,6 +84,8 @@
             return (b.displayPriority || 0) - (a.displayPriority || 0);
           })
         : null;
+      // Prebuild the "library by task" grouping so pages don't have to.
+      store.byTask = store.data ? buildByTask(store.data) : null;
       // Notify any component that mounted before the fetch resolved.
       window.dispatchEvent(new CustomEvent("zgpu:models-loaded"));
       return store.data;
