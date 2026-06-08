@@ -128,7 +128,7 @@
             "description": "Forbidden"
           },
           "420": {
-            "description": "Context length exceeded",
+            "description": "Insufficient quota",
             "content": {
               "application/json": {
                 "schema": {
@@ -258,7 +258,7 @@
             "description": "Forbidden"
           },
           "420": {
-            "description": "Context length exceeded"
+            "description": "Insufficient quota"
           },
           "500": {
             "description": "Internal server error"
