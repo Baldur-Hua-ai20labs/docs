@@ -5,7 +5,7 @@ description: "Extract structured fields and entities from unstructured text with
 
 Use extraction models to turn free-form text into **structured JSON** or **labeled spans**. For example: contact blocks from email signatures, technologies from product descriptions, or PII from user-submitted content.
 
-ZeroGPU routes these requests through the [Responses API](/api-reference/endpoint/responses). Pass model-specific options in the **`metadata`** object (`usecase`, `schema`, `labels`, and related fields).
+ZeroGPU routes these requests through the [Responses API](/api-reference/responses). Pass model-specific options in the **`metadata`** object (`usecase`, `schema`, `labels`, and related fields).
 
 ## Structured field extraction
 
@@ -185,12 +185,12 @@ print(response.json())
 
 </CodeGroup>
 
-To **redact** PII instead of returning spans, use `metadata.usecase` **`redact`** with `mask` set to `label` or another supported mask mode. See the [gliner-multi-pii-v1](/models/gliner-multi-pii-v1) model page for use-case details.
+To **redact** PII instead of returning spans, use `metadata.usecase` **`redact`** with `mask` set to `label` or another supported mask mode. See the [gliner-multi-pii-v1](/api-reference/models/gliner-multi-pii-v1) model page for use-case details.
 
 ## Tips
 
-- **`input` shape:** GLiNER models accept a **plain string** for `input` (as above). Other models may expect a message array. See [Responses](/api-reference/endpoint/responses#input-shape).
+- **`input` shape:** GLiNER models accept a **plain string** for `input` (as above). Other models may expect a message array. See [Responses](/api-reference/responses#input-shape).
 - **Schema design:** Use clear field descriptions in `name::type::description`; they guide what the model extracts.
 - **Batch workloads:** Extract many documents with [batch patterns](/cookbook/batch-requests) (parallel requests, per-item error handling).
-- **Try interactively:** Open [gliner2-base-v1](/models/gliner2-base-v1) or [gliner-multi-pii-v1](/models/gliner-multi-pii-v1) in the model catalog and use the playground to switch use cases and edit the request body.
+- **Try interactively:** Open [gliner2-base-v1](/api-reference/models/gliner2-base-v1) or [gliner-multi-pii-v1](/api-reference/models/gliner-multi-pii-v1) in the model catalog and use the playground to switch use cases and edit the request body.
 - **Full walkthrough:** See the [resume & profile extraction tutorial](/cookbook/data-extraction-tutorial) with a [synthetic dataset](https://github.com/zerogpu/cookbook/tree/main/demos/data-extraction/dataset) and batch script.

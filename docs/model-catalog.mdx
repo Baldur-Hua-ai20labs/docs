@@ -236,7 +236,7 @@ export const PricingTable = () => {
       {models.map((m) => (
         <a
           key={m.modelId}
-          href={"/models/" + modelSlug(m.modelId)}
+          href={"/api-reference/models/" + modelSlug(m.modelId)}
           style={cols}
           className="border-b border-zinc-950/5 py-4 no-underline dark:border-white/5"
         >
@@ -264,7 +264,7 @@ export const ModelCards = () => {
         return (
           <a
             key={m.modelId}
-            href={"/models/" + modelSlug(m.modelId)}
+            href={"/api-reference/models/" + modelSlug(m.modelId)}
             className="group flex flex-col rounded-2xl border border-zinc-950/10 bg-white/40 p-5 no-underline transition-all hover:-translate-y-0.5 hover:border-zinc-950/30 hover:shadow-sm dark:border-white/10 dark:bg-white/[0.02] dark:hover:border-white/30"
           >
             <div className="flex items-center gap-3">

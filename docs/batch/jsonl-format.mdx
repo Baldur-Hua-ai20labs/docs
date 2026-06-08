@@ -16,9 +16,9 @@ This page is the canonical specification for all three line schemas.
 ## Input JSONL
 
 The input is a JSONL file (one JSON object per line, separated by `\n`). You
-upload it via [`POST /v1/files`](/api-reference/batch/upload-file)
+upload it via [`POST /v1/files`](/api-reference/upload-file)
 with `purpose=batch`, then reference its ID when you call
-[`POST /v1/batches`](/api-reference/batch/create-batch).
+[`POST /v1/batches`](/api-reference/create-batch).
 
 ### Line schema
 
@@ -82,7 +82,7 @@ See [Supported endpoints](/docs/batch/supported-endpoints) for the
 When a batch reaches `status: "completed"`, the service writes the successful
 results to a file referenced by `output_file_id` on the Batch object. You
 download it via
-[`GET /v1/files/{file_id}/content`](/api-reference/batch/download-file).
+[`GET /v1/files/{file_id}/content`](/api-reference/download-file).
 
 Only lines that received a **2xx** response from the underlying endpoint
 appear in the output file. Failed lines go to the error file (see below).

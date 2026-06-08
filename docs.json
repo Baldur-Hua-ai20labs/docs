@@ -117,20 +117,20 @@
           {
             "group": "Endpoints",
             "pages": [
-              "api-reference/endpoint/responses",
-              "api-reference/endpoint/chat-completions",
+              "api-reference/responses",
+              "api-reference/chat-completions",
               {
                 "group": "By model",
                 "pages": [
-                  "models/deberta-v3-small",
-                  "models/gliner-multi-pii-v1",
-                  "models/gliner2-base-v1",
-                  "models/lfm2-5-1-2b-instruct",
-                  "models/lfm2-5-1-2b-thinking",
-                  "models/llama-3-1-8b-instruct-fast",
-                  "models/zlm-v1-followup-questions-edge",
-                  "models/zlm-v1-iab-classify-edge",
-                  "models/zlm-v1-iab-classify-edge-enriched"
+                  "api-reference/models/deberta-v3-small",
+                  "api-reference/models/gliner-multi-pii-v1",
+                  "api-reference/models/gliner2-base-v1",
+                  "api-reference/models/lfm2-5-1-2b-instruct",
+                  "api-reference/models/lfm2-5-1-2b-thinking",
+                  "api-reference/models/llama-3-1-8b-instruct-fast",
+                  "api-reference/models/zlm-v1-followup-questions-edge",
+                  "api-reference/models/zlm-v1-iab-classify-edge",
+                  "api-reference/models/zlm-v1-iab-classify-edge-enriched"
                 ]
               }
             ]
@@ -138,15 +138,15 @@
           {
             "group": "Batch API",
             "pages": [
-              "api-reference/batch/upload-file",
-              "api-reference/batch/list-files",
-              "api-reference/batch/retrieve-file",
-              "api-reference/batch/download-file",
-              "api-reference/batch/delete-file",
-              "api-reference/batch/create-batch",
-              "api-reference/batch/retrieve-batch",
-              "api-reference/batch/list-batches",
-              "api-reference/batch/cancel-batch"
+              "api-reference/upload-file",
+              "api-reference/list-files",
+              "api-reference/retrieve-file",
+              "api-reference/download-file",
+              "api-reference/delete-file",
+              "api-reference/create-batch",
+              "api-reference/retrieve-batch",
+              "api-reference/list-batches",
+              "api-reference/cancel-batch"
             ]
           }
         ]
@@ -234,7 +234,59 @@
     },
     {
       "source": "/api-reference/introduction",
-      "destination": "/api-reference/endpoint/responses"
+      "destination": "/api-reference/responses"
+    },
+    {
+      "source": "/api-reference/endpoint/responses",
+      "destination": "/api-reference/responses"
+    },
+    {
+      "source": "/api-reference/endpoint/chat-completions",
+      "destination": "/api-reference/chat-completions"
+    },
+    {
+      "source": "/api-reference/batch/upload-file",
+      "destination": "/api-reference/upload-file"
+    },
+    {
+      "source": "/api-reference/batch/list-files",
+      "destination": "/api-reference/list-files"
+    },
+    {
+      "source": "/api-reference/batch/retrieve-file",
+      "destination": "/api-reference/retrieve-file"
+    },
+    {
+      "source": "/api-reference/batch/download-file",
+      "destination": "/api-reference/download-file"
+    },
+    {
+      "source": "/api-reference/batch/delete-file",
+      "destination": "/api-reference/delete-file"
+    },
+    {
+      "source": "/api-reference/batch/create-batch",
+      "destination": "/api-reference/create-batch"
+    },
+    {
+      "source": "/api-reference/batch/retrieve-batch",
+      "destination": "/api-reference/retrieve-batch"
+    },
+    {
+      "source": "/api-reference/batch/list-batches",
+      "destination": "/api-reference/list-batches"
+    },
+    {
+      "source": "/api-reference/batch/cancel-batch",
+      "destination": "/api-reference/cancel-batch"
+    },
+    {
+      "source": "/api-reference/models",
+      "destination": "/docs/model-catalog"
+    },
+    {
+      "source": "/models/:slug",
+      "destination": "/api-reference/models/:slug"
     },
     {
       "source": "/platform/model-catalog",

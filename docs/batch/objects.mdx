@@ -32,20 +32,20 @@ The Files API stores the JSONL that drives a batch:
 
 | Method | Path | Reference |
 |---|---|---|
-| `POST` | `/v1/files` | [Upload file](/api-reference/batch/upload-file) |
-| `GET` | `/v1/files` | [List files](/api-reference/batch/list-files) |
-| `GET` | `/v1/files/{file_id}` | [Retrieve file](/api-reference/batch/retrieve-file) |
-| `GET` | `/v1/files/{file_id}/content` | [Download file](/api-reference/batch/download-file) |
-| `DELETE` | `/v1/files/{file_id}` | [Delete file](/api-reference/batch/delete-file) |
+| `POST` | `/v1/files` | [Upload file](/api-reference/upload-file) |
+| `GET` | `/v1/files` | [List files](/api-reference/list-files) |
+| `GET` | `/v1/files/{file_id}` | [Retrieve file](/api-reference/retrieve-file) |
+| `GET` | `/v1/files/{file_id}/content` | [Download file](/api-reference/download-file) |
+| `DELETE` | `/v1/files/{file_id}` | [Delete file](/api-reference/delete-file) |
 
 The Batches API submits and monitors the jobs:
 
 | Method | Path | Reference |
 |---|---|---|
-| `POST` | `/v1/batches` | [Create batch](/api-reference/batch/create-batch) |
-| `GET` | `/v1/batches` | [List batches](/api-reference/batch/list-batches) |
-| `GET` | `/v1/batches/{batch_id}` | [Retrieve batch](/api-reference/batch/retrieve-batch) |
-| `POST` | `/v1/batches/{batch_id}/cancel` | [Cancel batch](/api-reference/batch/cancel-batch) |
+| `POST` | `/v1/batches` | [Create batch](/api-reference/create-batch) |
+| `GET` | `/v1/batches` | [List batches](/api-reference/list-batches) |
+| `GET` | `/v1/batches/{batch_id}` | [Retrieve batch](/api-reference/retrieve-batch) |
+| `POST` | `/v1/batches/{batch_id}/cancel` | [Cancel batch](/api-reference/cancel-batch) |
 
 Both APIs are wire-compatible with OpenAI's `/v1/files` and `/v1/batches`, so
 the official SDKs work once pointed at the ZeroGPU base URL. The ZeroGPU

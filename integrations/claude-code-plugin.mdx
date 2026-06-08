@@ -497,7 +497,7 @@ For full flag reference on any command, run `zerogpu <command> --help` outside t
 
 **`Request failed with status 403`** - the key is valid but doesn't have access to the project, or the project doesn't have access to the requested model. Confirm your Project ID matches the project that owns the key.
 
-**`Request failed with status 429`** - you're being rate-limited. Back off and retry with exponential delay, or switch heavy workloads to the [Batch API](/api-reference/batch/index), which has separate quotas tuned for bulk jobs.
+**`Request failed with status 429`** - you're being rate-limited. Back off and retry with exponential delay, or switch heavy workloads to the [Batch API](/docs/batch), which has separate quotas tuned for bulk jobs.
 
 **Wrong skill auto-invoked for a request.** Claude picks based on phrasing. If you want a specific skill, call it explicitly with `/zerogpu-router:<name>`. If a skill keeps getting picked when you don't want it, rephrase to remove the trigger words ("redact", "classify", "extract") or invoke the right one by name.
 
@@ -515,7 +515,7 @@ The `zerogpu-router` plugin turns ZeroGPU's nano language models into first-clas
   <Card title="Model Catalog" icon="layer-group" href="/docs/model-catalog">
     Browse every model the plugin can route to.
   </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/endpoint/responses">
+  <Card title="API Reference" icon="code" href="/api-reference/responses">
     Explore the full OpenAI-compatible API surface.
   </Card>
   <Card title="Cookbook" icon="book" href="/cookbook/index">
