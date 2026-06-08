@@ -138,7 +138,7 @@ Paste this as the second opening paragraph on every integration page so messagin
 
 ## Things to avoid
 
-- Leave the API-reference files alone unless that's your task. `openapi/zerogpu.openapi.json`, `openapi/playgrounds/*.openapi.json`, and the `models/<model-id>.mdx` pages are committed, hand-maintained files (the old `scripts/` generators were removed), see `CLAUDE.md`.
+- Leave the API-reference files alone unless that's your task. `api-reference/openapi/zerogpu.openapi.json`, `api-reference/openapi/playgrounds/*.openapi.json`, and the `api-reference/models/<model-id>.mdx` pages are committed, hand-maintained files (the old `scripts/` generators were removed), see `CLAUDE.md`.
 - Do not invent new top-level navigation tabs.
 - Do not add a card to the live grid without a real backing `.mdx` file, broken links fail `mint validate`.
 - Do not duplicate a card across "Coming Soon" and a live section.

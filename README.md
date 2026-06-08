@@ -86,13 +86,13 @@ mint dev
 
 Preview at `http://localhost:3000` (or the port Mintlify reports).
 
-**API playground:** Each **model** has a live playground under **API Reference → Endpoints → By model** (and on its catalog page). Specs live in `openapi/playgrounds/*.openapi.json` and the `docs.json` nav is maintained by hand. These files are committed and edited directly, there is no longer a generator.
+**API playground:** Each **model** has a live playground under **API Reference → Endpoints → By model** (and on its catalog page). Specs live in `api-reference/openapi/playgrounds/*.openapi.json` and the `docs.json` nav is maintained by hand. These files are committed and edited directly, there is no longer a generator.
 
-**Batch & Files playgrounds** use `openapi/batch.openapi.json` (hand-maintained; all `/v1/files` and `/v1/batches` paths). Playground pages: `api-reference/batch/upload-file.mdx`, `list-files.mdx`, `retrieve-file.mdx`, `download-file.mdx`, `delete-file.mdx`, `create-batch.mdx`, `retrieve-batch.mdx`, `list-batches.mdx`, `cancel-batch.mdx`. The prose reference pages under `api-reference/batch/` are also hand-maintained.
+**Batch & Files playgrounds** use `api-reference/openapi/batch.openapi.json` (hand-maintained; all `/v1/files` and `/v1/batches` paths). Playground pages live flat under `api-reference/`: `upload-file.mdx`, `list-files.mdx`, `retrieve-file.mdx`, `download-file.mdx`, `delete-file.mdx`, `create-batch.mdx`, `retrieve-batch.mdx`, `list-batches.mdx`, `cancel-batch.mdx`. These are also hand-maintained.
 
 Docs use ASCII hyphens only (no em/en dashes). Check this by hand when editing prose.
 
-See `openapi/zerogpu.openapi.json` and `api` in `docs.json`. Validate with `mint validate`.
+See `api-reference/openapi/zerogpu.openapi.json` and `api` in `docs.json`. Validate with `mint validate`.
 
 ### Submitting changes
 

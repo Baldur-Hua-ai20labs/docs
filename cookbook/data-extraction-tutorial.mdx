@@ -3,7 +3,7 @@ title: "Tutorial: Resume & profile extraction"
 description: "Step-by-step guide with example dataset. Text-only extraction, no OCR."
 ---
 
-This tutorial walks through **three production-style use cases** for the [Data extraction](/cookbook/data-extraction) recipe. You will use plain text only (resumes, LinkedIn-style exports, job posts). **Not** OCR or PDF parsing.
+This tutorial walks through **three production-style use cases** for structured data extraction with the [gliner2-base-v1](/api-reference/models/gliner2-base-v1) model. You will use plain text only (resumes, LinkedIn-style exports, job posts). **Not** OCR or PDF parsing.
 
 <Note>
 All sample people and companies in the [example dataset](https://github.com/zerogpu/cookbook/tree/main/demos/data-extraction/dataset) are **synthetic and fictional**.
@@ -187,11 +187,11 @@ export ZEROGPU_PROJECT_ID="your-project-uuid"
 
 Results are written to `demos/data-extraction/outputs/*.jsonl`. Inspect them before wiring into production ETL.
 
-For many files at once, combine this with [Batch requests](/cookbook/batch-requests) patterns (parallelism, retries).
+For many files at once, combine this with the [Batch API](/api-reference/create-batch) (parallelism, retries).
 
 ## Optional: PII on inbound text
 
-Before storing user-submitted resumes, run [PII extraction](/cookbook/data-extraction#pii-extraction) with `gliner-multi-pii-v1` and `extract-pii` or `redact`.
+Before storing user-submitted resumes, run PII extraction with the [gliner-multi-pii-v1](/api-reference/models/gliner-multi-pii-v1) model and `extract-pii` or `redact`.
 
 ## Production tips
 
@@ -203,8 +203,8 @@ Before storing user-submitted resumes, run [PII extraction](/cookbook/data-extra
 ## Go deeper
 
 <CardGroup cols={2}>
-  <Card title="Data extraction recipe" icon="book" href="/cookbook/data-extraction">
-    API reference-style examples for json, NER, and PII.
+  <Card title="gliner2-base-v1 model" icon="book" href="/api-reference/models/gliner2-base-v1">
+    API reference and schema examples for json and NER extraction.
   </Card>
   <Card title="Example dataset (GitHub)" icon="github" href="https://github.com/zerogpu/cookbook/tree/main/demos/data-extraction/dataset">
     Synthetic resumes, profiles, and job posts (JSONL).

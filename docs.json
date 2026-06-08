@@ -155,13 +155,19 @@
         "tab": "Cookbook",
         "groups": [
           {
-            "group": "General",
+            "group": "Cookbook",
+            "pages": [
+              "cookbook/index"
+            ]
+          },
+          {
+            "group": "Tutorials",
             "pages": [
               "cookbook/data-extraction-tutorial"
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Integrations & plugins",
             "pages": [
               "cookbook/claude-code-csv-sanitizer"
             ]

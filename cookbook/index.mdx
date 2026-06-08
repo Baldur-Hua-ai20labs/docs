@@ -1,32 +1,30 @@
 ---
-title: "Cookbook"
-description: "Ready-to-use recipes for common ZeroGPU API tasks."
+title: "Overview"
+description: "Ready-to-run recipes for the high-volume tasks ZeroGPU's nano models are built for."
 ---
 
-Copy, adapt, and run. These recipes show how to accomplish specific tasks with the ZeroGPU API.
+ZeroGPU is an inference provider. We run specialized small and nano language models across an edge-powered network, purpose-built for the high-volume tasks specific verticals depend on, from ad-tech classification to content moderation to document extraction. The result: more efficient compute, faster latency, and roughly 50% lower cost than frontier-model workflows.
 
-<Columns cols={2}>
-  <Card title="Runnable demos" icon="rocket" href="/cookbook/demos">
-    Clone and run full apps from the cookbook repo (e.g. React summarization demo).
-  </Card>
-  <Card title="Summarize text" icon="file-text" href="/cookbook/summarize-text">
-    Use the summarization model to shorten long text.
-  </Card>
-  <Card title="IAB content classification" icon="tags" href="/cookbook/iab-classification">
-    Classify content into IAB categories with the classification model.
-  </Card>
-  <Card title="Data extraction" icon="database" href="/cookbook/data-extraction">
-    Extract structured fields, entities, and PII from unstructured text.
-  </Card>
-  <Card title="Tutorial: Resume & profile extraction" icon="graduation-cap" href="/cookbook/data-extraction-tutorial">
-    Step-by-step walkthrough with example dataset (text only, no OCR).
-  </Card>
-  <Card title="Batch requests" icon="layer-group" href="/cookbook/batch-requests">
-    Send multiple requests efficiently (parallelism, error handling).
-  </Card>
-  <Card title="Sanitize a CSV with the Claude Code plugin" icon="file-text" href="/cookbook/claude-code-csv-sanitizer">
-    Redact PII from a feedback export and produce an audit log, from one prompt.
-  </Card>
-</Columns>
+The cookbook turns those models into working code. Each recipe is copy, adapt, and run: a focused walkthrough that combines ZeroGPU with another tool, runtime, or SDK against the OpenAI-compatible endpoint at `https://api.zerogpu.ai/v1`. For single-endpoint request and response shapes, see the [API reference](/api-reference/chat-completions) and [model pages](/docs/model-catalog).
 
-Use your own **API key**, **project ID**, and **model** from the [dashboard](https://zerogpu.ai). See [Authentication](/docs/platform#authentication) and [Quickstart](/docs/quickstart) if you haven't set up yet.
+Before you begin, read the [quickstart](/docs/quickstart) to provision an [API key](https://platform.zerogpu.ai/dashboard) and pick a model from the [model catalog](/docs/model-catalog). Bring your own **API key**, **project ID**, and **model** from the [dashboard](https://platform.zerogpu.ai/dashboard); see [Authentication](/docs/platform#authentication) if you haven't set up yet.
+
+## Tutorials
+
+Longer, step-by-step walkthroughs with example data.
+
+<CardGroup cols={2}>
+    <Card title="Resume & profile extraction" icon="graduation-cap" href="/cookbook/data-extraction-tutorial">
+        Three production-style extraction use cases over plain text (resumes, profile exports, job posts). No OCR.
+    </Card>
+</CardGroup>
+
+## Integrations & plugins
+
+Recipes that combine ZeroGPU with another tool, runtime, or SDK.
+
+<CardGroup cols={2}>
+    <Card title="Sanitize a CSV with the Claude Code plugin" icon="shield" href="/cookbook/claude-code-csv-sanitizer">
+        Redact PII from a feedback export and produce an audit log, from a single natural-language prompt.
+    </Card>
+</CardGroup>
