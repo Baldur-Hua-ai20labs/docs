@@ -1,0 +1,52 @@
+---
+title: "Overview"
+description: "Run large workloads of AI inference asynchronously, wire-compatible with `/v1/batches` and `/v1/files`."
+---
+
+The Batch API processes hundreds, thousands, or up to 50,000 inference
+requests at a discounted rate within a 24-hour window. It's the right
+choice when you don't need a real-time response and want to avoid per-request
+rate limits.
+
+<CardGroup cols={2}>
+  <Card title="Quickstart" href="/docs/batch/getting-started">
+    Run your first batch end to end in curl and Python: upload, create, poll, download.
+  </Card>
+  <Card title="Objects & lifecycle" href="/docs/batch/objects">
+    The File and Batch objects, the status lifecycle, and every endpoint.
+  </Card>
+  <Card title="JSONL format" href="/docs/batch/jsonl-format">
+    Line schemas for input, output, and error files, plus validation rules.
+  </Card>
+  <Card title="Supported endpoints" href="/docs/batch/supported-endpoints">
+    The one endpoint a batch line can target, with its request and response body.
+  </Card>
+  <Card title="Errors" href="/docs/batch/errors">
+    Every status and error-file code, with recovery guidance.
+  </Card>
+</CardGroup>
+
+## Quick facts
+
+| | |
+|---|---|
+| **Base URL (production)** | `https://api.zerogpu.ai` |
+| **Auth headers** | `x-api-key`, `x-project-id` |
+| **Completion window** | 24 hours (fixed) |
+| **Supported batch endpoint** | `/v1/chat/completions` (only) |
+| **Max requests per batch** | 50,000 |
+| **Max input file size** | 200 MB total, 1 MB per line |
+| **Max upload size** | 100 MB |
+| **File retention** | 30 days |
+
+## When to use the Batch API
+
+| You need… | Use |
+|---|---|
+| A single immediate response | The synchronous endpoint directly (e.g. `POST /v1/chat/completions`) |
+| Hundreds-to-thousands of completions, can wait minutes-to-hours | The Batch API |
+| To avoid per-second rate limits during a backfill | The Batch API |
+| Streaming responses | The synchronous endpoint, streaming is **not** supported in batch mode |
+
+Every endpoint also has an interactive playground under
+[API Reference → Batch API](/api-reference/upload-file).

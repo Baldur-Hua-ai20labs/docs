@@ -7,7 +7,7 @@
     "light": "#4ADE80",
     "dark": "#16A34A"
   },
-  "favicon": "/favicon.ico",
+  "favicon": "/assets/logo/favicon.ico",
   "contextual": {
     "options": [
       "copy",
@@ -47,114 +47,44 @@
         "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting Started",
+            "group": "Get Started",
             "pages": [
               "index",
-              "quickstart",
-              "platform/dashboard",
-              "api-reference/batch/index"
+              "docs/how-zerogpu-works",
+              "docs/quickstart"
             ]
           },
           {
             "group": "Models",
             "pages": [
-              "platform/model-catalog",
-              "models/ad-tech",
-              "models/text-classification",
-              "models/text-generation",
-              "models/pii",
-              "models/summarization"
+              "docs/model-catalog",
+              "docs/text-classification",
+              "docs/text-generation",
+              "docs/pii",
+              "docs/summarization"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              {
+                "group": "Batch & Files API",
+                "pages": [
+                  "docs/batch/index",
+                  "docs/batch/getting-started",
+                  "docs/batch/objects",
+                  "docs/batch/jsonl-format",
+                  "docs/batch/supported-endpoints",
+                  "docs/batch/errors"
+                ]
+              },
+              "docs/production-patterns"
             ]
           },
           {
             "group": "Platform",
             "pages": [
-              "platform/organizations-and-projects",
-              "platform/authentication",
-              "platform/api-keys",
-              "platform/usage-analytics",
-              "platform/logs",
-              "platform/billing"
-            ]
-          },
-          {
-            "group": "Core Concepts",
-            "pages": [
-              "concepts/nano-language-models",
-              "concepts/distributed-inference",
-              "concepts/geo-aware-routing"
-            ]
-          },
-          {
-            "group": "Resources",
-            "pages": [
-              "faq",
-              "resources/ai-and-mcp"
-            ]
-          }
-        ]
-      },
-      {
-        "tab": "API Reference",
-        "groups": [
-          {
-            "group": "Overview",
-            "pages": [
-              "api-reference/introduction"
-            ]
-          },
-          {
-            "group": "Endpoints",
-            "pages": [
-              "api-reference/endpoint/responses",
-              "api-reference/endpoint/chat-completions",
-              {
-                "group": "By model",
-                "pages": [
-                  "api-reference/models/index",
-                  "models/deberta-v3-small",
-                  "models/gliner-multi-pii-v1",
-                  "models/gliner2-base-v1",
-                  "models/lfm2-5-1-2b-instruct",
-                  "models/lfm2-5-1-2b-thinking",
-                  "models/llama-3-1-8b-instruct-fast",
-                  "models/zlm-v1-followup-questions-edge",
-                  "models/zlm-v1-iab-classify-edge",
-                  "models/zlm-v1-iab-classify-edge-enriched"
-                ]
-              }
-            ]
-          },
-          {
-            "group": "Batch API",
-            "pages": [
-              "api-reference/batch/index",
-              "api-reference/batch/getting-started",
-              "api-reference/batch/upload-file",
-              "api-reference/batch/list-files",
-              "api-reference/batch/retrieve-file",
-              "api-reference/batch/download-file",
-              "api-reference/batch/delete-file",
-              "api-reference/batch/files-api",
-              "api-reference/batch/create-batch",
-              "api-reference/batch/retrieve-batch",
-              "api-reference/batch/list-batches",
-              "api-reference/batch/cancel-batch",
-              "api-reference/batch/batches-api",
-              "api-reference/batch/jsonl-format",
-              "api-reference/batch/supported-endpoints",
-              "api-reference/batch/examples",
-              "api-reference/batch/errors"
-            ]
-          },
-          {
-            "group": "SDK Examples",
-            "pages": [
-              "sdks/python",
-              "sdks/javascript",
-              "sdks/rust",
-              "sdks/go",
-              "sdks/ruby"
+              "docs/platform"
             ]
           }
         ]
@@ -168,6 +98,56 @@
               "integrations/index",
               "integrations/claude-code-plugin"
             ]
+          },
+          {
+            "group": "Official SDKs",
+            "pages": [
+              "integrations/python",
+              "integrations/javascript",
+              "integrations/rust",
+              "integrations/go",
+              "integrations/ruby"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Endpoints",
+            "pages": [
+              "api-reference/responses",
+              "api-reference/chat-completions",
+              {
+                "group": "By model",
+                "pages": [
+                  "api-reference/models/deberta-v3-small",
+                  "api-reference/models/gliner-multi-pii-v1",
+                  "api-reference/models/gliner2-base-v1",
+                  "api-reference/models/lfm2-5-1-2b-instruct",
+                  "api-reference/models/lfm2-5-1-2b-thinking",
+                  "api-reference/models/llama-3-1-8b-instruct-fast",
+                  "api-reference/models/zlm-v1-followup-questions-edge",
+                  "api-reference/models/zlm-v1-iab-classify-edge",
+                  "api-reference/models/zlm-v1-iab-classify-edge-enriched"
+                ]
+              }
+            ]
+          },
+          {
+            "group": "Batch API",
+            "pages": [
+              "api-reference/upload-file",
+              "api-reference/list-files",
+              "api-reference/retrieve-file",
+              "api-reference/download-file",
+              "api-reference/delete-file",
+              "api-reference/create-batch",
+              "api-reference/retrieve-batch",
+              "api-reference/list-batches",
+              "api-reference/cancel-batch"
+            ]
           }
         ]
       },
@@ -175,13 +155,19 @@
         "tab": "Cookbook",
         "groups": [
           {
-            "group": "General",
+            "group": "Cookbook",
+            "pages": [
+              "cookbook/index"
+            ]
+          },
+          {
+            "group": "Tutorials",
             "pages": [
               "cookbook/data-extraction-tutorial"
             ]
           },
           {
-            "group": "Integrations",
+            "group": "Integrations & plugins",
             "pages": [
               "cookbook/claude-code-csv-sanitizer"
             ]
@@ -215,8 +201,8 @@
     }
   },
   "logo": {
-    "light": "/logo/zerogpu-docs-logo-light.png",
-    "dark": "/logo/zerogpu-docs-logo-dark.png"
+    "light": "/assets/logo/zerogpu-docs-logo-light.png",
+    "dark": "/assets/logo/zerogpu-docs-logo-dark.png"
   },
   "navbar": {
     "links": [
@@ -247,6 +233,156 @@
       "href": "https://platform.zerogpu.ai/"
     }
   },
+  "redirects": [
+    {
+      "source": "/sdks/:slug",
+      "destination": "/integrations/:slug"
+    },
+    {
+      "source": "/api-reference/introduction",
+      "destination": "/api-reference/responses"
+    },
+    {
+      "source": "/api-reference/endpoint/responses",
+      "destination": "/api-reference/responses"
+    },
+    {
+      "source": "/api-reference/endpoint/chat-completions",
+      "destination": "/api-reference/chat-completions"
+    },
+    {
+      "source": "/api-reference/batch/upload-file",
+      "destination": "/api-reference/upload-file"
+    },
+    {
+      "source": "/api-reference/batch/list-files",
+      "destination": "/api-reference/list-files"
+    },
+    {
+      "source": "/api-reference/batch/retrieve-file",
+      "destination": "/api-reference/retrieve-file"
+    },
+    {
+      "source": "/api-reference/batch/download-file",
+      "destination": "/api-reference/download-file"
+    },
+    {
+      "source": "/api-reference/batch/delete-file",
+      "destination": "/api-reference/delete-file"
+    },
+    {
+      "source": "/api-reference/batch/create-batch",
+      "destination": "/api-reference/create-batch"
+    },
+    {
+      "source": "/api-reference/batch/retrieve-batch",
+      "destination": "/api-reference/retrieve-batch"
+    },
+    {
+      "source": "/api-reference/batch/list-batches",
+      "destination": "/api-reference/list-batches"
+    },
+    {
+      "source": "/api-reference/batch/cancel-batch",
+      "destination": "/api-reference/cancel-batch"
+    },
+    {
+      "source": "/api-reference/models",
+      "destination": "/docs/model-catalog"
+    },
+    {
+      "source": "/models/:slug",
+      "destination": "/api-reference/models/:slug"
+    },
+    {
+      "source": "/platform/model-catalog",
+      "destination": "/docs/model-catalog"
+    },
+    {
+      "source": "/model-catalog",
+      "destination": "/docs/model-catalog"
+    },
+    {
+      "source": "/api-reference/batch/index",
+      "destination": "/docs/batch"
+    },
+    {
+      "source": "/api-reference/batch",
+      "destination": "/docs/batch"
+    },
+    {
+      "source": "/api-reference/batch/getting-started",
+      "destination": "/docs/batch/getting-started"
+    },
+    {
+      "source": "/api-reference/batch/jsonl-format",
+      "destination": "/docs/batch/jsonl-format"
+    },
+    {
+      "source": "/api-reference/batch/files-api",
+      "destination": "/docs/batch/objects"
+    },
+    {
+      "source": "/api-reference/batch/batches-api",
+      "destination": "/docs/batch/objects"
+    },
+    {
+      "source": "/docs/batch/files-api",
+      "destination": "/docs/batch/objects"
+    },
+    {
+      "source": "/docs/batch/batches-api",
+      "destination": "/docs/batch/objects"
+    },
+    {
+      "source": "/api-reference/batch/examples",
+      "destination": "/docs/batch/getting-started"
+    },
+    {
+      "source": "/docs/batch/examples",
+      "destination": "/docs/batch/getting-started"
+    },
+    {
+      "source": "/api-reference/batch/errors",
+      "destination": "/docs/batch/errors"
+    },
+    {
+      "source": "/api-reference/batch/supported-endpoints",
+      "destination": "/docs/batch/supported-endpoints"
+    },
+    {
+      "source": "/platform/dashboard",
+      "destination": "/docs/platform#dashboard"
+    },
+    {
+      "source": "/platform/organizations-and-projects",
+      "destination": "/docs/platform#organizations-and-projects"
+    },
+    {
+      "source": "/platform/api-keys",
+      "destination": "/docs/platform#api-keys"
+    },
+    {
+      "source": "/platform/authentication",
+      "destination": "/docs/platform#authentication"
+    },
+    {
+      "source": "/platform/usage-analytics",
+      "destination": "/docs/platform#usage-and-logs"
+    },
+    {
+      "source": "/platform/logs",
+      "destination": "/docs/platform#usage-and-logs"
+    },
+    {
+      "source": "/platform/billing",
+      "destination": "/docs/platform#billing"
+    },
+    {
+      "source": "/platform/security",
+      "destination": "/docs/platform#api-keys"
+    }
+  ],
   "footer": {
     "socials": {
       "website": "https://zerogpu.ai",

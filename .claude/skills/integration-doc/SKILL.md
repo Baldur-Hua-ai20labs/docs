@@ -51,7 +51,7 @@ boilerplate below. No heading.>
    ### Prerequisites
        What the user needs before starting (account, runtime version, etc.).
        Link the API key page (https://platform.zerogpu.ai/dashboard) and the
-       model catalog (/platform/model-catalog).
+       model catalog (/docs/model-catalog).
    ### Get your ZeroGPU API key
        Short steps to create and copy an API key.
    ### Install <integration>
@@ -132,13 +132,13 @@ Paste this as the second opening paragraph on every integration page so messagin
 
 3. **Edit `docs.json`:** add `"integrations/<slug>"` to the `pages` array of the Integrations tab's group, inserted alphabetically by slug after `"integrations/index"`. Do not reorder unrelated entries.
 
-4. **Normalize dashes:** run `node scripts/normalize-dashes.mjs` from the repo root. The repo convention (see `CLAUDE.md`) is ASCII hyphens only, no em (`-`) or en (`-`) dashes in prose. Fix anything the script flags.
+4. **Normalize dashes:** the repo convention (see `CLAUDE.md`) is ASCII hyphens only, no em (`-`) or en (`-`) dashes in prose. Check your new prose by hand and fix any that slipped in.
 
 5. **Verify (recommended):** run `mint validate` to catch broken nav references or frontmatter issues before handing back.
 
 ## Things to avoid
 
-- Do **not** hand-edit generated files. `openapi/zerogpu.openapi.json`, `openapi/playgrounds/*.openapi.json`, `snippets/model-playgrounds.json`, and most `models/<model-id>.mdx` pages are produced by the scripts in `scripts/`, see `CLAUDE.md` for the full list.
+- Leave the API-reference files alone unless that's your task. `api-reference/openapi/zerogpu.openapi.json`, `api-reference/openapi/playgrounds/*.openapi.json`, and the `api-reference/models/<model-id>.mdx` pages are committed, hand-maintained files (the old `scripts/` generators were removed), see `CLAUDE.md`.
 - Do not invent new top-level navigation tabs.
 - Do not add a card to the live grid without a real backing `.mdx` file, broken links fail `mint validate`.
 - Do not duplicate a card across "Coming Soon" and a live section.
