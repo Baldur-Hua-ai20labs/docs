@@ -127,12 +127,9 @@ export const byPriority = (list) =>
 
 export const loadModels = () => {
   if (typeof window === "undefined") return Promise.resolve(SEED_MODELS);
-  if (!window.__zgpuModelsPromise) {
-    window.__zgpuModelsPromise = fetch(ZGPU_MODELS_URL)
-      .then((r) => r.json())
-      .then((d) => (d && d.models && d.models.length ? d.models : SEED_MODELS));
-  }
-  return window.__zgpuModelsPromise;
+  return fetch(ZGPU_MODELS_URL)
+    .then((r) => r.json())
+    .then((d) => (d && d.models && d.models.length ? d.models : SEED_MODELS));
 };
 
 export const modelSlug = (id) => id.toLowerCase().replace(/\./g, "-");
