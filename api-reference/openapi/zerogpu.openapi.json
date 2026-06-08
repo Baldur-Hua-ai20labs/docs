@@ -235,6 +235,7 @@
               "deberta-v3-small",
               "gliner2-base-v1",
               "gliner-multi-pii-v1",
+              "zlm-v1-followup-questions-edge",
               "zlm-v1-iab-classify-edge",
               "zlm-v1-iab-classify-edge-enriched"
             ],
@@ -291,6 +292,7 @@
               "deberta-v3-small",
               "gliner2-base-v1",
               "gliner-multi-pii-v1",
+              "zlm-v1-followup-questions-edge",
               "zlm-v1-iab-classify-edge",
               "zlm-v1-iab-classify-edge-enriched"
             ],
