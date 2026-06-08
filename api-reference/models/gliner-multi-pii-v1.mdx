@@ -1,0 +1,47 @@
+---
+title: "gliner-multi-pii-v1"
+sidebarTitle: "PII Detection"
+description: "Model details for gliner-multi-pii-v1."
+openapi: "api-reference/openapi/playgrounds/gliner-multi-pii-v1.openapi.json POST /responses"
+---
+
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="gliner-multi-pii-v1" />
+
+**References:** [Model docs](https://github.com/fastino-ai/GLiNER2/blob/main/README.md) • [Terms](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE) • [Privacy](https://github.com/fastino-ai/GLiNER2/blob/main/LICENSE)

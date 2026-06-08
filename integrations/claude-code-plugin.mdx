@@ -1,5 +1,5 @@
 ---
-title: "Claude Code Plugin"
+title: "Skills + CLI (Claude Code)"
 description: "Route Claude Code subagents and slash commands through ZeroGPU's nano language models."
 icon: "terminal"
 ---
@@ -23,7 +23,7 @@ This guide walks through installing the `zerogpu-router` plugin, which exposes e
 - Node.js 20 or newer.
 - [Claude Code](https://docs.claude.com/en/docs/claude-code) installed: `npm install -g @anthropic-ai/claude-code`.
 - A ZeroGPU [API key](https://platform.zerogpu.ai/dashboard) and Project ID.
-- A model ID from the [model catalog](/platform/model-catalog) if you plan to call models by name.
+- A model ID from the [model catalog](/docs/model-catalog) if you plan to call models by name.
 
 ### Get your ZeroGPU API key
 
@@ -74,7 +74,7 @@ You'll get back: `Email [PERSON] at [EMAIL] about invoice 12345.`
 
 Every inference skill auto-invokes when Claude detects a matching request, or you can call any skill explicitly with `/zerogpu-router:<name> <args>`. Two skills (`signin` and `status`) are manual-only. This section walks through every skill in the plugin: what it does, which ZeroGPU model it routes to, the full argument surface, and the shape of the response you'll get back.
 
-### How auto-invocation works
+#### How auto-invocation works
 
 The plugin ships each skill with a description that Claude reads when deciding whether to invoke it for a given user message. You don't have to remember slash command names: just describe the task. Claude picks based on intent words like "redact", "scrub", "classify by", "extract", or "tag this as", and on the structure of the data you supply (a label list implies zero-shot; a JSON schema with category axes implies structured classification).
 
@@ -109,7 +109,7 @@ Claude routes to `classify-structured` and synthesizes a schema with `sentiment`
 
 If you ever want a specific skill instead of letting Claude choose, invoke it explicitly with the `/zerogpu-router:<name>` syntax shown below.
 
-### `/zerogpu-router:signin`
+#### `/zerogpu-router:signin`
 
 Sign in to ZeroGPU and persist your credentials so every subsequent skill call works without re-prompting. Manual only; not auto-invoked by Claude.
 
@@ -128,13 +128,13 @@ Sign in to ZeroGPU and persist your credentials so every subsequent skill call w
 
 On success the API key and Project ID are written to your config file, and `ZEROGPU_API_KEY` is added to your shell profile so other tools can pick it up.
 
-### `/zerogpu-router:status`
+#### `/zerogpu-router:status`
 
 Show your current ZeroGPU sign-in status and the masked API key. Manual only.
 
 **Wraps** `zerogpu status`. Exit code is `0` when signed in, `1` when not. Use this in scripts that need a hard fail before running any inference skill.
 
-### `/zerogpu-router:chat`
+#### `/zerogpu-router:chat`
 
 Short, single-turn chat reply for things that don't need Claude-level reasoning or prior conversation context. Use this when you'd otherwise burn Claude tokens on a one-liner.
 
@@ -161,7 +161,7 @@ Short, single-turn chat reply for things that don't need Claude-level reasoning 
 
 The skill returns raw assistant text (or pretty-printed JSON if the model returned a structured object).
 
-### `/zerogpu-router:chat-thinking`
+#### `/zerogpu-router:chat-thinking`
 
 Same shape as `chat`, but the model returns its reasoning trace alongside the answer.
 
@@ -175,7 +175,7 @@ Same shape as `chat`, but the model returns its reasoning trace alongside the an
 /zerogpu-router:chat-thinking "If a train leaves at 3 PM going 60 mph, when does it cover 150 miles?"
 ```
 
-### `/zerogpu-router:summarize`
+#### `/zerogpu-router:summarize`
 
 Condense a longer passage into a short summary. Use this when you need the gist of a report, ticket thread, transcript, or document without spending Claude tokens on the read.
 
@@ -209,7 +209,7 @@ as the main Q4 risk, the board approved a hiring freeze on non-engineering roles
 a revised 2025 budget by mid-December.
 ```
 
-### `/zerogpu-router:classify-iab`
+#### `/zerogpu-router:classify-iab`
 
 Classify text against the **IAB content / audience taxonomy** (standard ad-tech category labels).
 
@@ -233,7 +233,7 @@ Classify text against the **IAB content / audience taxonomy** (standard ad-tech 
 }
 ```
 
-### `/zerogpu-router:classify-iab-enriched`
+#### `/zerogpu-router:classify-iab-enriched`
 
 Enriched IAB classification that returns audience categories **plus** topics, keywords, and inferred user intent.
 
@@ -258,7 +258,7 @@ Enriched IAB classification that returns audience categories **plus** topics, ke
 }
 ```
 
-### `/zerogpu-router:classify-zero-shot`
+#### `/zerogpu-router:classify-zero-shot`
 
 Zero-shot classification against an arbitrary list of candidate labels you supply at call time. The model picks the single best fit and returns scores for all candidates.
 
@@ -290,7 +290,7 @@ Zero-shot classification against an arbitrary list of candidate labels you suppl
 { "label": "positive", "scores": { "positive": 0.94, "neutral": 0.04, "negative": 0.02 } }
 ```
 
-### `/zerogpu-router:classify-structured`
+#### `/zerogpu-router:classify-structured`
 
 Schema-driven, multi-axis classification. You define each category and its allowed labels, and the model returns one chosen label per category.
 
@@ -322,7 +322,7 @@ Schema-driven, multi-axis classification. You define each category and its allow
 { "sentiment": "negative", "topic": "support" }
 ```
 
-### `/zerogpu-router:extract-entities`
+#### `/zerogpu-router:extract-entities`
 
 Custom-label named-entity recognition. You define the entity labels; the model finds matching spans with confidence scores.
 
@@ -360,7 +360,7 @@ Custom-label named-entity recognition. You define the entity labels; the model f
 ]
 ```
 
-### `/zerogpu-router:extract-pii`
+#### `/zerogpu-router:extract-pii`
 
 Extract personally identifiable information entities, grouped by category, **without modifying the source text**. Use when you need structured data about PII (for redaction policies, audits, or downstream tooling) rather than a masked version.
 
@@ -398,7 +398,7 @@ Extract personally identifiable information entities, grouped by category, **wit
 
 If you want to **mask** PII inline rather than extract it, use `/zerogpu-router:redact-pii`.
 
-### `/zerogpu-router:redact-pii`
+#### `/zerogpu-router:redact-pii`
 
 Detect PII and replace each span in-line with a `[LABEL]` placeholder. Use this before sharing or logging sensitive text, or before forwarding user input to another LLM that you don't want to expose raw PII to.
 
@@ -420,7 +420,7 @@ Email [PERSON] at [EMAIL] about invoice 12345.
 
 Note that `12345` is not masked: only spans the model recognizes as PII are replaced. Domain-specific identifiers (account numbers, internal ticket IDs) should be handled by your own redaction layer or by `extract-entities` with custom labels.
 
-### `/zerogpu-router:extract-json`
+#### `/zerogpu-router:extract-json`
 
 Pull specific named fields out of free text into a structured JSON object, defined by a per-field schema. Each field is declared as `name::type::description`.
 
@@ -453,7 +453,7 @@ Pull specific named fields out of free text into a structured JSON object, defin
 }
 ```
 
-### Skills reference table
+#### Skills reference table
 
 Every skill at a glance.
 
@@ -475,7 +475,7 @@ Every skill at a glance.
 
 For full flag reference on any command, run `zerogpu <command> --help` outside the Claude Code session.
 
-### Patterns and recipes
+#### Patterns and recipes
 
 **Sanitize before Claude sees raw input.** Pipe untrusted text through `redact-pii` first when you don't want personal data captured in Claude's transcript or sent to downstream LLMs. Combine with `extract-pii` if you also need an audit log of what was masked.
 
@@ -497,7 +497,7 @@ For full flag reference on any command, run `zerogpu <command> --help` outside t
 
 **`Request failed with status 403`** - the key is valid but doesn't have access to the project, or the project doesn't have access to the requested model. Confirm your Project ID matches the project that owns the key.
 
-**`Request failed with status 429`** - you're being rate-limited. Back off and retry with exponential delay, or switch heavy workloads to the [Batch API](/api-reference/batch/index), which has separate quotas tuned for bulk jobs.
+**`Request failed with status 429`** - you're being rate-limited. Back off and retry with exponential delay, or switch heavy workloads to the [Batch API](/docs/batch), which has separate quotas tuned for bulk jobs.
 
 **Wrong skill auto-invoked for a request.** Claude picks based on phrasing. If you want a specific skill, call it explicitly with `/zerogpu-router:<name>`. If a skill keeps getting picked when you don't want it, rephrase to remove the trigger words ("redact", "classify", "extract") or invoke the right one by name.
 
@@ -512,10 +512,10 @@ For full flag reference on any command, run `zerogpu <command> --help` outside t
 The `zerogpu-router` plugin turns ZeroGPU's nano language models into first-class Claude Code skills, so Claude can hand off classification, extraction, and short chat tasks to a cheaper, faster model without you leaving the session. It's a fast way to keep raw PII out of Claude's context, cut token spend on well-defined NLP work, and prototype routing patterns you can later promote to production.
 
 <CardGroup cols={2}>
-  <Card title="Model Catalog" icon="layer-group" href="/platform/model-catalog">
+  <Card title="Model Catalog" icon="layer-group" href="/docs/model-catalog">
     Browse every model the plugin can route to.
   </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+  <Card title="API Reference" icon="code" href="/api-reference/responses">
     Explore the full OpenAI-compatible API surface.
   </Card>
   <Card title="Cookbook" icon="book" href="/cookbook/index">

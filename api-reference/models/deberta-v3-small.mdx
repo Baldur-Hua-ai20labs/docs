@@ -1,0 +1,47 @@
+---
+title: "deberta-v3-small"
+sidebarTitle: "Text Classifier"
+description: "Model details for deberta-v3-small."
+openapi: "api-reference/openapi/playgrounds/deberta-v3-small.openapi.json POST /responses"
+---
+
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="deberta-v3-small" />
+
+**References:** [Model docs](https://github.com/microsoft/DeBERTa/tree/master/docs) • [Terms](https://github.com/microsoft/DeBERTa/blob/master/SECURITY.md) • [Privacy](https://github.com/microsoft/DeBERTa/blob/master/LICENSE)

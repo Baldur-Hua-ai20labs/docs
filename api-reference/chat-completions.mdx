@@ -1,0 +1,12 @@
+---
+title: "Chat completions"
+description: "OpenAI-style chat inference for models that use this route."
+sidebarTitle: "Chat completions"
+openapi: "api-reference/openapi/zerogpu.openapi.json POST /chat/completions"
+---
+
+Some models are invoked with a **chat-completions** style body (`messages` array) instead of the [Responses](/api-reference/responses) `input` field. The dashboard and [model catalog](/docs/model-catalog) indicate which route applies. Each model page has its own playground with the right examples for that model.
+
+Install the official SDK from [npm](https://www.npmjs.com/package/zerogpu-api) or [PyPI](https://pypi.org/project/zerogpu-api/) (`pip install zerogpu-api`). Source: [zerogpu/SDK](https://github.com/zerogpu/SDK).
+
+Response JSON shape depends on the model; handle errors the same way as [API error codes](/docs/production-patterns#handle-status-codes-explicitly).

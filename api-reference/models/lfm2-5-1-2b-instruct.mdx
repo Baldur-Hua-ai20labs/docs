@@ -1,0 +1,47 @@
+---
+title: "LFM2.5-1.2B-Instruct"
+sidebarTitle: "Instruct Chat"
+description: "Model details for LFM2.5-1.2B-Instruct."
+openapi: "api-reference/openapi/playgrounds/LFM2_5-1_2B-Instruct.openapi.json POST /responses"
+---
+
+{/*
+  Description pulled live from the API and cached on window.__zgpuModels by
+  /zgpu-models-init.js. Renders nothing until the data loads.
+*/}
+
+export const ModelDescription = ({ id }) => {
+  const read = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const m = (store.data || []).find((x) => x.modelId === id);
+    return (m && m.pricing && m.pricing.description) || "";
+  };
+  const [desc, setDesc] = useState(read);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setDesc(read());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+  if (!desc) return null;
+  return <blockquote>{desc}</blockquote>;
+};
+
+<ModelDescription id="LFM2.5-1.2B-Instruct" />
+
+**References:** [Model docs](https://docs.liquid.ai/deployment/on-device/android/ai-agent-usage-guide#text-models) • [Terms](https://www.liquid.ai/terms-conditions) • [Privacy](https://www.liquid.ai/lfm-license)

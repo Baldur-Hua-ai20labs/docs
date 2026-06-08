@@ -1,0 +1,206 @@
+---
+title: "Text Generation"
+description: "Edge generative models for conversation and reasoning."
+---
+
+{/*
+  Inline pricing table: reads Params / Max tokens / Input pricing for the given
+  model ids from the live data cached on window.__zgpuModels by
+  /zgpu-models-init.js. Output pricing is static (default "$0.40").
+*/}
+
+export const ModelPricingTable = ({ models, output }) => {
+  const ids = (models || "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const outPrice = output || "$0.40";
+
+  const fmtNum = (n) =>
+    typeof n === "number" ? n.toLocaleString("en-US") : n != null ? n : "-";
+  const fmtPrice = (n) => (typeof n === "number" ? "$" + n.toFixed(2) : "-");
+  const slug = (id) => id.toLowerCase().replace(/\./g, "-");
+
+  const readById = () => {
+    const store = (typeof window !== "undefined" && window.__zgpuModels) || {};
+    const map = {};
+    (store.data || []).forEach((m) => {
+      map[m.modelId] = m;
+    });
+    return map;
+  };
+
+  const [byId, setById] = useState(readById);
+  useEffect(() => {
+    let active = true;
+    const refresh = () => {
+      if (active) setById(readById());
+    };
+    const store = window.__zgpuModels;
+    if (store && store.data) {
+      refresh();
+    } else if (store && store.promise) {
+      store.promise.then(refresh);
+    } else {
+      window.addEventListener("zgpu:models-loaded", refresh);
+      return () => {
+        active = false;
+        window.removeEventListener("zgpu:models-loaded", refresh);
+      };
+    }
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const cols = {
+    display: "grid",
+    gridTemplateColumns:
+      "minmax(0,2.6fr) minmax(0,1fr) minmax(0,1.2fr) minmax(0,1fr) minmax(0,1fr)",
+    gap: "1.5rem",
+    alignItems: "center",
+    minWidth: "640px",
+  };
+
+  return (
+    <div className="not-prose w-full overflow-x-auto text-base">
+      <div
+        style={cols}
+        className="border-b border-zinc-950/10 pb-3 text-xs font-medium uppercase tracking-wide text-zinc-500 dark:border-white/10 dark:text-zinc-400"
+      >
+        <div>Model</div>
+        <div>Params</div>
+        <div className="text-right">Max tokens</div>
+        <div className="text-right">Input /1M</div>
+        <div className="text-right">Output /1M</div>
+      </div>
+      {ids.map((id) => {
+        const m = byId[id] || {};
+        const p = m.pricing || {};
+        return (
+          <a
+            key={id}
+            href={"/api-reference/models/" + slug(id)}
+            style={cols}
+            className="border-b border-zinc-950/5 py-4 no-underline dark:border-white/5"
+          >
+            <div className="font-medium text-zinc-950 dark:text-white">
+              <code className="break-words text-sm">{id}</code>
+            </div>
+            <div className="text-zinc-600 dark:text-zinc-300">{m.parameters || "-"}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtNum(m.maxTokens)}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{fmtPrice(p.input_per_1m_tokens)}</div>
+            <div className="text-right tabular-nums text-zinc-600 dark:text-zinc-300">{outPrice}</div>
+          </a>
+        );
+      })}
+    </div>
+  );
+};
+
+Text generation models produce new text from an input prompt. ZeroGPU offers conversational and reasoning models from Liquid AI. Each request is shown for both the [Responses API](/api-reference/responses) and the OpenAI-compatible [Chat Completions API](/api-reference/chat-completions).
+
+<ModelPricingTable models="LFM2.5-1.2B-Thinking,LFM2.5-1.2B-Instruct" />
+
+## LFM2.5-1.2B-Instruct
+
+Liquid AI's LFM2.5-1.2B-Instruct is a hybrid architecture model purpose-built for on-device deployment, trained on 28 trillion tokens with multi-stage reinforcement learning. It delivers best-in-class instruction following and native tool-calling at the 1B scale. Its hybrid design gives it significantly faster inference with lower memory usage compared to transformer-only models of the same size. Supports 8 languages including English, Chinese, Japanese, and Spanish. Pass a system prompt via `instructions` (Responses API) or a system message (Chat Completions).
+
+**References:** [Model docs](https://docs.liquid.ai/deployment/on-device/android/ai-agent-usage-guide#text-models) - [Terms](https://www.liquid.ai/terms-conditions) - [Privacy](https://www.liquid.ai/lfm-license)
+
+### Request
+
+<CodeGroup>
+
+```bash Responses API wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "LFM2.5-1.2B-Instruct",
+    "input": "I just completed a 5K run in 28 minutes. Give me a short motivational follow-up message.",
+    "instructions": "You are a friendly in-app assistant for a fitness app."
+  }'
+```
+
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "LFM2.5-1.2B-Instruct",
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a friendly in-app assistant for a fitness app."
+      },
+      {
+        "role": "user",
+        "content": "I just completed a 5K run in 28 minutes. Give me a short motivational follow-up message."
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+### Response
+
+```text wrap
+That's an amazing accomplishment! Keep up the great work, each step brings you closer to your goals. You're stronger than you think!
+
+Would you like tips to help you keep improving?
+```
+
+## LFM2.5-1.2B-Thinking
+
+Liquid AI's LFM2.5-1.2B-Thinking is a hybrid architecture reasoning model built for deep, step-by-step problem solving at the 1B scale. It generates explicit reasoning traces before producing a final answer, working through math, logic, and multi-step tasks the way a human would on paper, delivering thinking-model performance without the usual compute overhead. Its hybrid SSM-attention design keeps inference fast and memory usage low.
+
+**References:** [Model docs](https://docs.liquid.ai/deployment/on-device/android/ai-agent-usage-guide#text-models) - [Terms](https://www.liquid.ai/terms-conditions) - [Privacy](https://www.liquid.ai/lfm-license)
+
+### Request
+
+<CodeGroup>
+
+```bash Responses API wrap
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "LFM2.5-1.2B-Thinking",
+    "input": "What is the capital of Japan"
+  }'
+```
+
+```bash Chat Completions wrap
+curl https://api.zerogpu.ai/v1/chat/completions \
+  -H "content-type: application/json" \
+  -H "x-api-key: YOUR_API_KEY" \
+  -H "x-project-id: YOUR_PROJECT_ID" \
+  -d '{
+    "model": "LFM2.5-1.2B-Thinking",
+    "messages": [
+      {
+        "role": "user",
+        "content": "What is the capital of Japan"
+      }
+    ]
+  }'
+```
+
+</CodeGroup>
+
+### Response
+
+The model returns its answer alongside an explicit reasoning trace.
+
+```text wrap
+The capital of Japan is **Tokyo**.
+
+**Reasoning:**
+1. Japan's political, cultural, and economic center is located in Tokyo.
+2. Historically, Tokyo has served as Japan's...
+```

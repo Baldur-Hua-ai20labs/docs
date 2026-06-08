@@ -28,7 +28,7 @@ Video walkthrough coming soon.
 
 - Python 3.10 or newer.
 - A ZeroGPU [API key](https://platform.zerogpu.ai/dashboard) (starts with `zgpu-api-`) and a Project ID.
-- A look at the [model catalog](/platform/model-catalog) if you want to see what each tool routes to.
+- A look at the [model catalog](/docs/model-catalog) if you want to see what each tool routes to.
 
 ### Get your ZeroGPU API key
 
@@ -543,7 +543,7 @@ Every tool at a glance.
 
 **`ZeroGPU access denied (403)`** - the key is valid but the project doesn't have access to the requested model, or the Project ID doesn't match the project that owns the key. Check `ZEROGPU_PROJECT_ID` and your model entitlements.
 
-**`ZeroGPU rate limit exceeded (429)`** - back off and retry with exponential delay, or move bulk workloads to the [Batch API](/api-reference/batch/index), which has separate quotas tuned for offline jobs.
+**`ZeroGPU rate limit exceeded (429)`** - back off and retry with exponential delay, or move bulk workloads to the [Batch API](/docs/batch/index), which has separate quotas tuned for offline jobs.
 
 **Pydantic validation error when invoking a tool** - tool inputs are validated against each tool's `args_schema`. Pass a `dict` with the documented argument names (`tool.invoke({"text": ..., "labels": [...]})`), not a bare string, and make sure list arguments like `labels` contain at least one entry.
 
@@ -560,10 +560,10 @@ Every tool at a glance.
 `langchain-zerogpu` gives every LangChain agent a set of fast, low-cost specialists for the NLP work it runs constantly - classification, extraction, PII handling, summarization, and short chat - so frontier-model tokens are spent only where frontier-model reasoning is needed. Install the package, export two environment variables, and `ZeroGPUToolkit().get_tools()` puts all eleven on the table.
 
 <CardGroup cols={2}>
-  <Card title="Model Catalog" icon="layer-group" href="/platform/model-catalog">
+  <Card title="Model Catalog" icon="layer-group" href="/docs/model-catalog">
     Browse every model the tools route to and pick the best fit.
   </Card>
-  <Card title="API Reference" icon="code" href="/api-reference/introduction">
+  <Card title="API Reference" icon="code" href="/api-reference/responses">
     Explore the full OpenAI-compatible API surface.
   </Card>
   <Card title="Cookbook" icon="book" href="/cookbook/index">

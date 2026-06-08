@@ -1,0 +1,455 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "zlm-v1-iab-classify-edge-enriched playground",
+    "version": "1.0",
+    "description": "Interactive playground for **zlm-v1-iab-classify-edge-enriched**.\nModel is always `zlm-v1-iab-classify-edge-enriched` on this page (shown in the form, not editable).\nUse the **request example** selector to switch use cases (JSON, NER, PII, etc.).\nAuthentication: `x-api-key` and `x-project-id`."
+  },
+  "servers": [
+    {
+      "url": "https://api.zerogpu.ai/v1",
+      "description": "Production"
+    }
+  ],
+  "security": [
+    {
+      "ApiKey": [],
+      "ProjectId": []
+    }
+  ],
+  "paths": {
+    "/responses": {
+      "post": {
+        "operationId": "createResponse_zlm-v1-iab-classify-edge-enriched",
+        "summary": "zlm-v1-iab-classify-edge-enriched: Responses",
+        "tags": [
+          "zlm-v1-iab-classify-edge-enriched"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateResponseRequest"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "model": {
+                        "type": "string",
+                        "const": "zlm-v1-iab-classify-edge-enriched",
+                        "default": "zlm-v1-iab-classify-edge-enriched",
+                        "example": "zlm-v1-iab-classify-edge-enriched",
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
+                      }
+                    }
+                  }
+                ]
+              },
+              "examples": {
+                "default": {
+                  "summary": "Default",
+                  "value": {
+                    "input": "Technology has quietly reshaped the rhythm of everyday life, weaving itself into routines so seamlessly that it often goes unnoticed. From the moment a smartphone alarm wakes someone in the morning to the final glance at a glowing screen before sleep, digital systems guide communication, navigation, work, and entertainment. This transformation did not happen overnight. It emerged through decades of incremental innovation, each new tool building upon the last, until the modern world became deeply interconnected.One of the most significant changes has been the speed at which information travels.",
+                    "model": "zlm-v1-iab-classify-edge-enriched"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "audience": [
+                        {
+                          "id": 687,
+                          "parent_id": 206,
+                          "name": "Technology & Computing",
+                          "tier1_name": "Interest",
+                          "tier2_name": "Technology & Computing",
+                          "score": 0.7686
+                        },
+                        {
+                          "id": 703,
+                          "parent_id": 687,
+                          "name": "Consumer Electronics",
+                          "tier1_name": "Interest",
+                          "tier2_name": "Technology & Computing",
+                          "tier3_name": "Consumer Electronics",
+                          "score": 0.7206
+                        }
+                      ],
+                      "content": {
+                        "iab_1_0": [
+                          {
+                            "code": "IAB19-6",
+                            "name": "Cell Phones",
+                            "tier": 2,
+                            "parent_code": "IAB19",
+                            "score": 0.7597
+                          },
+                          {
+                            "code": "IAB19",
+                            "name": "Technology & Computing",
+                            "tier": 1,
+                            "parent_code": null,
+                            "score": 0.7387
+                          }
+                        ]
+                      },
+                      "topics": [
+                        {
+                          "name": "smartphones",
+                          "score": 0.7597
+                        },
+                        {
+                          "name": "wearable technology",
+                          "score": 0.7387
+                        },
+                        {
+                          "name": "technology & computing",
+                          "score": 0.7109
+                        }
+                      ],
+                      "keywords": [
+                        "technology",
+                        "reshaped",
+                        "everyday",
+                        "routines",
+                        "quietly",
+                        "weaving",
+                        "rhythm",
+                        "itself",
+                        "life",
+                        "into"
+                      ],
+                      "user_intent": {
+                        "name": "mastering technology quietly reshaped rhythm everyday life",
+                        "category": "informational",
+                        "score": 0.5
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "420": {
+            "description": "Context length exceeded",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    },
+    "/chat/completions": {
+      "post": {
+        "operationId": "createChatCompletion_zlm-v1-iab-classify-edge-enriched",
+        "summary": "zlm-v1-iab-classify-edge-enriched: Chat completions",
+        "tags": [
+          "zlm-v1-iab-classify-edge-enriched"
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/CreateChatCompletionRequest"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "model": {
+                        "type": "string",
+                        "const": "zlm-v1-iab-classify-edge-enriched",
+                        "default": "zlm-v1-iab-classify-edge-enriched",
+                        "example": "zlm-v1-iab-classify-edge-enriched",
+                        "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
+                      }
+                    }
+                  }
+                ]
+              },
+              "examples": {
+                "default": {
+                  "summary": "Default",
+                  "value": {
+                    "model": "zlm-v1-iab-classify-edge-enriched",
+                    "messages": [
+                      {
+                        "role": "user",
+                        "content": "What are the basics of exercise and physical fitness?Exercise is anything that gets your body moving. Regular exercise is one of the best things you can do for your health. It has many benefits, including improving your overall health and fitness, and reducing your risk for many chronic (long-term) diseases.Every physical fitness routine is built on a few simple ideas. These include:Make exercise a habit, as your body adapts to the type of activity you do most often. Regular practice will help you improve.Build up your activity level slowly to help you continue to get stronger, faster, or more flexible without pushing too hard all at once.Challenge yourself by lifting slightly heavier weights, adding a few more minutes to your walk, or increasing your pace."
+                      }
+                    ]
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatCompletionResponse"
+                },
+                "examples": {
+                  "default": {
+                    "summary": "Default",
+                    "value": {
+                      "audience": [
+                        {
+                          "id": 687,
+                          "parent_id": 206,
+                          "name": "Technology & Computing",
+                          "tier1_name": "Interest",
+                          "tier2_name": "Technology & Computing",
+                          "score": 0.7686
+                        },
+                        {
+                          "id": 703,
+                          "parent_id": 687,
+                          "name": "Consumer Electronics",
+                          "tier1_name": "Interest",
+                          "tier2_name": "Technology & Computing",
+                          "tier3_name": "Consumer Electronics",
+                          "score": 0.7206
+                        }
+                      ],
+                      "content": {
+                        "iab_1_0": [
+                          {
+                            "code": "IAB19-6",
+                            "name": "Cell Phones",
+                            "tier": 2,
+                            "parent_code": "IAB19",
+                            "score": 0.7597
+                          },
+                          {
+                            "code": "IAB19",
+                            "name": "Technology & Computing",
+                            "tier": 1,
+                            "parent_code": null,
+                            "score": 0.7387
+                          }
+                        ]
+                      },
+                      "topics": [
+                        {
+                          "name": "smartphones",
+                          "score": 0.7597
+                        },
+                        {
+                          "name": "wearable technology",
+                          "score": 0.7387
+                        },
+                        {
+                          "name": "technology & computing",
+                          "score": 0.7109
+                        }
+                      ],
+                      "keywords": [
+                        "technology",
+                        "reshaped",
+                        "everyday",
+                        "routines",
+                        "quietly",
+                        "weaving",
+                        "rhythm",
+                        "itself",
+                        "life",
+                        "into"
+                      ],
+                      "user_intent": {
+                        "name": "mastering technology quietly reshaped rhythm everyday life",
+                        "category": "informational",
+                        "score": 0.5
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "420": {
+            "description": "Context length exceeded"
+          },
+          "500": {
+            "description": "Internal server error"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "ApiKey": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-api-key"
+      },
+      "ProjectId": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-project-id"
+      }
+    },
+    "schemas": {
+      "CreateResponseRequest": {
+        "type": "object",
+        "required": [
+          "model",
+          "input"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "const": "zlm-v1-iab-classify-edge-enriched",
+            "default": "zlm-v1-iab-classify-edge-enriched",
+            "example": "zlm-v1-iab-classify-edge-enriched",
+            "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
+          },
+          "input": {
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "maxLength": 131072,
+            "description": "Multi-line text or document content to send to the model."
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "CreateChatCompletionRequest": {
+        "type": "object",
+        "required": [
+          "model",
+          "messages"
+        ],
+        "properties": {
+          "model": {
+            "type": "string",
+            "const": "zlm-v1-iab-classify-edge-enriched",
+            "default": "zlm-v1-iab-classify-edge-enriched",
+            "example": "zlm-v1-iab-classify-edge-enriched",
+            "description": "Model identifier (fixed for this playground). Use request examples to change use cases."
+          },
+          "messages": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "$ref": "#/components/schemas/ChatMessage"
+            }
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "ChatMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "system",
+              "user",
+              "assistant"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "maxLength": 131072,
+            "description": "Message text."
+          }
+        }
+      },
+      "ChatCompletionResponse": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "InputMessage": {
+        "type": "object",
+        "required": [
+          "role",
+          "content"
+        ],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": [
+              "user",
+              "system"
+            ]
+          },
+          "content": {
+            "type": "string",
+            "minLength": 1,
+            "format": "textarea",
+            "maxLength": 131072,
+            "description": "Message text."
+          }
+        }
+      },
+      "Response": {
+        "type": "object",
+        "additionalProperties": true
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "additionalProperties": true
+      }
+    }
+  }
+}
