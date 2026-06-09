@@ -8,6 +8,10 @@
     "light": "#4ADE80",
     "dark": "#16A34A"
   },
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
   "favicon": "/assets/favicon.ico",
   "contextual": {
     "options": [
@@ -98,7 +102,8 @@
             "group": "Integrations",
             "pages": [
               "integrations/index",
-              "integrations/claude-code-plugin"
+              "integrations/claude-code-plugin",
+              "integrations/langchain"
             ]
           },
           {
@@ -177,7 +182,8 @@
           {
             "group": "Integrations & plugins",
             "pages": [
-              "cookbook/claude-code-csv-sanitizer"
+              "cookbook/claude-code-csv-sanitizer",
+              "cookbook/langchain-resume-screening"
             ]
           }
         ]
@@ -226,7 +232,7 @@
       },
       {
         "label": "",
-        "href": "https://discord.gg/Ad5KZvAyky",
+        "href": "https://discord.gg/58XZuxKyq6",
         "icon": "discord"
       },
       {
