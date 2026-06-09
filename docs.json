@@ -169,6 +169,12 @@
             ]
           },
           {
+            "group": "Batch processing",
+            "pages": [
+              "cookbook/batch-review-tagging"
+            ]
+          },
+          {
             "group": "Integrations & plugins",
             "pages": [
               "cookbook/claude-code-csv-sanitizer"
