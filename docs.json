@@ -8,6 +8,10 @@
     "light": "#4ADE80",
     "dark": "#16A34A"
   },
+  "appearance": {
+    "default": "dark",
+    "strict": true
+  },
   "favicon": "/assets/favicon.ico",
   "contextual": {
     "options": [
@@ -220,7 +224,7 @@
       },
       {
         "label": "",
-        "href": "https://discord.gg/Ad5KZvAyky",
+        "href": "https://discord.gg/58XZuxKyq6",
         "icon": "discord"
       },
       {
