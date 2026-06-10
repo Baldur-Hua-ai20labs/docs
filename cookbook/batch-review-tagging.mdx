@@ -3,9 +3,12 @@ title: "🏷️ Tag Customer Reviews Overnight with the ZeroGPU Batch API"
 description: "Tag a CSV of customer reviews with sentiment and topics in one overnight job using the ZeroGPU Batch API and LFM2.5-1.2B-Instruct, then recover any failed rows by custom_id."
 ---
 
-This notebook demonstrates how to use the ZeroGPU Batch API to tag a CSV of customer reviews in a single asynchronous job. You hand the API a `reviews.csv` with one review per row, and you get back a `tagged.csv` with a `sentiment` label and a short list of `topics` for every row, plus a recoverable list of any rows that failed. By combining the Batch API's OpenAI-compatible JSONL flow with LFM2.5-1.2B-Instruct, this notebook walks you through a practical pattern where thousands of rows are tagged overnight at a fraction of the cost of synchronous calls, keyed back to their source rows by `custom_id`.
+This notebook shows how to use the ZeroGPU Batch API to tag a CSV of customer reviews in a single asynchronous job. You hand the API a `reviews.csv` with one review per row, and you get back a `tagged.csv` with a `sentiment` label and a short list of `topics` for every row, plus a recoverable list of any rows that failed. By combining the Batch API's OpenAI-compatible JSONL flow with LFM2.5-1.2B-Instruct, this notebook walks you through a practical pattern where thousands of rows are tagged overnight at a fraction of the cost of synchronous calls, keyed back to their source rows by `custom_id`.
 
 For the full reference, see the [Batch API quickstart](/docs/batch/getting-started).
+
+For another end-to-end workflow, see:
+**[Screen resumes with LangChain and ZeroGPU](https://zerogpu.ai/cookbook/langchain-resume-screening)**.
 
 In this notebook, you'll explore:
 
@@ -14,6 +17,14 @@ In this notebook, you'll explore:
 - **LFM2.5-1.2B-Instruct**: A small, fast instruct model that handles short-form classification well, keeping per-row cost low while still producing open-vocabulary topics and a JSON tag. See the [model card](/api-reference/models/lfm2-5-1-2b-instruct) for context window and playground.
 
 This setup not only demonstrates a practical application of large-scale review tagging, but also provides a flexible framework that can be adapted to other real-world scenarios requiring high-volume, asynchronous classification over tabular data.
+
+## Run this example
+
+Run it in Google Colab and execute cells top to bottom — no setup required.
+
+**[🏷️ Run in Google Colab →](https://colab.research.google.com/drive/1MXw0SMYA0CrF4PViy-04I_Vix6znKxdT?usp=sharing)**
+
+The notebook generates the dataset, builds the JSONL file, and runs the full Batch API workflow automatically.
 
 ## 🎥 Watch the Video Guide
 
@@ -54,12 +65,6 @@ export ZEROGPU_API_KEY="zgpu-api-..."
 export ZEROGPU_PROJECT_ID="your-project-uuid"
 ```
 
-## 🏷️ Tag a Review with ZeroGPU
-
-ZeroGPU is an ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default. In this section, we will tag a single review as an example, so you can see exactly what the model returns before pointing it at a whole file.
-
-We pin the model to JSON-only output with `temperature: 0` so the parser does not have to be clever. The same system prompt drives every row of the batch later.
-
 ```python Python
 import os, requests
 
@@ -97,35 +102,23 @@ For a fixed, short taxonomy, a classifier head like [deberta-v3-small](/api-refe
 
 ## 🌙 Tag a CSV of Reviews Overnight
 
-_This section takes a CSV of customer reviews and produces a tagged copy plus a recoverable list of failures, with the Batch API running every row as one asynchronous job while you sleep._
+This section takes a CSV of customer reviews and produces a tagged copy plus a recoverable list of failures, with the Batch API running every row as one asynchronous job while you sleep.
 
 Your support tool exports `reviews.csv`, one review per row. You want a `sentiment` label and a short list of `topics` for every row, but calling the model synchronously across thousands of rows is slow and costly. Instead you submit them as a single batch, poll until it finishes, and merge the results back by `custom_id`.
 
-The job has six steps: prepare the CSV, build a JSONL request file, upload it, create the batch, poll until it finishes, then download and merge the results.
+The job has five steps: prepare the data, build a JSONL request file, upload it, create the batch, then poll and download the results.
 
 ### Step 1: Prepare the input CSV
 
-Place your export in the working directory. The recipe assumes a CSV with a stable, unique `review_id` and a free-text `review` column. Note that **row 7 is intentionally malformed** (missing the `review` value); you'll see how it is handled before it ever reaches the API.
+The dataset is generated directly in the Colab notebook, so you do not need to prepare any files manually.
 
-```csv reviews.csv
-review_id,review
-r-001,"Battery lasts two days, love it."
-r-002,"Screen cracked after one drop. Awful build quality."
-r-003,"Customer support replied in 3 minutes, very impressed."
-r-004,"Shipping took three weeks. Product is fine but the wait was painful."
-r-005,"It's okay. Does the job. Nothing special."
-r-006,"App keeps crashing on Android 14 after the latest update."
-r-007,
-r-008,"Sound is crisp, mic is muddy. Mixed feelings."
-r-009,"Best purchase of the year. Replaced my old setup entirely."
-r-010,"Refund process was smooth, even if the product wasn't for me."
-```
+Each row includes a unique `review_id` and a free-text `review`. One row is intentionally malformed (empty review) to demonstrate how invalid input is handled.
 
 Keep the `review_id` column unique. It is what links a tagged row back to its source, and duplicates are rejected at create time.
 
 ### Step 2: Build the JSONL, one request per row
 
-Each line in the JSONL is an independent chat completion. `custom_id` is the only way to match a result back to a CSV row, because the Batch API does not preserve input order in the output file. Use your `review_id` directly so the join is unambiguous.
+The notebook builds this JSONL file programmatically from the CSV, so you do not need to create it manually.
 
 We pin the same JSON-only system prompt on every line:
 
@@ -510,8 +503,6 @@ r-010,"Refund process was smooth, even if the product wasn't for me.",neutral,re
 ```
 
 Row `r-007` carries through with empty tags because it was filtered locally before upload, so it never reached the API.
-
-### Step 6: Recover the failed rows
 
 Even a `completed` batch can have a populated `error_file_id` when some lines failed but the batch as a whole ran. A failed line carries a null `response` and a populated `error`. If you skip the local filter and let the API reject the empty row, the error file carries a line like this:
 
