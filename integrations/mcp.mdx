@@ -1,0 +1,425 @@
+---
+title: "MCP Server"
+description: "Connect any MCP client to ZeroGPU's nano language models over the Model Context Protocol."
+icon: "plug"
+---
+
+The [Model Context Protocol](https://modelcontextprotocol.io) (MCP) is an open standard that lets AI assistants and agents discover and call external tools through a uniform interface. An MCP client (Claude Desktop, Claude Code, Cursor, your own agent runtime, and others) connects to an MCP server, lists the tools it exposes, and invokes them with structured arguments. Because the protocol is transport- and vendor-neutral, one server works across every compliant client without bespoke glue code.
+
+ZeroGPU is an ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
+
+## Overview
+
+This guide connects an MCP client to the hosted ZeroGPU MCP server at `https://mcp.zerogpu.ai/mcp`. The server speaks the streamable HTTP transport and exposes ZeroGPU's edge models (summarization, classification, entity and PII extraction, short chat, and more) as MCP tools, so a host model like Claude can offload cheap, well-defined NLP work instead of doing it itself. By the end you'll be able to authenticate, list the available tools, and call any of them, including a worked example for the `zerogpu_summarize` tool.
+
+## Video walkthrough
+
+Video walkthrough coming soon.
+
+## Quickstart
+
+### Prerequisites
+
+- An MCP-capable client (Claude Desktop, Claude Code, Cursor, or any runtime that speaks MCP over streamable HTTP).
+- A ZeroGPU [API key](https://platform.zerogpu.ai/dashboard) and Project ID.
+- A model ID from the [model catalog](/docs/model-catalog) if you plan to override the default model on `zerogpu_chat`.
+
+### Get your ZeroGPU API key
+
+1. Sign in to the [ZeroGPU dashboard](https://platform.zerogpu.ai/dashboard).
+2. Open **API Keys** and click **Create key**.
+3. Copy the key (starts with `zgpu-api-`) and grab your Project ID (UUID) from the project settings page.
+
+### Connect the server
+
+The ZeroGPU MCP server authenticates with two headers on every request: `x-api-key` (your API key) and `x-project-id` (your Project ID). Most clients let you declare a remote server with custom headers in a config file. Using placeholders:
+
+```json
+{
+  "mcpServers": {
+    "zerogpu": {
+      "type": "http",
+      "url": "https://mcp.zerogpu.ai/mcp",
+      "headers": {
+        "x-api-key": "<YOUR_API_KEY>",
+        "x-project-id": "<YOUR_PROJECT_ID>"
+      }
+    }
+  }
+}
+```
+
+In Claude Code you can register the same server from the terminal:
+
+```bash
+claude mcp add --transport http zerogpu https://mcp.zerogpu.ai/mcp \
+  --header "x-api-key: <YOUR_API_KEY>" \
+  --header "x-project-id: <YOUR_PROJECT_ID>"
+```
+
+Never commit real credentials. Keep them in environment variables or a local, git-ignored config and substitute them at runtime.
+
+### Your first request
+
+Once the server is registered, the client performs the MCP handshake (`initialize`, then `notifications/initialized`) automatically and the ZeroGPU tools become available to the host model. To verify the connection end to end without a client, you can drive the streamable HTTP transport directly with `curl`. First initialize a session and capture the `mcp-session-id` response header:
+
+```bash
+export ZEROGPU_API_KEY="<YOUR_API_KEY>"
+export ZEROGPU_PROJECT_ID="<YOUR_PROJECT_ID>"
+
+curl -sS -D - https://mcp.zerogpu.ai/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "x-api-key: $ZEROGPU_API_KEY" \
+  -H "x-project-id: $ZEROGPU_PROJECT_ID" \
+  -d '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"my-client","version":"1.0.0"}}}'
+```
+
+The server replies with its capabilities and returns an `mcp-session-id` header. Pass that session id (plus the same auth headers) on every later call. A quick health check confirms the orchestration API is reachable:
+
+```bash
+curl -sS https://mcp.zerogpu.ai/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "x-api-key: $ZEROGPU_API_KEY" \
+  -H "x-project-id: $ZEROGPU_PROJECT_ID" \
+  -H "mcp-session-id: <SESSION_ID>" \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"zerogpu_health","arguments":{}}}'
+```
+
+Inside the tool result you'll get back overall and per-component status:
+
+```json
+{
+  "status": "ok",
+  "components": {
+    "worker": { "status": "ok" },
+    "redisDeviceRegistry": { "status": "ok", "error": null },
+    "redisKeys": { "status": "ok", "error": null },
+    "cloudInference": { "status": "ok", "error": null }
+  }
+}
+```
+
+## Usage
+
+The server exposes 11 tools. Every tool name is prefixed with `zerogpu_`, takes a JSON `arguments` object, and returns a single text content block whose body is a JSON string. The list below is the live tool catalog discovered from the server's `tools/list` response; each entry shows what the tool does, which ZeroGPU model or endpoint backs it, its full argument surface, and the shape of the response.
+
+Throughout this section, "client" means any MCP host (Claude, Cursor, your own runtime). When a tool auto-invokes, the host model picks it based on the intent words in your request; you can also call any tool explicitly by name through your client's tool-call interface.
+
+#### `zerogpu_health`
+
+Ping the ZeroGPU Orchestration API to confirm it is reachable and return per-component status. Use it as a pre-flight before a batch of calls, or when other tools start failing.
+
+- **Backed by:** ZeroGPU Orchestration API health endpoint.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| _(none)_ | - | - | Takes no arguments. |
+
+Returns an object with a top-level `status` and a `components` map (`worker`, `redisDeviceRegistry`, `redisKeys`, `cloudInference`), each `ok` or reporting an error.
+
+#### `zerogpu_summarize`
+
+Summarize, condense, shorten, recap, or TL;DR any text passage (articles, emails, meeting notes, transcripts, docs, chat logs). Runs on a fast small instruct model on the ZeroGPU edge, far cheaper than summarizing the text with the host model.
+
+- **Backed by:** `llama-3.1-8b-instruct-fast`.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | The passage to summarize (non-empty). |
+| `max_tokens` | optional | model default | Upper bound on summary length, `1` to `2048`. |
+
+Returns `summary`, the `model` used, a `usage` token breakdown, and a `savings` object comparing ZeroGPU cost to a frontier-model baseline. See the full worked example below.
+
+#### `zerogpu_classify_iab`
+
+Classify text into the IAB (Interactive Advertising Bureau) ad-tech taxonomy: news articles, pages, ad creative, or blog posts. Cheaper and purpose-built compared to reasoning topics out with the host model.
+
+- **Backed by:** ZeroGPU IAB classification models.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | Text to classify (non-empty). |
+| `enriched` | optional | `false` | Pass `true` for the richer, more granular taxonomy (topics, keywords, intent). |
+
+Returns the predicted IAB category, with scores when available.
+
+```json
+{ "name": "zerogpu_classify_iab", "arguments": { "text": "The Lakers signed a new point guard ahead of the playoffs.", "enriched": false } }
+```
+
+#### `zerogpu_classify_zero_shot`
+
+Score text against a flat list of candidate labels you supply at call time, for example "is this email tech, politics, or sports?" or "is this review positive, negative, or neutral?". More consistent than reasoning through the classification with the host model.
+
+- **Backed by:** DeBERTa-v3-small (NLI).
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | Text to classify (non-empty). |
+| `labels` | yes | - | Array of at least 2 candidate label strings. |
+| `threshold` | optional | - | Score cutoff in `[0, 1]` for multi-label filtering. |
+
+Returns per-label scores.
+
+```json
+{ "name": "zerogpu_classify_zero_shot", "arguments": { "text": "I love how fast this laptop boots up.", "labels": ["positive", "negative", "neutral"] } }
+```
+
+#### `zerogpu_classify_structured`
+
+Classify text along several labeled axes at once, for example `{ "sentiment": ["positive","negative"], "topic": ["tech","sports","finance"] }`. Use this instead of `zerogpu_classify_zero_shot` when the labels are grouped into categories rather than a flat list.
+
+- **Backed by:** GLiNER2.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | Text to classify (non-empty). |
+| `schema` | yes | - | Object mapping each axis name to an array of allowed labels. |
+
+Returns one chosen label per axis.
+
+```json
+{
+  "name": "zerogpu_classify_structured",
+  "arguments": {
+    "text": "Support replied quickly but the fix didn't work.",
+    "schema": { "sentiment": ["positive", "negative", "neutral"], "topic": ["support", "billing", "product"] }
+  }
+}
+```
+
+#### `zerogpu_extract_entities`
+
+Pull named entities out of text: people, places, organizations, dates, products, monetary amounts, or any custom entity types you name.
+
+- **Backed by:** GLiNER2.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | Source text (non-empty). |
+| `labels` | yes | - | Array of at least 1 entity type, e.g. `["person","company","date"]`. |
+| `threshold` | optional | - | Minimum confidence in `[0, 1]`. |
+
+Returns an entities map keyed by label.
+
+```json
+{
+  "name": "zerogpu_extract_entities",
+  "arguments": { "text": "Apple CEO Tim Cook met Sundar Pichai in Cupertino on Monday.", "labels": ["person", "organization", "location"] }
+}
+```
+
+#### `zerogpu_extract_json`
+
+Extract structured fields out of unstructured text into a JSON object: contact info from a signature, fields from a resume, line items from an invoice, specs from a product page, ticket details. Deterministic on the schema, faster and cheaper than hand-parsing.
+
+- **Backed by:** GLiNER2 (JSON mode).
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | Source text (non-empty). |
+| `schema` | yes | - | Grouped schema: keys are group names, values are arrays of `field::type::desc` specs. |
+
+Returns the extracted object, grouped exactly as the schema declares.
+
+```json
+{
+  "name": "zerogpu_extract_json",
+  "arguments": {
+    "text": "Reach Maria Lopez at maria.lopez@acme.io or 415-555-0188.",
+    "schema": { "contact": ["name::str::Full name", "email::str::Email address", "phone::str::Phone number"] }
+  }
+}
+```
+
+#### `zerogpu_redact_pii`
+
+Redact, mask, scrub, or anonymize personally identifiable information in text: names, phone numbers, emails, addresses, SSN, credit cards, account numbers, dates of birth. Use this before sharing or logging sensitive text, or before forwarding user input to another model you don't want to expose raw PII to.
+
+- **Backed by:** gliner-multi-pii.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | Source text (non-empty). |
+| `mask` | optional | generic mask | Set to `"label"` to substitute `[NAME]`, `[EMAIL]`, `[PHONE]`-style placeholders. |
+
+Returns the redacted text.
+
+```json
+{ "name": "zerogpu_redact_pii", "arguments": { "text": "Email John Smith at john@acme.com about invoice 12345.", "mask": "label" } }
+```
+
+#### `zerogpu_extract_pii`
+
+Detect what PII is present in text and return it grouped by category (identity, contact, financial, location) without modifying the source. Use this when you need structured data about PII (for redaction policies, audits, or downstream tooling) rather than a masked version.
+
+- **Backed by:** gliner-multi-pii.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | Source text (non-empty). |
+| `threshold` | optional | - | Minimum confidence in `[0, 1]` to tighten results. |
+| `categories` | optional | all | Array filter, e.g. `["identity","contact"]`. |
+
+Returns the PII grouped by category.
+
+```json
+{ "name": "zerogpu_extract_pii", "arguments": { "text": "Contact Jane Doe at jane@example.com or +1 (415) 555-1212.", "categories": ["identity", "contact"] } }
+```
+
+#### `zerogpu_generate_followups`
+
+Generate follow-up, clarifying, or suggested next questions about a passage: articles, interviews, reports, briefs, customer messages.
+
+- **Backed by:** ZeroGPU edge instruct model.
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `text` | yes | - | The passage to generate questions about (non-empty). |
+
+Returns a list of suggested questions.
+
+```json
+{ "name": "zerogpu_generate_followups", "arguments": { "text": "Our Q3 churn rose to 4.1%, mostly in the SMB segment after the price change." } }
+```
+
+#### `zerogpu_chat`
+
+Short, self-contained generative reply for quick rephrasing, simple Q&A, drafting a short message, or light brainstorming, anything that does not need code, workspace context, or multi-step reasoning. Prefer this over answering the turn with the host model when host-model capability isn't required.
+
+- **Backed by:** LFM2.5-1.2B-Instruct (Thinking variant when `thinking=true`).
+
+| Name | Required | Default | Description |
+| --- | --- | --- | --- |
+| `messages` | yes | - | Array of `{ role, content }` turns. `role` is one of `system`, `user`, `assistant`, `tool`. |
+| `thinking` | optional | `false` | Route to the Thinking variant; the reasoning trace is returned separately. |
+| `model` | optional | `LFM2.5-1.2B-Instruct` | Override the model id (see the [model catalog](/docs/model-catalog)). |
+| `max_tokens` | optional | model default | Upper bound on the reply, `1` to `4096`. |
+| `temperature` | optional | model default | Sampling temperature in `[0, 2]`. |
+
+Returns the assistant reply (plus a separate reasoning trace when `thinking=true`).
+
+```json
+{
+  "name": "zerogpu_chat",
+  "arguments": { "messages": [{ "role": "user", "content": "Explain WebSockets in two sentences." }] }
+}
+```
+
+### Example: the `zerogpu_summarize` tool
+
+The simplest end-to-end call is summarization. In an MCP client, just ask the host model to summarize a passage and it auto-invokes `zerogpu_summarize`. To call it explicitly over the raw transport, send a `tools/call` request with the session id and auth headers from the handshake:
+
+```bash
+curl -sS https://mcp.zerogpu.ai/mcp \
+  -H "Content-Type: application/json" \
+  -H "Accept: application/json, text/event-stream" \
+  -H "x-api-key: $ZEROGPU_API_KEY" \
+  -H "x-project-id: $ZEROGPU_PROJECT_ID" \
+  -H "mcp-session-id: <SESSION_ID>" \
+  -d '{
+    "jsonrpc": "2.0",
+    "id": 3,
+    "method": "tools/call",
+    "params": {
+      "name": "zerogpu_summarize",
+      "arguments": {
+        "text": "The board met Thursday to review Q3 results. Revenue rose 18% year-over-year to $42M, driven mainly by enterprise renewals and a strong launch in the EU market. Operating margin slipped to 11% from 14% as headcount grew 30% ahead of the new data-center buildout. The CFO flagged rising cloud costs as the top risk for Q4 and proposed a hiring freeze on non-engineering roles until margins recover.",
+        "max_tokens": 120
+      }
+    }
+  }'
+```
+
+The tool result is a text content block whose body parses to:
+
+```json
+{
+  "summary": "The board reviewed Q3 results, with revenue increasing 18% to $42M due to enterprise renewals and a strong EU launch, but operating margin dropped to 11% from 14% due to a 30% headcount growth ahead of the data-center buildout. The CFO identified rising cloud costs as a top risk for Q4 and proposed a hiring freeze on non-engineering roles until margins recover.",
+  "model": "llama-3.1-8b-instruct-fast",
+  "usage": {
+    "prompt_tokens": 158,
+    "completion_tokens": 91,
+    "total_tokens": 249
+  },
+  "savings": {
+    "zerogpu_cost_usd": 0.000034,
+    "baseline_cost_usd": 0.001839,
+    "savings_usd": 0.001805,
+    "price_table_version": "2026-05-26-2"
+  }
+}
+```
+
+Every generative tool returns a `usage` and `savings` block like this, so you can measure exactly how much offloading the task to ZeroGPU saved versus running it on a frontier model.
+
+### Patterns and recipes
+
+**Sanitize before the host model sees raw input.** Pipe untrusted text through `zerogpu_redact_pii` first when you don't want personal data captured in the host model's transcript or sent to downstream LLMs. Combine with `zerogpu_extract_pii` if you also need an audit log of what was masked.
+
+**Cheap router in front of the host model.** Use `zerogpu_classify_zero_shot` or `zerogpu_classify_structured` to triage an incoming message (bug / feature / question, urgent / normal, in-scope / out-of-scope) and only escalate the hard cases to the host model. The classifier call costs orders of magnitude less than a full host-model turn.
+
+**Structured extraction over free-form parsing.** For semi-structured text (signatures, invoices, contact blocks), prefer `zerogpu_extract_json` over asking the host model to "parse this into JSON." It's deterministic on the schema, faster, and cheaper. Keep field descriptions short and specific, since the description is what the model uses to find the span.
+
+**Health-check before a batch.** Call `zerogpu_health` once before fanning out a large run of tool calls. If a component reports an error, back off rather than failing each call individually.
+
+### Tool reference table
+
+Every tool at a glance.
+
+| Tool | Purpose | Required arguments |
+| --- | --- | --- |
+| `zerogpu_health` | Confirm the orchestration API is reachable | _(none)_ |
+| `zerogpu_summarize` | Summarize / TL;DR a text passage | `text` |
+| `zerogpu_classify_iab` | IAB ad-tech taxonomy classification | `text` |
+| `zerogpu_classify_zero_shot` | Score text against a flat label list | `text`, `labels` |
+| `zerogpu_classify_structured` | Multi-axis classification by schema | `text`, `schema` |
+| `zerogpu_extract_entities` | Named-entity recognition | `text`, `labels` |
+| `zerogpu_extract_json` | Extract structured fields into JSON | `text`, `schema` |
+| `zerogpu_redact_pii` | Mask / scrub PII in text | `text` |
+| `zerogpu_extract_pii` | Detect PII grouped by category | `text` |
+| `zerogpu_generate_followups` | Suggest follow-up questions | `text` |
+| `zerogpu_chat` | Short small-model chat reply | `messages` |
+
+## Troubleshooting
+
+**`missing required headers: x-api-key and x-project-id`** - the request reached the server without both auth headers. Make sure your client config sets `x-api-key` and `x-project-id`, and that they're sent on the `initialize` call as well as every later request.
+
+**`Request failed with status 401`** - your API key is missing, revoked, or mistyped. Rotate the key in the [dashboard](https://platform.zerogpu.ai/dashboard) and update your client config. Keys must start with `zgpu-api-`.
+
+**`Request failed with status 403`** - the key is valid but doesn't have access to the project, or the project doesn't have access to a requested model. Confirm your `x-project-id` matches the project that owns the key.
+
+**`Request failed with status 429`** - you're being rate-limited. Back off and retry with exponential delay, or move bulk workloads to the [Batch API](/docs/batch), which has separate quotas tuned for high-volume jobs.
+
+**Tools don't appear in the client.** The client never completed the MCP handshake. Confirm the transport is set to streamable HTTP (`type: "http"`), the URL is exactly `https://mcp.zerogpu.ai/mcp`, and the client supports remote MCP servers. Restart or reload the client after editing its config.
+
+**`Bad Request` or session errors on follow-up calls.** Every call after `initialize` must include the `mcp-session-id` returned by the handshake. If you're driving the transport by hand, capture that response header and resend it (along with the auth headers) on each request.
+
+**Empty or low-confidence extraction / classification.** Lower `threshold` to surface more candidates, or check that your label set matches the language of the source text (the underlying models are English-tuned for most label sets). Very short inputs (one or two words) yield lower confidence across the board.
+
+**Schema-shaped tools reject the arguments.** `zerogpu_extract_json` and `zerogpu_classify_structured` expect `schema` as a JSON object whose values are arrays. For `zerogpu_extract_json`, each array item is a `field::type::desc` string; for `zerogpu_classify_structured`, each array is a list of allowed labels. A flat array or a stringified schema will be rejected.
+
+**`zerogpu_chat` returns an empty or off-topic reply.** It's backed by a 1.2B model and is meant for short, self-contained turns. For anything needing code, workspace context, or multi-step reasoning, keep the work on the host model. Set `thinking=true` for short logic or math turns where a reasoning trace helps.
+
+**Wrong tool auto-invoked.** The host model picks based on phrasing. Rephrase to remove trigger words ("summarize", "classify", "redact", "extract"), or call the intended tool explicitly through your client's tool interface.
+
+## Conclusion
+
+The ZeroGPU MCP server turns every edge model into a first-class tool that any MCP client can call, so a host model can hand off summarization, classification, extraction, and short chat to a cheaper, faster model without leaving the conversation. It's a fast way to keep raw PII out of the host model's context, cut token spend on well-defined NLP work, and measure the savings on every call.
+
+<CardGroup cols={2}>
+  <Card title="Model Catalog" icon="layer-group" href="/docs/model-catalog">
+    Browse every model the MCP tools route to.
+  </Card>
+  <Card title="API Reference" icon="code" href="/api-reference/responses">
+    Explore the full OpenAI-compatible API surface.
+  </Card>
+  <Card title="Cookbook" icon="book" href="/cookbook/index">
+    Worked examples for classification, extraction, and batch jobs.
+  </Card>
+  <Card title="Join Discord" icon="discord" href="https://discord.gg/Ad5KZvAyky">
+    Ask questions and share what you're building.
+  </Card>
+</CardGroup>
