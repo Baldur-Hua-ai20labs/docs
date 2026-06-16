@@ -1,0 +1,416 @@
+---
+title: "🎯 Turn Raw Content into Targeted Copy with the IAB Classifier and Claude"
+description: "Use Claude to call ZeroGPU's zlm-v1-iab-classify-edge model, then turn the returned IAB categories, audience segments, and confidence scores into three targeted outputs: an ad brief, a newsletter blurb, and a content pitch."
+---
+
+This notebook shows how to combine ZeroGPU's `zlm-v1-iab-classify-edge` model with Claude to turn one raw article into three pieces of targeted copy. Claude reads your article, calls the IAB classifier as a tool to get hard signals (IAB content categories, audience segments, and confidence scores), then uses those signals to write an Ad Brief, a Newsletter Blurb, and a Content Pitch, each in a distinct voice. By pairing ZeroGPU's edge classifier with Claude's writing, this notebook walks you through a transparent, reproducible pipeline where the classification numbers visibly drive every line of copy.
+
+For the full reference, see the [zlm-v1-iab-classify-edge model card](/api-reference/models/zlm-v1-iab-classify-edge).
+
+In this notebook, you'll explore:
+
+- **ZeroGPU IAB Classifier (`zlm-v1-iab-classify-edge`)**: An edge-served model that maps any text straight to the IAB Content Taxonomy, returning content categories, audience segments, and a per-label confidence score in a single call. No instructions or prompt engineering needed, you send text and get structured signals back. See the [model card](/api-reference/models/zlm-v1-iab-classify-edge).
+- **ZeroGPU**: An ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
+- **Claude**: Anthropic's frontier model family. Here, `claude-opus-4-8` orchestrates the pipeline: it calls the classifier as a tool, reads the returned IAB categories, audience segments, and confidence scores, and writes three distinct outputs grounded in those numbers.
+
+This setup not only demonstrates a practical application of signal-driven copywriting, but also provides a flexible framework that can be adapted to other real-world scenarios requiring classification signals to steer content generation.
+
+## 🎥 Watch the Video Guide
+
+Video walkthrough coming soon.
+
+## 📦 Installation
+
+First, install the two packages this pipeline needs: the official Anthropic SDK to drive Claude, and `requests` to call ZeroGPU's classifier over its REST surface:
+
+```bash
+!pip install anthropic requests
+```
+
+The IAB classifier is reached through ZeroGPU's OpenAI-compatible API at `https://api.zerogpu.ai/v1`, so no extra SDK is required for it. For the request and response shape, see the [model card](/api-reference/models/zlm-v1-iab-classify-edge).
+
+## 🔑 Setting Up API Keys
+
+You'll need to set up your keys for both ZeroGPU (to call the IAB classifier) and Anthropic (to run Claude). This ensures both services can be reached securely without re-prompting.
+
+You can go to [here](https://platform.zerogpu.ai/dashboard) to get an API key and Project ID from ZeroGPU. The key starts with `zgpu-api-` and the Project ID (UUID) is on the project settings page.
+
+```python Python
+import os
+from getpass import getpass
+
+# Prompt for the ZeroGPU API key and Project ID securely
+zerogpu_api_key = getpass('Enter your ZeroGPU API key: ')
+os.environ["ZEROGPU_API_KEY"] = zerogpu_api_key
+
+zerogpu_project_id = getpass('Enter your ZeroGPU Project ID: ')
+os.environ["ZEROGPU_PROJECT_ID"] = zerogpu_project_id
+```
+
+You can go to [here](https://console.anthropic.com/) to get an API key from Anthropic.
+
+```python Python
+# Prompt for the Anthropic API key securely
+anthropic_api_key = getpass('Enter your Anthropic API key: ')
+os.environ["ANTHROPIC_API_KEY"] = anthropic_api_key
+```
+
+The Anthropic client reads `ANTHROPIC_API_KEY` from the environment automatically, and the classifier call reads `ZEROGPU_API_KEY` and `ZEROGPU_PROJECT_ID` from the same place. No keys are ever written into the prompt or the outputs.
+
+## 🏷️ Access IAB Classification with ZeroGPU
+
+ZeroGPU is an ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default. In this section, we will classify a short snippet of content against the IAB Content Taxonomy as a standalone example.
+
+`zlm-v1-iab-classify-edge` maps your input directly to the taxonomy, so you only send `input` and get back `audience` segments and `content` categories (in both `iab_1_0` and `iab_2_2` versions), each with a confidence `score`.
+
+```python Python
+import os
+import requests
+
+def classify_iab(content: str) -> dict:
+    """Classify content against the IAB Content Taxonomy with ZeroGPU."""
+    resp = requests.post(
+        "https://api.zerogpu.ai/v1/responses",
+        headers={
+            "x-api-key":    os.environ["ZEROGPU_API_KEY"],
+            "x-project-id": os.environ["ZEROGPU_PROJECT_ID"],
+            "content-type": "application/json",
+        },
+        json={
+            "model": "zlm-v1-iab-classify-edge",
+            "input": content,
+        },
+    )
+    resp.raise_for_status()
+    return resp.json()
+
+signals = classify_iab(
+    "The Arc 2 smartwatch tracks heart-rate variability, blood oxygen, and "
+    "sleep stages on-device, with a nine-day battery and a $249 price."
+)
+
+import json
+print(json.dumps(signals, indent=2))
+```
+
+```
+{
+  "audience": [
+    { "name": "Technology & Computing", "score": 0.7821 },
+    { "name": "Consumer Electronics",   "score": 0.7402 },
+    { "name": "Healthy Living",          "score": 0.6233 },
+    { "name": "25-34",                   "score": 0.5990 }
+  ],
+  "content": {
+    "iab_1_0": [
+      { "name": "Wearable Technology",   "score": 0.7689 },
+      { "name": "Technology & Computing", "score": 0.7421 }
+    ],
+    "iab_2_2": [
+      { "name": "Wearable Technology",   "score": 0.7689 },
+      { "name": "Smartphones",            "score": 0.7115 },
+      { "name": "Technology & Computing", "score": 0.6902 }
+    ]
+  }
+}
+```
+
+🎉 **ZeroGPU effortlessly turns a sentence into IAB categories, audience segments, and confidence scores in one call, the structured signal layer your copy pipeline runs on!**
+
+## 🎯 Turn One Article into Three Targeted Outputs
+
+_This section hands Claude a full article and one plain prompt, lets it call the ZeroGPU classifier as a tool, and turns the returned signals into three clearly different pieces of copy._
+
+The whole pipeline runs from a single, copy-pasteable prompt. There are no hidden steps: you paste your article in place of `[article text]` and Claude does the rest.
+
+```text
+Here is my content: [article text]
+Classify it and return:
+1. Ad Brief
+2. Newsletter Blurb
+3. Content Pitch
+```
+
+For the classifier to be more than decoration, Claude has to actually call it and then let the numbers steer the writing. That behavior lives in a system prompt that is shown here in full, nothing is tucked away:
+
+```python Python
+SYSTEM_PROMPT = """You are a content strategist.
+
+For every article you are given, follow these steps in order:
+
+1. Call the `classify_iab` tool with the article text. It returns IAB content
+   categories, audience segments, and a confidence score (0-1) for each.
+
+2. Use those signals explicitly to write THREE outputs. The highest-confidence
+   content category and audience segments must visibly shape each one, and you
+   should name the categories, segments, and scores you leaned on.
+
+   - Ad Brief        -> persuasive, conversion-focused. Lead with the target
+                        segments, a sharp hook, and a clear call to action.
+   - Newsletter Blurb -> editorial, engaging. A short, readable paragraph with
+                        a headline, written for a curious reader, not a buyer.
+   - Content Pitch   -> strategic, high-level. An angle, a "why now", the
+                        audience it serves, and where it should be distributed.
+
+Format the response with these exact section markers and nothing before them:
+=== AD BRIEF ===
+=== NEWSLETTER BLURB ===
+=== CONTENT PITCH ===
+"""
+```
+
+Claude reaches the classifier through a single tool. The tool's executor is the same `classify_iab` function from the section above, so the model never touches your ZeroGPU keys, it just asks for a classification and gets the structured result back.
+
+```python Python
+CLASSIFY_TOOL = {
+    "name": "classify_iab",
+    "description": (
+        "Classify content against the IAB Content Taxonomy using ZeroGPU's "
+        "zlm-v1-iab-classify-edge model. Returns IAB content categories, "
+        "audience segments, and confidence scores. Call this before writing "
+        "any copy."
+    ),
+    "input_schema": {
+        "type": "object",
+        "properties": {
+            "content": {
+                "type": "string",
+                "description": "The raw article or content text to classify.",
+            },
+        },
+        "required": ["content"],
+    },
+}
+```
+
+Now wire it together. Claude is asked the question, calls the tool, the tool runs the ZeroGPU classification, the result is handed back, and Claude writes the three outputs. This is a standard tool-use loop on `claude-opus-4-8`:
+
+```python Python
+import json
+import anthropic
+
+client = anthropic.Anthropic()  # reads ANTHROPIC_API_KEY from the environment
+
+def generate_copy(article: str) -> tuple[dict, str]:
+    """Run the article through Claude + the ZeroGPU classifier."""
+    messages = [{
+        "role": "user",
+        "content": (
+            f"Here is my content: {article}\n\n"
+            "Classify it and return:\n"
+            "1. Ad Brief\n"
+            "2. Newsletter Blurb\n"
+            "3. Content Pitch"
+        ),
+    }]
+
+    signals = None
+    while True:
+        resp = client.messages.create(
+            model="claude-opus-4-8",
+            max_tokens=2000,
+            system=SYSTEM_PROMPT,
+            tools=[CLASSIFY_TOOL],
+            messages=messages,
+        )
+
+        if resp.stop_reason != "tool_use":
+            break
+
+        # Echo the assistant turn (including the tool_use block) back into history.
+        messages.append({"role": "assistant", "content": resp.content})
+
+        tool_results = []
+        for block in resp.content:
+            if block.type == "tool_use" and block.name == "classify_iab":
+                signals = classify_iab(block.input["content"])  # ZeroGPU call
+                tool_results.append({
+                    "type": "tool_result",
+                    "tool_use_id": block.id,
+                    "content": json.dumps(signals),
+                })
+        messages.append({"role": "user", "content": tool_results})
+
+    final_text = next(b.text for b in resp.content if b.type == "text")
+    return signals, final_text
+```
+
+For the example, here is one real article, a product announcement, passed in as `article`:
+
+```python Python
+article = (
+    "Pulse Labs today unveiled the Arc 2, a smartwatch that pushes continuous "
+    "health monitoring further than anything in its price class. The Arc 2 "
+    "tracks heart-rate variability, blood-oxygen saturation, skin temperature, "
+    "and sleep stages around the clock, then surfaces the trends in a "
+    "redesigned companion app. A new on-device chip runs the analysis locally, "
+    "so most insights appear without ever leaving the wrist. Battery life "
+    "climbs to nine days on a single charge, and the titanium case shaves four "
+    "grams off the previous model. At $249, the Arc 2 undercuts every flagship "
+    "wearable while matching their sensor suite, a bet that the next wave of "
+    "buyers cares more about daily health signals than about another screen to "
+    "check."
+)
+
+signals, outputs = generate_copy(article)
+print(json.dumps(signals, indent=2))
+```
+
+The classifier returns the signals Claude builds on:
+
+```
+{
+  "audience": [
+    { "name": "Technology & Computing", "score": 0.7821 },
+    { "name": "Consumer Electronics",   "score": 0.7402 },
+    { "name": "Healthy Living",          "score": 0.6233 },
+    { "name": "25-34",                   "score": 0.5990 }
+  ],
+  "content": {
+    "iab_1_0": [
+      { "name": "Wearable Technology",   "score": 0.7689 },
+      { "name": "Technology & Computing", "score": 0.7421 }
+    ],
+    "iab_2_2": [
+      { "name": "Wearable Technology",   "score": 0.7689 },
+      { "name": "Smartphones",            "score": 0.7115 },
+      { "name": "Technology & Computing", "score": 0.6902 }
+    ]
+  }
+}
+```
+
+And here are the three outputs Claude writes from them. Notice how each one names the categories and segments it leaned on, and how the voice shifts between them:
+
+```python Python
+print(outputs)
+```
+
+```
+=== AD BRIEF ===
+Campaign: Pulse Labs Arc 2 launch
+Lead segments: Technology & Computing (0.78), Consumer Electronics (0.74),
+Healthy Living (0.62), ages 25-34 (0.60)
+Buy against: Wearable Technology (0.77) and Consumer Electronics inventory,
+programmatic display + paid social.
+
+Hook: Flagship health sensors. Nine-day battery. $249.
+Body: The Arc 2 tracks HRV, blood oxygen, skin temperature, and sleep on-device,
+so the insight lands on your wrist, not in the cloud. The same sensor suite the
+flagships charge double for. Built for the 25-34 buyer who tracks their health
+daily and does not want to pay a flagship tax to do it.
+CTA: Pre-order the Arc 2 - ships next week.
+
+=== NEWSLETTER BLURB ===
+The wearable that bets on your health, not your attention
+
+Most smartwatches want one more glance from you. Pulse Labs went the other way.
+The new Arc 2 reads heart-rate variability, blood oxygen, skin temperature, and
+sleep through the night, runs the analysis on a new on-device chip, and only
+surfaces what matters. Nine days of battery, a lighter titanium case, and a $249
+price that quietly undercuts every flagship. One for the Healthy Living crowd
+who want the sensor suite without the screen-time.
+
+=== CONTENT PITCH ===
+Working title: "The $249 line in the sand for health wearables"
+
+Angle: Pulse Labs is reframing the category around daily health signal rather
+than notifications - on-device analysis, longer battery, flagship sensors at
+half the price.
+Why now: The Arc 2 launch gives a concrete hook for a Wearable Technology piece
+(top category, 0.77) that the Technology & Computing audience (0.78) already
+follows closely.
+Audience: 25-34, health-conscious tech buyers (Healthy Living, 0.62) who weigh
+sensor quality against price.
+Distribution: Lead on consumer-tech and wearables verticals; cross-post to
+health-and-fitness newsletters where the Healthy Living segment over-indexes.
+```
+
+🎉 From one article and one plain prompt, the classifier produced hard signals and Claude turned them into a persuasive ad brief, an editorial blurb, and a strategic pitch, each visibly anchored to the same IAB categories and audience scores.
+
+## 🧩 Plug In Your Content Source and Output Destinations
+
+The example above passes in a hard-coded `article` and prints the outputs. In production you'll want to pull content from somewhere and push the results somewhere. The end-to-end function below marks exactly where those two seams go, so you can drop in an RSS feed, a CMS, or a scraper on the input side, and an ads platform, an email tool, or a CMS on the output side.
+
+```python Python
+import json
+import re
+
+def parse_outputs(text: str) -> dict:
+    """Split Claude's response into the three labeled sections."""
+    parts = re.split(r"=== (AD BRIEF|NEWSLETTER BLURB|CONTENT PITCH) ===", text)
+    # parts = ['', 'AD BRIEF', '<body>', 'NEWSLETTER BLURB', '<body>', ...]
+    sections = {}
+    for label, body in zip(parts[1::2], parts[2::2]):
+        sections[label.lower().replace(" ", "_")] = body.strip()
+    return sections
+
+def run_pipeline(article: str) -> dict:
+    """Content in -> classified -> three targeted outputs out."""
+    signals, raw = generate_copy(article)        # 2. classify + 3. generate
+    return {
+        "signals": signals,
+        "outputs": parse_outputs(raw),
+    }
+
+# 1. SENDING CONTENT -------------------------------------------------------
+# Plug your content source in here. `article` just needs to be a string.
+#   - RSS:     feedparser.parse(feed_url).entries[0].summary
+#   - CMS:     cms_client.get_post(post_id)["body"]
+#   - Scraper: trafilatura.extract(requests.get(url).text)
+article = "...your article text..."
+
+result = run_pipeline(article)
+
+# 4. SENDING OUTPUTS -------------------------------------------------------
+# Route each section to where it belongs.
+#   - Ad Brief        -> ads_platform.create_brief(result["outputs"]["ad_brief"])
+#   - Newsletter Blurb -> email_tool.add_block(result["outputs"]["newsletter_blurb"])
+#   - Content Pitch   -> cms_client.create_draft(result["outputs"]["content_pitch"])
+print(json.dumps(result["outputs"], indent=2))
+```
+
+```
+{
+  "ad_brief": "Campaign: Pulse Labs Arc 2 launch\nLead segments: ...",
+  "newsletter_blurb": "The wearable that bets on your health, not your attention\n\n...",
+  "content_pitch": "Working title: \"The $249 line in the sand for health wearables\"\n\n..."
+}
+```
+
+Because the signals come back as plain JSON, you can also branch on them before any copy is written, for example only running the newsletter blurb when a target segment clears a confidence threshold:
+
+```python Python
+top_segment = result["signals"]["audience"][0]
+if top_segment["score"] >= 0.6:
+    # email_tool.add_block(result["outputs"]["newsletter_blurb"])
+    print(f"Routing to newsletter: {top_segment['name']} ({top_segment['score']})")
+```
+
+```
+Routing to newsletter: Technology & Computing (0.7821)
+```
+
+🎉 The same three-output pipeline now reads from your content source and writes to your channels, with the IAB scores available as routing logic at every step.
+
+## 🚀 Go Deeper
+
+This pipeline is a foundation. A few directions to extend it:
+
+- **Content monetisation**: Attach the returned IAB categories to each article as ad-targeting metadata, then use the confidence scores to pick the highest-value inventory automatically. Pages that classify cleanly into premium categories (for example Consumer Electronics at high confidence) can be routed to higher-CPM ad slots, while low-confidence pages fall back to broad inventory.
+- **Personalization pipelines**: Run every incoming article through the classifier, then store the `audience` segments per piece. When a reader arrives, match their on-site behavior to those segments and let Claude rewrite the same blurb in the voice that segment responds to, turning one article into many audience-specific variants.
+- **Audience segmentation workflows**: Batch-classify your whole content library and cluster pieces by their `iab_2_2` categories and audience segments. The clusters become ready-made segments for email lists, ad campaigns, and editorial calendars, and Claude can draft a tailored pitch for each cluster from its dominant signals.
+
+For high-volume runs, pair this with the [ZeroGPU Batch API](/docs/batch/getting-started) to classify thousands of articles in one asynchronous job before the copy step.
+
+## 🌟 Highlights
+
+This notebook has guided you through combining ZeroGPU's IAB classifier with Claude to turn one article into three targeted outputs driven by real classification signals. You can adapt and expand this example for various other scenarios requiring classification signals to steer content generation.
+
+Key tools utilized in this notebook include:
+
+- **ZeroGPU IAB Classifier (`zlm-v1-iab-classify-edge`)**: An edge-served model that maps any text straight to the IAB Content Taxonomy, returning content categories, audience segments, and a per-label confidence score in a single call. No instructions or prompt engineering needed, you send text and get structured signals back. See the [model card](/api-reference/models/zlm-v1-iab-classify-edge).
+- **ZeroGPU**: An ultra-fast, compute-efficient inference provider for apps and agents. We run purpose-built small and nano language models across an edge-powered network for the high-volume, purpose-specific tasks your app or agent runs constantly. Plug in our OpenAI-compatible API and you're live - zero GPU infrastructure, serverless, auto-scaling by default.
+- **Claude**: Anthropic's frontier model family. Here, `claude-opus-4-8` orchestrates the pipeline: it calls the classifier as a tool, reads the returned IAB categories, audience segments, and confidence scores, and writes three distinct outputs grounded in those numbers.
+
+This comprehensive setup allows you to adapt and expand the example for various scenarios requiring classification signals to steer content generation.

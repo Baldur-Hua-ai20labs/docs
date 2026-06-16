@@ -179,7 +179,8 @@
             "group": "Integrations & plugins",
             "pages": [
               "cookbook/claude-code-csv-sanitizer",
-              "cookbook/langchain-resume-screening"
+              "cookbook/langchain-resume-screening",
+              "cookbook/claude-iab-targeted-copy"
             ]
           }
         ]
