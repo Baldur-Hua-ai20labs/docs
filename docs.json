@@ -103,7 +103,8 @@
             "pages": [
               "integrations/index",
               "integrations/claude-code-plugin",
-              "integrations/langchain"
+              "integrations/langchain",
+              "integrations/mcp"
             ]
           },
           {
@@ -178,7 +179,8 @@
             "group": "Integrations & plugins",
             "pages": [
               "cookbook/claude-code-csv-sanitizer",
-              "cookbook/langchain-resume-screening"
+              "cookbook/langchain-resume-screening",
+              "cookbook/claude-iab-targeted-copy"
             ]
           }
         ]
