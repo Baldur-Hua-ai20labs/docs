@@ -13,6 +13,13 @@ Before you begin, read the [quickstart](/docs/quickstart) to provision an [API k
 
 <CardGroup cols={2}>
     <Card
+        title="LangChain"
+        icon="crow"
+        href="/integrations/langchain"
+    >
+        Offload classification, extraction, PII redaction, and chat from LangChain agents to ZeroGPU's nano models with eleven ready-made tools.
+    </Card>
+    <Card
         title="MCP Server"
         icon="plug"
         href="/integrations/mcp"
@@ -26,13 +33,6 @@ Before you begin, read the [quickstart](/docs/quickstart) to provision an [API k
     >
         Route Claude Code's repetitive steps through ZeroGPU from the terminal. Powered by the ZeroGPU Router.
     </Card>
-    <Card
-        title="LangChain"
-        icon="crow"
-        href="/integrations/langchain"
-    >
-        Offload classification, extraction, PII redaction, and chat from LangChain agents to ZeroGPU's nano models with eleven ready-made tools.
-    </Card>
 </CardGroup>
 
 ## Official SDKs
@@ -40,19 +40,19 @@ Before you begin, read the [quickstart](/docs/quickstart) to provision an [API k
 Call the OpenAI-compatible endpoint from your language of choice. Each guide shows how to point an existing OpenAI client at ZeroGPU.
 
 <CardGroup cols={2}>
-    <Card title="Python" icon="python" href="/integrations/python">
-        Use the OpenAI Python SDK with ZeroGPU's base URL for chat, classification, and extraction.
-    </Card>
-    <Card title="JavaScript" icon="js" href="/integrations/javascript">
-        Drop ZeroGPU into Node.js and the browser with the OpenAI JavaScript SDK.
-    </Card>
-    <Card title="Rust" icon="rust" href="/integrations/rust">
-        Call ZeroGPU's endpoint from Rust with an OpenAI-compatible client.
-    </Card>
-    <Card title="Go" icon="golang" href="/integrations/go">
+    <Card title="Go" icon="golang" href="/integrations/sdk/go">
         Wire ZeroGPU into Go services using an OpenAI-compatible client.
     </Card>
-    <Card title="Ruby" icon="gem" href="/integrations/ruby">
+    <Card title="JavaScript" icon="js" href="/integrations/sdk/javascript">
+        Drop ZeroGPU into Node.js and the browser with the OpenAI JavaScript SDK.
+    </Card>
+    <Card title="Python" icon="python" href="/integrations/sdk/python">
+        Use the OpenAI Python SDK with ZeroGPU's base URL for chat, classification, and extraction.
+    </Card>
+    <Card title="Ruby" icon="gem" href="/integrations/sdk/ruby">
         Use ZeroGPU from Ruby with the OpenAI-compatible client library.
+    </Card>
+    <Card title="Rust" icon="rust" href="/integrations/sdk/rust">
+        Call ZeroGPU's endpoint from Rust with an OpenAI-compatible client.
     </Card>
 </CardGroup>

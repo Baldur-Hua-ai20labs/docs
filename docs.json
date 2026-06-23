@@ -110,11 +110,11 @@
           {
             "group": "Official SDKs",
             "pages": [
-              "integrations/python",
-              "integrations/javascript",
-              "integrations/rust",
-              "integrations/go",
-              "integrations/ruby"
+              "integrations/sdk/go",
+              "integrations/sdk/javascript",
+              "integrations/sdk/python",
+              "integrations/sdk/ruby",
+              "integrations/sdk/rust"
             ]
           }
         ]
@@ -247,7 +247,27 @@
   "redirects": [
     {
       "source": "/sdks/:slug",
-      "destination": "/integrations/:slug"
+      "destination": "/integrations/sdk/:slug"
+    },
+    {
+      "source": "/integrations/python",
+      "destination": "/integrations/sdk/python"
+    },
+    {
+      "source": "/integrations/javascript",
+      "destination": "/integrations/sdk/javascript"
+    },
+    {
+      "source": "/integrations/rust",
+      "destination": "/integrations/sdk/rust"
+    },
+    {
+      "source": "/integrations/go",
+      "destination": "/integrations/sdk/go"
+    },
+    {
+      "source": "/integrations/ruby",
+      "destination": "/integrations/sdk/ruby"
     },
     {
       "source": "/api-reference/introduction",
