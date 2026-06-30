@@ -1,0 +1,109 @@
+---
+title: "🎫 Route Support Tickets with Claude and ZeroGPU's Thinking Model"
+description: "Use the ZeroGPU Skill in Claude to triage incoming support tickets. Claude builds an exact /v1/responses call to the LFM2.5-1.2B-Thinking model, which returns a team and priority for routing."
+---
+
+This guide shows how to use Claude as a support-ticket router with the ZeroGPU Skill. The Skill defines how Claude calls ZeroGPU: when a ticket comes in, Claude builds an exact `curl` request to the `/v1/responses` endpoint, sends it to the `LFM2.5-1.2B-Thinking` model, and reports the routing decision the model returns. Claude does not decide the team or priority itself; the label comes from the API. The result is a triage step that runs on each incoming ticket and produces a consistent team and priority.
+
+For the full reference, see the [LFM2.5-1.2B-Thinking model card](/api-reference/models/lfm2-5-1-2b-thinking).
+
+In this guide, you'll explore:
+
+- **Claude with the ZeroGPU Skill**: Claude follows the `SKILL.md` contract for ZeroGPU. It reads the skill, requires an API key before doing anything, builds the exact `/v1/responses` request for the right model, and reports the response. It does not fabricate or simulate model outputs.
+- **ZeroGPU**: An OpenAI-compatible inference provider that serves small, purpose-built language models over a serverless, auto-scaling API. It targets high-volume, narrow tasks and does not require you to provision or manage GPU infrastructure.
+- **LFM2.5-1.2B-Thinking**: Liquid AI's 1.2B-parameter reasoning model. It reasons step by step internally before producing a final answer and is small enough to run on edge hardware.
+
+This setup demonstrates automated ticket triage and can be adapted to other scenarios that require classifying short text into fixed categories.
+
+## 🎥 Watch the Video Guide
+
+Video walkthrough coming soon.
+
+## 🎫 The Problem: Triaging Tickets at Volume
+
+Support inboxes receive more tickets than agents can read in order. Each ticket needs two decisions before it can be handled: which team owns it (Billing, Technical, Account, General) and how urgent it is (Low, Medium, High). Done by hand, this first pass is slow and varies between agents, and a high-impact issue can sit in a general queue until someone picks it up.
+
+The goal is a routing step that reads each ticket, returns a team and a priority, and runs on every ticket without provisioning GPU infrastructure.
+
+## ⚡ Why ZeroGPU
+
+Triage is a high-volume, narrow classification task. The `LFM2.5-1.2B-Thinking` model is a 1.2B-parameter reasoning model that runs on edge hardware, which keeps per-ticket cost and latency low and removes the need to manage your own servers.
+
+It is a reasoning model, so it works through the ticket internally before committing to a decision, which suits cases where the team and priority depend on context (impact, urgency, number of accounts affected). ZeroGPU serves it over an OpenAI-compatible, serverless API, so the same `/v1/responses` call handles one ticket or many.
+
+## 🔑 Setting Up Your API Key
+
+The ZeroGPU Skill requires an API key before it builds any request. If the key is not available, Claude asks you for it and waits. Per the Skill contract, it does not proceed, does not build a `curl` request, and does not generate or describe any model output until you supply the key.
+
+You can go to the [ZeroGPU dashboard](https://platform.zerogpu.ai/dashboard) to get an API key. The key starts with `zgpu-api-`.
+
+Export the key so Claude can reference it in the request:
+
+```bash
+export ZEROGPU_API_KEY="zgpu-api-..."
+```
+
+Requests authenticate with the `x-api-key` header, and all calls go to the `/v1/responses` endpoint at `https://api.zerogpu.ai/v1`.
+
+## 🧠 The Workflow: How Claude Routes a Ticket
+
+With the Skill loaded, routing a ticket follows a fixed sequence:
+
+1. **Read the Skill.** Claude loads the ZeroGPU `SKILL.md` and selects `LFM2.5-1.2B-Thinking` for the triage task.
+2. **Check authentication.** If `ZEROGPU_API_KEY` is not set, Claude prompts you for the key and waits. It does not proceed or produce any model output until the key is provided.
+3. **Build the request.** Claude assembles a `curl` call to `/v1/responses`: the ticket text goes in `input`, and the routing rubric goes in `instructions`.
+4. **Send it and report the result.** Claude runs the request and reports the routing decision returned by the API. It does not substitute its own label.
+
+### Example prompt
+
+You give Claude a ticket and ask it to route the ticket through ZeroGPU:
+
+```text
+Route this support ticket with ZeroGPU's thinking model. Assign a team
+and a priority.
+
+"Customers on our Pro plan report that exported PDF invoices are missing
+line items since this morning's release. Three accounts have emailed
+already and one is threatening to churn."
+```
+
+### Exact curl request
+
+Claude builds and runs this request. The `instructions` field encodes the routing rubric so the model returns a single, parseable decision line:
+
+```bash
+curl https://api.zerogpu.ai/v1/responses \
+  -H "content-type: application/json" \
+  -H "x-api-key: $ZEROGPU_API_KEY" \
+  -d '{
+    "model": "LFM2.5-1.2B-Thinking",
+    "input": "Customers on our Pro plan report that exported PDF invoices are missing line items since this morning'\''s release. Three accounts have emailed already and one is threatening to churn.",
+    "instructions": "You are a support triage assistant. Briefly reason, then assign one team (Billing, Technical, Account, General) and one priority (Low, Medium, High). End with a single line: TEAM | PRIORITY."
+  }'
+```
+
+### API response
+
+The Thinking model reasons internally and ends its output with the routing line. The integration keeps only that final `TEAM | PRIORITY` line and discards the rest, so no intermediate reasoning is surfaced or stored:
+
+```
+Technical | High
+```
+
+## ✅ Final Outcome
+
+Claude reads the final line, `Technical | High`, and routes the ticket to the engineering queue at high priority. A billing question would return `Billing | Low` or `Billing | Medium` and go to a different queue.
+
+Wired into your inbox, the same `/v1/responses` call runs on every incoming ticket, so each one is assigned a team and a priority without a human first pass and without managing GPU infrastructure.
+
+## 🌟 Highlights
+
+This guide has walked you through using Claude and the ZeroGPU Skill to triage support tickets with the `LFM2.5-1.2B-Thinking` model, where Claude builds the exact `/v1/responses` call and the API returns the team-and-priority decision. You can adapt this example to other scenarios that require classifying short text into fixed categories.
+
+Key tools utilized in this guide include:
+
+- **Claude with the ZeroGPU Skill**: Claude follows the `SKILL.md` contract for ZeroGPU. It reads the skill, requires an API key before doing anything, builds the exact `/v1/responses` request for the right model, and reports the response. It does not fabricate or simulate model outputs.
+- **ZeroGPU**: An OpenAI-compatible inference provider that serves small, purpose-built language models over a serverless, auto-scaling API. It targets high-volume, narrow tasks and does not require you to provision or manage GPU infrastructure.
+- **LFM2.5-1.2B-Thinking**: Liquid AI's 1.2B-parameter reasoning model. It reasons step by step internally before producing a final answer and is small enough to run on edge hardware.
+
+This setup can be adapted to other scenarios that require classifying short text into fixed categories.
