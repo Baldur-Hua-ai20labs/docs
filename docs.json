@@ -182,7 +182,8 @@
             "pages": [
               "cookbook/claude-code-csv-sanitizer",
               "cookbook/langchain-resume-screening",
-              "cookbook/claude-iab-targeted-copy"
+              "cookbook/claude-iab-targeted-copy",
+              "cookbook/claude-support-ticket-routing"
             ]
           }
         ]
